@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16
+    container_name: agrodroid-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: vinedosdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql

@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
 
-const vinedoController =
-    require("../controllers/vinedo.controller");
+const controller = require("../controllers/vinedo.controller");
 
-router.get("/", vinedoController.listarVinedos);
+router.get("/", controller.listarVinedos);
+router.get("/:id", controller.obtenerVinedo);
+router.post("/", controller.crearVinedo);
+router.put("/:id", controller.actualizarVinedo);
 
 module.exports = router;

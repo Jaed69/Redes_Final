@@ -1,24 +1,28 @@
-const umbralService = require("../services/umbral.service");
+const service = require("../services/umbral.service");
 
-const listarUmbrales = async (req, res) => {
-
-    try {
-
-        const umbrales = await umbralService.obtenerUmbrales();
-
-        res.status(200).json(umbrales);
-
-    } catch (error) {
-
-        console.error(error);
-
-        res.status(500).json({
-            mensaje: "Error obteniendo umbrales"
-        });
-
-    }
+const listar = async (req, res) => {
+    res.json(await service.obtenerUmbrales());
 };
 
-module.exports = {
-    listarUmbrales
+const obtener = async (req, res) => {
+    const data = await service.obtenerUmbralPorId(req.params.id);
+
+    if (!data) return res.status(404).json({ mensaje: "No encontrado" });
+
+    res.json(data);
 };
+
+const crear = async (req, res) => {
+    const data = await service.crearUmbral(req.body);
+    res.status(201).json(data);
+};
+
+const actualizar = async (req, res) => {
+    const data = await service.actualizarUmbral(req.params.id, req.body);
+
+    if (!data) return res.status(404).json({ mensaje: "No encontrado" });
+
+    res.json(data);
+};
+
+module.exports = { listar, obtener, crear, actualizar };

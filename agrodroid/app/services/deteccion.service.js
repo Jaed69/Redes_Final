@@ -1,25 +1,56 @@
 const pool = require("../config/db");
 
+// GET todos
 const obtenerDetecciones = async () => {
-
     const result = await pool.query(`
-        SELECT
-            de.iddeteccion,
-            de.nivelconfianza,
-            de.descripcion,
-            de.fechadeteccion,
-            i.rutaarchivo,
-            te.nombreenfermedad
-        FROM deteccionenfermedad de
-        JOIN imagen i
-            ON de.imagen_idimagen = i.idimagen
-        JOIN tipoenfermedad te
-            ON de.tipoenfermedad_idenfermedad = te.idenfermedad
+        SELECT * FROM deteccionenfermedad
     `);
-
     return result.rows;
 };
 
+// GET por ID
+const obtenerDeteccionPorId = async (id) => {
+    const result = await pool.query(`
+        SELECT * FROM deteccionenfermedad
+        WHERE iddeteccion = $1
+    `, [id]);
+
+    return result.rows[0];
+};
+
+// POST
+const crearDeteccion = async (data) => {
+    const {
+        nivelConfianza,
+        descripcion,
+        fechaDeteccion,
+        Imagen_idImagen,
+        TipoEnfermedad_idEnfermedad
+    } = data;
+
+    const result = await pool.query(`
+        INSERT INTO deteccionenfermedad (
+            nivelconfianza,
+            descripcion,
+            fechadeteccion,
+            imagen_idimagen,
+            tipoenfermedad_idenfermedad
+        )
+        VALUES ($1,$2,$3,$4,$5)
+        RETURNING *
+    `, [
+        nivelConfianza,
+        descripcion,
+        fechaDeteccion,
+        Imagen_idImagen,
+        TipoEnfermedad_idEnfermedad
+    ]);
+
+    return result.rows[0];
+};
+
 module.exports = {
-    obtenerDetecciones
+    obtenerDetecciones,
+    obtenerDeteccionPorId,
+    crearDeteccion
 };

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const controller = require("../controllers/deteccion.controller");
+const controller = require("../controllers/lectura.controller");
 
 router.get("/", controller.listar);
 router.get("/:id", controller.obtener);

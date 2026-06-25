@@ -1,8 +1,13 @@
 const express = require("express");
 const router = express.Router();
 
-const alertaController = require("../controllers/alerta.controller");
+const controller = require("../controllers/alerta.controller");
 
-router.get("/", alertaController.listarAlertas);
+router.get("/", controller.listarAlertas);
+router.get("/:id", controller.obtenerAlerta);
+
+router.post("/", controller.crearAlerta);
+
+router.put("/:id/estado", controller.actualizarEstado);
 
 module.exports = router;

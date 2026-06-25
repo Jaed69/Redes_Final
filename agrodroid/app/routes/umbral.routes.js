@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
 
-const umbralController =
-    require("../controllers/umbral.controller");
+const controller = require("../controllers/umbral.controller");
 
-router.get("/", umbralController.listarUmbrales);
+router.get("/", controller.listar);
+router.get("/:id", controller.obtener);
+router.post("/", controller.crear);
+router.put("/:id", controller.actualizar);
 
 module.exports = router;

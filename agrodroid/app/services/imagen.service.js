@@ -1,30 +1,81 @@
 const pool = require("../config/db");
 
-const obtenerImagenes = async () => {
+// GET ALL + filtros
+const obtenerImagenes = async ({ dron, vinedo, fecha }) => {
+    let query = `
+        SELECT * FROM imagen
+        WHERE 1=1
+    `;
 
-    const result = await pool.query(`
-        SELECT
-            i.idimagen,
-            i.fechacaptura,
-            i.horacaptura,
-            i.tamanoarchivo,
-            i.rutaarchivo,
-            i.ancho,
-            i.alto,
-            i.latitud,
-            i.longitud,
-            d.nombredron,
-            v.nombrevinedo
-        FROM imagen i
-        JOIN dron d
-            ON i.dron_iddron = d.iddron
-        JOIN vinedo v
-            ON d.vinedo_idvinedo = v.idvinedo
-    `);
+    const params = [];
 
+    if (dron) {
+        params.push(dron);
+        query += ` AND dron_iddron = $${params.length}`;
+    }
+
+    if (vinedo) {
+        params.push(vinedo);
+        query += ` AND vinedo_idvinedo = $${params.length}`;
+    }
+
+    if (fecha) {
+        params.push(fecha);
+        query += ` AND fechacaptura = $${params.length}`;
+    }
+
+    const result = await pool.query(query, params);
     return result.rows;
 };
 
+// GET BY ID
+const obtenerImagenPorId = async (id) => {
+    const result = await pool.query(
+        `SELECT * FROM imagen WHERE idimagen = $1`,
+        [id]
+    );
+    return result.rows[0];
+};
+
+// POST
+const crearImagen = async (data) => {
+    const {
+        fechaCaptura,
+        horaCaptura,
+        tamanoArchivo,
+        rutaArchivo,
+        ancho,
+        alto,
+        latitud,
+        longitud,
+        Dron_idDron
+    } = data;
+
+    const result = await pool.query(
+        `INSERT INTO imagen (
+            fechaCaptura, horaCaptura, tamanoArchivo,
+            rutaArchivo, ancho, alto, latitud, longitud, Dron_idDron
+        )
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+        RETURNING *`,
+        [
+            fechaCaptura,
+            horaCaptura,
+            tamanoArchivo,
+            rutaArchivo,
+            ancho,
+            alto,
+            latitud,
+            longitud,
+            Dron_idDron
+        ]
+    );
+
+    return result.rows[0];
+};
+
 module.exports = {
-    obtenerImagenes
+    obtenerImagenes,
+    obtenerImagenPorId,
+    crearImagen
 };

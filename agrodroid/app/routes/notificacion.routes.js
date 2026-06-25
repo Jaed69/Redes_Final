@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
-const notificacionController =
-    require("../controllers/notificacion.controller");
+const controller = require("../controllers/notificacion.controller");
 
-router.get("/", notificacionController.listarNotificaciones);
+router.get("/", controller.listarNotificaciones);
+router.get("/:id", controller.obtenerNotificacion);
+router.post("/", controller.crearNotificacion);
 
 module.exports = router;

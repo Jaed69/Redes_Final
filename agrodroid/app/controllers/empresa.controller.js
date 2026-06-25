@@ -1,24 +1,57 @@
 const empresaService = require("../services/empresa.service");
 
 const listarEmpresas = async (req, res) => {
-
     try {
-
-        const empresas = await empresaService.obtenerEmpresas();
-
-        res.status(200).json(empresas);
-
+        const data = await empresaService.obtenerEmpresas();
+        res.json(data);
     } catch (error) {
+        res.status(500).json({ mensaje: "Error obteniendo empresas" });
+    }
+};
 
-        console.error(error);
+const obtenerEmpresa = async (req, res) => {
+    try {
+        const data = await empresaService.obtenerEmpresaPorId(req.params.id);
 
-        res.status(500).json({
-            mensaje: "Error obteniendo empresas"
-        });
+        if (!data) {
+            return res.status(404).json({ mensaje: "No encontrada" });
+        }
 
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ mensaje: "Error obteniendo empresa" });
+    }
+};
+
+const crearEmpresa = async (req, res) => {
+    try {
+        const data = await empresaService.crearEmpresa(req.body);
+        res.status(201).json(data);
+    } catch (error) {
+        res.status(500).json({ mensaje: "Error creando empresa" });
+    }
+};
+
+const actualizarEmpresa = async (req, res) => {
+    try {
+        const data = await empresaService.actualizarEmpresa(
+            req.params.id,
+            req.body
+        );
+
+        if (!data) {
+            return res.status(404).json({ mensaje: "No encontrada" });
+        }
+
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ mensaje: "Error actualizando empresa" });
     }
 };
 
 module.exports = {
-    listarEmpresas
+    listarEmpresas,
+    obtenerEmpresa,
+    crearEmpresa,
+    actualizarEmpresa,
 };

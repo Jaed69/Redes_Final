@@ -1,25 +1,23 @@
-const deteccionService = require("../services/deteccion.service");
+const service = require("../services/deteccion.service");
 
-const listarDetecciones = async (req, res) => {
+const listar = async (req, res) => {
+    const data = await service.obtenerDetecciones();
+    res.json(data);
+};
 
-    try {
+const obtener = async (req, res) => {
+    const data = await service.obtenerDeteccionPorId(req.params.id);
 
-        const detecciones =
-            await deteccionService.obtenerDetecciones();
-
-        res.status(200).json(detecciones);
-
-    } catch (error) {
-
-        console.error(error);
-
-        res.status(500).json({
-            mensaje: "Error obteniendo detecciones"
-        });
-
+    if (!data) {
+        return res.status(404).json({ mensaje: "No encontrado" });
     }
+
+    res.json(data);
 };
 
-module.exports = {
-    listarDetecciones
+const crear = async (req, res) => {
+    const data = await service.crearDeteccion(req.body);
+    res.status(201).json(data);
 };
+
+module.exports = { listar, obtener, crear };

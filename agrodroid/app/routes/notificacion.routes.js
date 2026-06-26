@@ -2,9 +2,10 @@ const express = require("express");
 const router = express.Router();
 
 const controller = require("../controllers/notificacion.controller");
+const verificarToken = require("../middlewares/auth.middleware");
 
-router.get("/", controller.listarNotificaciones);
-router.get("/:id", controller.obtenerNotificacion);
-router.post("/", controller.crearNotificacion);
+router.get("/", verificarToken ,controller.listarNotificaciones);
+router.get("/:id", verificarToken , controller.obtenerNotificacion);
+router.post("/", verificarToken , controller.crearNotificacion);
 
 module.exports = router;

@@ -10,6 +10,7 @@ const deteccionRoutes = require("./routes/deteccion.routes");
 const lecturaRoutes = require("./routes/lectura.routes");
 const sensorRoutes = require("./routes/sensor.routes");
 const umbralRoutes = require("./routes/umbral.routes");
+const authRoutes = require("./routes/auth.routes");
 const app = express();
 
 app.use(express.json());
@@ -25,6 +26,7 @@ app.use("/detecciones", deteccionRoutes);
 app.use("/lecturas", lecturaRoutes);
 app.use("/sensores", sensorRoutes);
 app.use("/umbrales", umbralRoutes);
+app.use("/auth", authRoutes);
 
 app.get("/", (req, res) => {
     res.send("Servidor funcionando");

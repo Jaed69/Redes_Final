@@ -1,17 +1,17 @@
 const express = require("express");
 const router = express.Router();
 
-const sensorController =
-    require("../controllers/sensor.controller");
+const sensorController = require("../controllers/sensor.controller");
+const verificarToken = require("../middlewares/auth.middleware");
 
-router.get("/", sensorController.listarSensores);
+router.get("/", verificarToken, sensorController.listarSensores);
 
-router.get("/:id",sensorController.obtenerSensor);
+router.get("/:id", verificarToken, sensorController.obtenerSensor);
 
-router.post("/",sensorController.crearSensor);
+router.post("/", verificarToken, sensorController.crearSensor);
 
-router.put("/:id",sensorController.actualizarSensor);
+router.put("/:id", verificarToken, sensorController.actualizarSensor);
 
-router.delete("/:id",sensorController.eliminarSensor);
+router.delete("/:id", verificarToken, sensorController.eliminarSensor);
 
 module.exports = router;

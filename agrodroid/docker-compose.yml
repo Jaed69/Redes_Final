@@ -12,3 +12,20 @@ services:
       - "5432:5432"
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  app:
+    build: ./app
+    container_name: agrodroid-api
+    ports:
+      - "3000:3000"
+
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: admin
+      DB_PASSWORD: admin123
+      DB_NAME: vinedosdb
+      JWT_SECRET: mipalabrasecreta
+
+    depends_on:
+      - db

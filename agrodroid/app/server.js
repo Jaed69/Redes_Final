@@ -32,6 +32,7 @@ app.get("/", (req, res) => {
     res.send("Servidor funcionando");
 });
 
+// Configuración del puerto
 app.listen(3000, () => {
     console.log("Servidor corriendo en puerto 3000");
 });

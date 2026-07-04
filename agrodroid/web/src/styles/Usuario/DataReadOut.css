@@ -1,0 +1,65 @@
+
+.readout {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-hover);
+  border: 1px solid var(--border-soft);
+  min-width: 84px;
+}
+
+.readout__label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.readout__value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.readout__unit {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-left: 2px;
+}
+
+.readout--vine {
+  background: var(--accent-vine-bg);
+  border-color: color-mix(in srgb, var(--accent-vine) 35%, var(--border-soft));
+}
+.readout--vine .readout__value {
+  color: var(--accent-vine-dim);
+}
+
+.readout--water {
+  background: var(--accent-water-bg);
+  border-color: color-mix(in srgb, var(--accent-water) 35%, var(--border-soft));
+}
+.readout--water .readout__value {
+  color: var(--accent-water);
+}
+
+.readout--copper {
+  background: var(--accent-copper-bg);
+  border-color: color-mix(in srgb, var(--accent-copper) 35%, var(--border-soft));
+}
+.readout--copper .readout__value {
+  color: var(--accent-copper);
+}
+
+.readout--violet {
+  background: var(--accent-violet-bg);
+  border-color: color-mix(in srgb, var(--accent-violet) 35%, var(--border-soft));
+}
+.readout--violet .readout__value {
+  color: var(--accent-violet);
+}

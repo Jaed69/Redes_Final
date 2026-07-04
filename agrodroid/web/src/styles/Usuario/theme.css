@@ -1,0 +1,204 @@
+/* ============================================================
+   THEME — paleta clara "AgroVina": verde institucional + blanco,
+   igual a la de tu formulario (register-container).
+   ============================================================ */
+
+:root {
+  /* --- Superficies --- */
+  --bg: #e8f5e9;
+  --surface: #ffffff;
+  --surface-raised: #f8fafc;
+  --surface-hover: #f1f5f9;
+  --border: #cbd5e1;
+  --border-soft: #e2e8f0;
+
+  /* --- Texto --- */
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --text-muted: #64748b;
+
+  /* --- Acento primario (marca / navegación) --- */
+  --accent-vine: #2e7d32;
+  --accent-vine-dim: #1b5e20;
+  --accent-vine-bg: rgba(46, 125, 50, 0.12);
+
+  /* --- Acentos por dominio --- */
+  --accent-water: #0288d1; /* sensores / lecturas */
+  --accent-water-bg: rgba(2, 136, 209, 0.1);
+  --accent-copper: #b45309; /* drones / imágenes */
+  --accent-copper-bg: rgba(180, 83, 9, 0.1);
+  --accent-violet: #7c3aed; /* IA / enfermedades */
+  --accent-violet-bg: rgba(124, 58, 237, 0.1);
+
+  /* --- Estados de alerta --- */
+  --critical: #dc2626;
+  --critical-bg: rgba(220, 38, 38, 0.1);
+  --warning: #d97706;
+  --warning-bg: rgba(217, 119, 6, 0.1);
+  --success: #2e7d32;
+  --success-bg: rgba(46, 125, 50, 0.1);
+  --offline: #94a3b8;
+  --offline-bg: rgba(148, 163, 184, 0.16);
+
+  /* --- Tipografía (igual a tu formulario: Arial simple + monospace para chips) --- */
+  --font-display: Arial, Helvetica, sans-serif;
+  --font-body: Arial, Helvetica, sans-serif;
+  --font-mono: "Courier New", Courier, monospace;
+
+  /* --- Layout --- */
+  --sidebar-w: 232px;
+  --sidebar-w-collapsed: 68px;
+  --navbar-h: 60px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.07);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  margin: 0;
+  letter-spacing: -0.3px;
+  color: var(--text-primary);
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  font-family: var(--font-body);
+}
+
+a {
+  color: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-vine);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* --- Utilidades compartidas --- */
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.panel-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background-color: var(--surface-hover);
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Chip de estado genérico, usado en sensores/drones/alertas */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.status-dot.critico {
+  background: var(--critical);
+  box-shadow: 0 0 0 3px var(--critical-bg);
+}
+.status-dot.en_proceso,
+.status-dot.advertencia {
+  background: var(--warning);
+  box-shadow: 0 0 0 3px var(--warning-bg);
+}
+.status-dot.resuelto,
+.status-dot.normal,
+.status-dot.completado {
+  background: var(--success);
+  box-shadow: 0 0 0 3px var(--success-bg);
+}
+.status-dot.offline,
+.status-dot.en_espera,
+.status-dot.sin_datos {
+  background: var(--offline);
+  box-shadow: 0 0 0 3px var(--offline-bg);
+}
+
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell__body {
+  display: flex;       /* clave: sin esto el sidebar y el main no quedan en fila */
+  flex: 1;
+  min-height: calc(100vh - var(--navbar-h));
+}
+
+.app-shell__content {
+  flex: 1;
+  min-width: 0;        /* evita que tablas anchas empujen el layout */
+  padding: 28px 40px;
+  overflow-x: hidden;
+}
+
+/* Para que el contenido no se estire de pared a pared en pantallas grandes */
+.app-shell__content > * {
+  max-width: 1280px;
+  margin-left: 0;
+  margin-right: auto;
+}

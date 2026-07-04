@@ -1,0 +1,136 @@
+/* Compartido por todas las vistas: encabezado, paneles, tablas y pills. */
+
+.view-header {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.view-header h1 {
+  font-size: 22px;
+  color: var(--text-primary);
+}
+
+.view-header__sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border-soft);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 480px;
+}
+
+.data-table th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--border-soft);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+.data-table__desc {
+  color: var(--text-secondary);
+  max-width: 280px;
+}
+
+.mono-cell {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.empty-hint {
+  padding: 20px 18px;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.estado-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 500;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.estado-pill.critico {
+  background: var(--critical-bg);
+  color: var(--critical);
+}
+.estado-pill.en_proceso {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.estado-pill.resuelto {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.estado-pill.normal {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.estado-pill.advertencia {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.estado-pill.offline,
+.estado-pill.en_espera,
+.estado-pill.sin_datos {
+  background: var(--offline-bg);
+  color: var(--text-muted);
+}
+.estado-pill.completado {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.estado-pill.en_vuelo {
+  background: var(--accent-water-bg);
+  color: var(--accent-water);
+}
+.estado-pill.mantenimiento {
+  background: var(--warning-bg);
+  color: var(--warning);
+}

@@ -1,0 +1,55 @@
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 4px solid var(--accent-vine);
+  min-width: 0;
+}
+
+.stat-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-card__icon {
+  color: var(--text-muted);
+  display: flex;
+}
+
+.stat-card__value {
+  font-family: var(--font-mono);
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.stat-card__hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.stat-card--vine {
+  border-top-color: var(--accent-vine);
+}
+.stat-card--water {
+  border-top-color: var(--accent-water);
+}
+.stat-card--copper {
+  border-top-color: var(--accent-copper);
+}
+.stat-card--violet {
+  border-top-color: var(--accent-violet);
+}
+.stat-card--critical {
+  border-top-color: var(--critical);
+}
+.stat-card--critical .stat-card__value {
+  color: var(--critical);
+}

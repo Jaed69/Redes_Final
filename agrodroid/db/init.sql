@@ -293,8 +293,8 @@ VALUES
 INSERT INTO Usuario (nombreUsuario, correo, contrasenia, rol, Empresa_idEmpresa)
 VALUES
 ('admin', 'admin@agrovina.com', 'admin123', 'Administrador', 1),
-('supervisor1', 'supervisor1@agrovina.com', 'clave123', 'Supervisor', 1),
-('operador1', 'operador1@agrovina.com', 'clave123', 'Operador', 1);
+('supervisor1', 'supervisor1@agrovina.com', 'clave123', 'Usuario', 1),
+('operador1', 'operador1@agrovina.com', 'clave123', 'Usuario', 1);
 
 -- DRONES
 INSERT INTO Dron (nombreDron, Vinedo_idVinedo) VALUES

@@ -28,7 +28,11 @@ const crearEmpresa = async (req, res) => {
         const data = await empresaService.crearEmpresa(req.body);
         res.status(201).json(data);
     } catch (error) {
-        res.status(500).json({ mensaje: "Error creando empresa" });
+        console.error(error);
+
+    res.status(400).json({
+        mensaje: error.message
+    });
     }
 };
 

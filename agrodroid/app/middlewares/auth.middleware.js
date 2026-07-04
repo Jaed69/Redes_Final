@@ -1,3 +1,4 @@
+// Middleware para verificar el token de autenticación en las solicitudes entrantes
 const jwt = require("jsonwebtoken");
 
 const SECRET_KEY = "AgroDroid_2026";

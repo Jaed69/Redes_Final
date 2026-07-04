@@ -19,15 +19,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px 16px;
+  padding: 32px 16px;
 }
 
 /* ── Tarjeta principal ────────────────────────────────── */
-.login-container {
+.register-container {
   background-color: #ffffff;
   width: 100%;
-  max-width: 480px;
-  padding: 44px 40px;
+  max-width: 640px;
+  padding: 44px 44px 36px;
   border-radius: 10px;
   border-top: 6px solid #2e7d32;
   border-left: 1px solid #cbd5e1;
@@ -52,14 +52,46 @@ h2 {
   padding: 5px 10px;
   border-radius: 4px;
   display: inline-block;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
   font-family: monospace;
+}
+
+/* ── Divisor de sección ───────────────────────────────── */
+.divider {
+  position: relative;
+  margin: 40px 0 22px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.divider:first-of-type {
+  margin-top: 40px;
+}
+
+.divider-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  padding: 0 10px;
+  font-size: 10px;
+  color: #2e7d32;
+  font-weight: bold;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+}
+
+/* ── Filas de campos en dos columnas ──────────────────── */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
 }
 
 /* ── Campos del formulario ────────────────────────────── */
 .form-group {
   text-align: left;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 
 label {
@@ -80,7 +112,18 @@ label {
   font-size: 14px;
   color: #1f2937;
   background-color: #f8fafc;
+  font-family: inherit;
   transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+}
+
+select.input-field {
+  background-image: linear-gradient(45deg, transparent 50%, #4b5563 50%),
+    linear-gradient(135deg, #4b5563 50%, transparent 50%);
+  background-position: calc(100% - 18px) center, calc(100% - 13px) center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
 }
 
 .input-field:focus {
@@ -90,37 +133,20 @@ label {
   background-color: #fff;
 }
 
-/* ── Divisor de rol ───────────────────────────────────── */
-.divider {
-  position: relative;
-  margin: 28px 0 22px 0;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.divider-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #fff;
-  padding: 0 10px;
-  font-size: 10px;
-  color: #94a3b8;
-  font-weight: bold;
-  letter-spacing: 0.6px;
-  white-space: nowrap;
-}
-
-/* ── Botones de rol ───────────────────────────────────── */
+/* ── Botón de envío ───────────────────────────────────── */
 .btn {
   display: block;
+  width: 100%;
   padding: 13px 10px;
   color: #ffffff;
   text-decoration: none;
+  border: none;
   border-radius: 6px;
   font-size: 14px;
   font-weight: bold;
-  margin-bottom: 12px;
+  margin-top: 10px;
+  margin-bottom: 14px;
+  cursor: pointer;
   transition: opacity 0.18s, transform 0.15s;
   letter-spacing: 0.2px;
 }
@@ -135,17 +161,26 @@ label {
   transform: translateY(0);
 }
 
-.btn-user {
+.btn-submit {
   background-color: #2e7d32;
 }
 
-.btn-admin {
-  background-color: #212121;
+/* ── Enlace inferior ──────────────────────────────────── */
+.back-link {
+  display: inline-block;
+  margin-bottom: 4px;
+  color: #0288d1;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.back-link:hover {
+  text-decoration: underline;
 }
 
 /* ── Footer de seguridad ──────────────────────────────── */
 .security-footer {
-  margin-top: 24px;
+  margin-top: 22px;
   font-size: 11px;
   color: #64748b;
   line-height: 1.6;
@@ -153,13 +188,18 @@ label {
 }
 
 /* ── Responsive: pantallas pequeñas (móvil) ───────────── */
-@media (max-width: 520px) {
-  .login-container {
+@media (max-width: 560px) {
+  .register-container {
     padding: 32px 24px;
   }
 
   h2 {
     font-size: 20px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 
   .btn {

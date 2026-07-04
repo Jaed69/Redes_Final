@@ -12,7 +12,9 @@ const sensorRoutes = require("./routes/sensor.routes");
 const umbralRoutes = require("./routes/umbral.routes");
 const authRoutes = require("./routes/auth.routes");
 const app = express();
+const cors = require("cors");
 
+app.use(cors());
 app.use(express.json());
 
 app.use("/alertas", alertaRoutes);
@@ -27,6 +29,7 @@ app.use("/lecturas", lecturaRoutes);
 app.use("/sensores", sensorRoutes);
 app.use("/umbrales", umbralRoutes);
 app.use("/auth", authRoutes);
+
 
 app.get("/", (req, res) => {
     res.send("Servidor funcionando");

@@ -1,0 +1,130 @@
+@import "./shared.css";
+
+.drones-view__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.drone-card {
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-left: 4px solid var(--accent-copper);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  color: inherit;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.drone-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(180, 83, 9, 0.14);
+}
+
+.drone-card.is-active {
+  background: var(--accent-copper-bg);
+  border-left-color: var(--accent-copper);
+  box-shadow: 0 0 0 2px var(--accent-copper) inset;
+}
+
+.drone-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.drone-card__nombre {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.drone-card.is-active .drone-card__nombre {
+  color: var(--accent-copper);
+}
+
+.drone-card__vinedo {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.drone-card__readouts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.drones-view__galeria .panel-header {
+  align-items: center;
+}
+
+.galeria-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 16px 18px;
+}
+
+.galeria-item {
+  margin: 0;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: box-shadow 0.15s ease;
+}
+
+.galeria-item:hover {
+  box-shadow: var(--shadow-card);
+}
+
+.galeria-item__img {
+  height: 130px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--surface-hover);
+  transition: transform 0.25s ease;
+}
+
+.galeria-item:hover .galeria-item__img {
+  transform: scale(1.04);
+}
+
+.galeria-item figcaption {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.galeria-item__fecha {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--surface-hover);
+  padding: 3px 8px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+
+.galeria-item__meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+@media (max-width: 480px) {
+  .drones-view__grid,
+  .galeria-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

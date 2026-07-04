@@ -1,0 +1,121 @@
+@import "./shared.css";
+
+.disease-view__filtro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.disease-view__filtro label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.disease-view__filtro select {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.disease-view__filtro select:focus {
+  outline: none;
+  border-color: var(--accent-violet);
+  box-shadow: 0 0 0 3px var(--accent-violet-bg);
+}
+
+.disease-view__count {
+  margin-left: auto;
+}
+
+.disease-view__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.disease-card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  border-top: 4px solid var(--accent-violet);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.disease-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(124, 58, 237, 0.16);
+}
+
+.disease-card__img {
+  height: 150px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--surface-raised);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.disease-card__img-placeholder {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.disease-card__body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.disease-card__nombre {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.2px;
+  color: var(--accent-violet);
+}
+
+.disease-card__confianza-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-hover);
+  overflow: hidden;
+}
+
+.disease-card__confianza-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-violet) 0%, #a78bfa 100%);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.disease-card__fecha {
+  color: var(--text-muted);
+  font-size: 11px;
+  background: var(--surface-hover);
+  padding: 3px 8px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+
+@media (max-width: 480px) {
+  .disease-view__grid {
+    grid-template-columns: 1fr;
+  }
+}

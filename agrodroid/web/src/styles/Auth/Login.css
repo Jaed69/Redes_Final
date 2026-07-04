@@ -19,15 +19,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px 16px;
+  padding: 24px 16px;
 }
 
 /* ── Tarjeta principal ────────────────────────────────── */
-.register-container {
+.login-container {
   background-color: #ffffff;
   width: 100%;
-  max-width: 640px;
-  padding: 44px 44px 36px;
+  max-width: 480px;
+  padding: 44px 40px;
   border-radius: 10px;
   border-top: 6px solid #2e7d32;
   border-left: 1px solid #cbd5e1;
@@ -52,46 +52,15 @@ h2 {
   padding: 5px 10px;
   border-radius: 4px;
   display: inline-block;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
   font-family: monospace;
-}
-
-/* ── Divisor de sección ───────────────────────────────── */
-.divider {
-  position: relative;
-  margin: 26px 0 22px 0;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.divider:first-of-type {
-  margin-top: 4px;
-}
-
-.divider-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #fff;
-  padding: 0 10px;
-  font-size: 10px;
-  color: #2e7d32;
-  font-weight: bold;
-  letter-spacing: 0.6px;
-  white-space: nowrap;
-}
-
-/* ── Filas de campos en dos columnas ──────────────────── */
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0 20px;
 }
 
 /* ── Campos del formulario ────────────────────────────── */
 .form-group {
   text-align: left;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
+  margin-top: 30px;
 }
 
 label {
@@ -102,6 +71,7 @@ label {
   color: #4b5563;
   text-transform: uppercase;
   letter-spacing: 0.4px;
+  
 }
 
 .input-field {
@@ -112,18 +82,9 @@ label {
   font-size: 14px;
   color: #1f2937;
   background-color: #f8fafc;
-  font-family: inherit;
   transition: border-color 0.2s, box-shadow 0.2s;
-  appearance: none;
-}
-
-select.input-field {
-  background-image: linear-gradient(45deg, transparent 50%, #4b5563 50%),
-    linear-gradient(135deg, #4b5563 50%, transparent 50%);
-  background-position: calc(100% - 18px) center, calc(100% - 13px) center;
-  background-size: 5px 5px, 5px 5px;
-  background-repeat: no-repeat;
-  cursor: pointer;
+  margin-top: 4px;
+  
 }
 
 .input-field:focus {
@@ -133,23 +94,29 @@ select.input-field {
   background-color: #fff;
 }
 
-/* ── Botón de envío ───────────────────────────────────── */
-.btn {
-  display: block;
-  width: 100%;
-  padding: 13px 10px;
-  color: #ffffff;
-  text-decoration: none;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: bold;
-  margin-top: 10px;
-  margin-bottom: 14px;
-  cursor: pointer;
-  transition: opacity 0.18s, transform 0.15s;
-  letter-spacing: 0.2px;
+/* ── Divisor de rol ───────────────────────────────────── */
+.divider {
+  position: relative;
+  margin: 28px 0 22px 0;
+  border-bottom: 1px solid #e2e8f0;
 }
+
+.divider-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  padding: 0 10px;
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: bold;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+}
+
+/* ── Botones de rol ───────────────────────────────────── */
+
 
 .btn:hover {
   opacity: 0.88;
@@ -161,35 +128,42 @@ select.input-field {
   transform: translateY(0);
 }
 
-.btn-submit {
+.btn-user {
   background-color: #2e7d32;
 }
 
-/* ── Enlace inferior ──────────────────────────────────── */
-.back-link {
-  display: inline-block;
-  margin-bottom: 4px;
-  color: #0288d1;
-  text-decoration: none;
-  font-size: 13px;
+.btn-admin {
+  background-color: #212121;
 }
 
-.back-link:hover {
-  text-decoration: underline;
-}
 
 /* ── Footer de seguridad ──────────────────────────────── */
 .security-footer {
-  margin-top: 22px;
+  margin-top: 24px;
   font-size: 11px;
   color: #64748b;
   line-height: 1.6;
   text-align: justify;
 }
 
+.register-link {
+  display: block;
+  margin-top: 14px;
+  font-size: 12px;
+  color: #2e7d32;
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity 0.2s ease;
+}
+
+.register-link:hover {
+  opacity: 0.7;
+  text-decoration: underline;
+}
+
 /* ── Responsive: pantallas pequeñas (móvil) ───────────── */
-@media (max-width: 560px) {
-  .register-container {
+@media (max-width: 520px) {
+  .login-container {
     padding: 32px 24px;
   }
 
@@ -197,13 +171,14 @@ select.input-field {
     font-size: 20px;
   }
 
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-
   .btn {
     font-size: 13px;
     padding: 12px 10px;
   }
+}
+
+
+.login-container form button.btn-user {
+  margin-top: 45px !important;
+  display: block;
 }

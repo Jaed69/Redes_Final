@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../styles/Register.css";
+import "../../styles/Auth/Register.css";
 import { Link, useNavigate } from "react-router-dom";
 
 interface EmpresaForm {
@@ -16,7 +16,7 @@ interface UsuarioForm {
 }
 
 const Register: React.FC = () => {
-
+  const navigate = useNavigate();
 
   const [empresa, setEmpresa] = useState<EmpresaForm>({
     ruc: "",
@@ -31,9 +31,7 @@ const Register: React.FC = () => {
     rol: "Administrador",
   });
 
-  const handleEmpresaChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleEmpresaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setEmpresa((prev) => ({ ...prev, [name]: value }));
   };
@@ -45,37 +43,69 @@ const Register: React.FC = () => {
     setUsuario((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    // Payload de empresa (POST /empresas)
-    const empresaPayload = {
-      ruc: empresa.ruc,
-      nombreEmpresa: empresa.nombreEmpresa,
-      direccion: empresa.direccion,
-    };
+  try {
+    // 1. Crear empresa
+    const empresaResponse = await fetch("http://localhost:3000/empresas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ruc: empresa.ruc,
+        nombreEmpresa: empresa.nombreEmpresa,
+        direccion: empresa.direccion,
+      }),
+    });
 
-    // Payload de usuario (POST /usuarios)
-    // Empresa_idEmpresa se asigna con el id devuelto al crear la empresa
-    const usuarioPayload = {
-      nombreUsuario: usuario.nombreUsuario,
-      correo: usuario.correo,
-      contrasenia: usuario.contrasenia,
-      rol: usuario.rol,
-      Empresa_idEmpresa: 1,
-    };
+    const empresaData = await empresaResponse.json();
 
-    console.log("Registro de empresa:", empresaPayload);
-    console.log("Registro de usuario:", usuarioPayload);
+    if (!empresaResponse.ok) {
+      alert(empresaData.mensaje);
+      return;
+    }
 
-    // Aquí iría la llamada al backend (fetch / axios)
-  };
+    // 🔥 IMPORTANTE: backend devuelve idempresa (minúscula)
+    const idEmpresa = empresaData.idempresa;
+
+    // 2. Crear usuario
+    const usuarioResponse = await fetch(
+      "http://localhost:3000/auth/register",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombreUsuario: usuario.nombreUsuario,
+          correo: usuario.correo,
+          contrasenia: usuario.contrasenia,
+          rol: "Administrador",
+
+          // 🔥 ESTE ES EL NOMBRE QUE TU BACKEND ESPERA
+          Empresa_idEmpresa: idEmpresa,
+        }),
+      }
+    );
+
+    const usuarioData = await usuarioResponse.json();
+
+    if (!usuarioResponse.ok) {
+      alert(usuarioData.mensaje);
+      return;
+    }
+
+    alert("Registro exitoso");
+    navigate("/login");
+
+  } catch (error) {
+    console.error(error);
+    alert("Error de conexión");
+  }
+};
 
   return (
     <div className="wrapper">
       <div className="register-container">
         <h2>Registro de Cuenta</h2>
-        <div className="network-node">Gateway de Acceso: SSL/TLS Activo</div>
 
         <form onSubmit={handleSubmit}>
           <div className="divider">
@@ -93,7 +123,6 @@ const Register: React.FC = () => {
                 placeholder="12345678913"
                 value={empresa.ruc}
                 onChange={handleEmpresaChange}
-                required
               />
             </div>
 
@@ -127,7 +156,7 @@ const Register: React.FC = () => {
           </div>
 
           <div className="divider">
-            <span className="divider-text">INFORMACIÓN DEL USUARIO</span>
+            <span className="divider-text">INFORMACIÓN DEL ADMINISTRADOR</span>
           </div>
 
           <div className="form-row">
@@ -138,7 +167,7 @@ const Register: React.FC = () => {
                 name="nombreUsuario"
                 type="text"
                 className="input-field"
-                placeholder="Ej: agronomo_vinyedo1"
+                placeholder="Ej: admin_sanjose"
                 value={usuario.nombreUsuario}
                 onChange={handleUsuarioChange}
                 required
@@ -160,7 +189,6 @@ const Register: React.FC = () => {
             </div>
           </div>
 
-          <div className="form-row">
             <div className="form-group">
               <label htmlFor="contrasenia">Contraseña:</label>
               <input
@@ -175,21 +203,6 @@ const Register: React.FC = () => {
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="rol">Rol:</label>
-              <select
-                id="rol"
-                name="rol"
-                className="input-field"
-                value={usuario.rol}
-                onChange={handleUsuarioChange}
-              >
-                <option value="Administrador">Administrador</option>
-                <option value="Usuario">Usuario</option>
-              </select>
-            </div>
-          </div>
-
           <button type="submit" className="btn btn-submit">
             Crear Cuenta
           </button>
@@ -198,10 +211,6 @@ const Register: React.FC = () => {
           ¿Ya tienes cuenta? Inicia sesión
           </Link>
         </form>
-
-        <div className="security-footer">
-          Petición enrutada por el Router de Oficina Central hacia el contenedor
-        </div>
       </div>
     </div>
   );

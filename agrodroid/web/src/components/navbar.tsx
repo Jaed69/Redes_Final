@@ -121,7 +121,6 @@ export default function Navbar({
 
       <div className="navbar__right">
         
-
         <div className="navbar__notif">
           <button
             type="button"

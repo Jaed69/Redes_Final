@@ -39,7 +39,7 @@ const actualizarUsuario = async (id, nombreUsuario, correo, rol) => {
             correo = $2,
             rol = $3
         WHERE idusuario = $4
-        RETURNING *
+        RETURNING idusuario, nombreusuario, correo, rol, empresa_idempresa
     `, [nombreUsuario, correo, rol, id]);
 
     return result.rows[0];

@@ -9,10 +9,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Seguridad (SEC)
 
-- [ ] **SEC-01**: El secreto JWT se lee exclusivamente de `process.env.JWT_SECRET` (elimina el hardcode duplicado en `auth.middleware.js` y `auth.service.js`)
-- [ ] **SEC-02**: `POST /empresas` requiere `verificarToken` como el resto de rutas de empresa
+- [x] **SEC-01**: El secreto JWT se lee exclusivamente de `process.env.JWT_SECRET` (elimina el hardcode duplicado en `auth.middleware.js` y `auth.service.js`)
+- [x] **SEC-02**: `POST /empresas` requiere `verificarToken` como el resto de rutas de empresa
 - [ ] **SEC-03**: Credenciales de base de datos y JWT salen de `docker-compose.yml` en texto plano hacia un `.env` ignorado por git
-- [ ] **SEC-04**: Middleware de autorización por rol (`requireRole(...)`) bloquea acciones de mutación según el perfil del usuario autenticado
+- [x] **SEC-04**: Middleware de autorización por rol (`requireRole(...)`) bloquea acciones de mutación según el perfil del usuario autenticado
 
 ### Roles y Autenticación (AUTH)
 
@@ -80,10 +80,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SEC-01 | Phase 1 | Pending |
-| SEC-02 | Phase 1 | Pending |
+| SEC-01 | Phase 1 | Complete |
+| SEC-02 | Phase 1 | Complete |
 | SEC-03 | Phase 1 | Pending |
-| SEC-04 | Phase 1 | Pending |
+| SEC-04 | Phase 1 | Complete |
 | AUTH-01 | Phase 1 | Pending |
 | AUTH-02 | Phase 1 | Pending |
 | AUTH-03 | Phase 1 | Pending |
@@ -101,6 +101,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TI-02 | Phase 5 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 19 total
 - Mapped to phases: 19/19 ✓
 - Unmapped: 0

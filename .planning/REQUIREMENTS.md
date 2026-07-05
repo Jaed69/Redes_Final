@@ -80,31 +80,31 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SEC-01 | TBD | Pending |
-| SEC-02 | TBD | Pending |
-| SEC-03 | TBD | Pending |
-| SEC-04 | TBD | Pending |
-| AUTH-01 | TBD | Pending |
-| AUTH-02 | TBD | Pending |
-| AUTH-03 | TBD | Pending |
-| ADMIN-01 | TBD | Pending |
-| ADMIN-02 | TBD | Pending |
-| ADMIN-03 | TBD | Pending |
-| CLIENTE-01 | TBD | Pending |
-| CLIENTE-02 | TBD | Pending |
-| MONITOR-01 | TBD | Pending |
-| MONITOR-02 | TBD | Pending |
-| TI-01 | TBD | Pending |
-| TI-02 | TBD | Pending |
-| STATS-01 | TBD | Pending |
-| STATS-02 | TBD | Pending |
-| INFRA-01 | TBD | Pending |
+| SEC-01 | Phase 1 | Pending |
+| SEC-02 | Phase 1 | Pending |
+| SEC-03 | Phase 1 | Pending |
+| SEC-04 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 1 | Pending |
+| ADMIN-02 | Phase 1 | Pending |
+| INFRA-01 | Phase 1 | Pending |
+| ADMIN-01 | Phase 2 | Pending |
+| ADMIN-03 | Phase 2 | Pending |
+| MONITOR-01 | Phase 3 | Pending |
+| MONITOR-02 | Phase 3 | Pending |
+| STATS-01 | Phase 3 | Pending |
+| CLIENTE-01 | Phase 4 | Pending |
+| CLIENTE-02 | Phase 4 | Pending |
+| STATS-02 | Phase 4 | Pending |
+| TI-01 | Phase 5 | Pending |
+| TI-02 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 19 total
-- Mapped to phases: 0 (pending roadmap creation)
-- Unmapped: 19 ⚠️ (expected before roadmap step)
+- Mapped to phases: 19/19 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-07-05*
-*Last updated: 2026-07-05 after initial definition*
+*Last updated: 2026-07-05 after roadmap creation*

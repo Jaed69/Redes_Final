@@ -31,6 +31,7 @@ import ClienteReportes from "./pages/Cliente/ClienteReportes";
 
 import TiLayout from "./pages/TI/TiLayout";
 import TiCuentas from "./pages/TI/TiCuentas";
+import TiDashboard from "./pages/TI/TiDashboard";
 import TiSistema from "./pages/TI/TiSistema";
 
 import type {
@@ -74,6 +75,7 @@ export default function App() {
           nombre: v.nombrevinedo,
           ubicacion: v.ubicacion,
           areaHectareas: parseFloat(v.area_hectareas),
+          empresaId: String(v.empresa_idempresa),
           empresaNombre: v.nombreempresa,
         }))
       )
@@ -325,13 +327,22 @@ export default function App() {
                   sensores={sensores}
                   alertas={alertas}
                   detecciones={detecciones}
+                  lecturas={lecturas}
+                  notificaciones={notifs}
                   empresaId={empresa.id}
                 />
               }
             />
             <Route
               path="alertas"
-              element={<ClienteAlertas alertas={alertas} empresaId={empresa.id} vinedos={vinedos} />}
+              element={
+                <ClienteAlertas
+                  alertas={alertas}
+                  empresaId={empresa.id}
+                  vinedos={vinedos}
+                  notificaciones={notifs}
+                />
+              }
             />
             <Route
               path="reportes"
@@ -343,7 +354,7 @@ export default function App() {
         {/* TI */}
         <Route element={<RequireRole roles={["ti"]} />}>
           <Route path="/ti" element={<TiLayout usuario={usuario} />}>
-            <Route index element={<TiCuentas />} />
+            <Route index element={<TiDashboard />} />
             <Route path="cuentas" element={<TiCuentas />} />
             <Route path="sistema" element={<TiSistema />} />
           </Route>

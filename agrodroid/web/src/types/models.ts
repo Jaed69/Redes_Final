@@ -176,6 +176,7 @@ export interface Vinedo {
   nombre: string;
   ubicacion: string;
   areaHectareas: number;
+  empresaId?: string;
   empresaNombre?: string;
 }
 

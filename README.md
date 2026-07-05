@@ -71,9 +71,9 @@ Sin framework de tests (MVP). Sin CI/CD. Sin despliegue cloud (el informe TB1 ju
 | Rol | Ruta | Lo que puede |
 |-----|------|--------------|
 | `admin` | `/admin` | CRUD completo sobre Empresa, Viñedo, Sensor, Dron, Umbral, Usuario. Dashboard con KPIs en vivo. |
-| `monitor` | `/dashboard` | Ver sensores/drones/lecturas/detecciones de sus viñedos; mapa (Leaflet); trend chart; **cambiar estado de alertas**. |
-| `cliente` | `/cliente` | Solo lectura: dashboard, alertas y reportes comparativos de los viñedos de su empresa. Sin mutación. |
-| `ti` | `/ti/cuentas`, `/ti/sistema` | CRUD de cuentas de usuario (alta/baja/reset password); estado de DB y variables de entorno. |
+| `monitor` | `/dashboard` | Ver sensores/drones/lecturas/detecciones de sus viñedos; mapa (Leaflet); trend chart; **cambiar estado de alertas** (Pendiente/En Proceso/Resuelta). |
+| `cliente` | `/cliente` | Solo lectura filtrada por `empresaId`: **dashboard con gráficos** (LineChart de tendencia de lecturas + BarChart de alertas por viñedo + panel de notificaciones recientes), **alertas y notificaciones** (tabs, sin mutación), **reportes comparativos** (BarChart activas vs resueltas + PieChart de distribución de estados + ranking). |
+| `ti` | `/ti` (dashboard), `/ti/cuentas`, `/ti/sistema` | Dashboard TI con KPIs (usuarios, empresas, DB ok, env faltantes) + últimos usuarios + estado de sistema de un vistazo; CRUD de cuentas (alta/baja/reset password); estado detallado de DB y variables de entorno. |
 
 **Autorización backend:** `verificarToken` en toda ruta protegida; `requireRole(...)` en cada mutación (POST/PUT/DELETE). Frontend Además tiene `RequireRole` guard que bloquea cross‑role por URL.
 
@@ -224,6 +224,11 @@ Redes_Final/
 - **`actualizarEstadoAlerta`** acepta `estado` string (lookup en `EstadoAlerta`) o `estadoalerta_idestado` numérico (retrocompat).
 - **Login devuelve `empresaId` + `empresaNombre`** en `usuario` — Cliente/Monitor filtran por empresa en frontend.
 - **Detecciones JOIN a TipoEnfermedad + Imagen** ahora devuelven `nombreenfermedad` + `rutaarchivo`.
+- **Cliente TI usan shell + design system de DESIGN.md** (Mintlify: Inter, mint accent #00d4a4, pill buttons, hairline cards 12px, elevation 1). Tokens inyectados en `theme.css`; componentes en `styles/Shared/ClienteTi.css`.
+- **Cliente Dashboard con gráficos Recharts:** LineChart tendencia de lecturas, BarChart alertas por viñedo (activas vs resueltas), panel de notificaciones recientes. Fltrado real por `empresaId`.
+- **Cliente Alertas:** tabs (Alertas + Notificaciones), sin selector de estado (cliente no muta).
+- **Cliente Reportes:** BarChart comparativo + PieChart de distribución de estados + tabla ranking.
+- **TI Dashboard (`/ti` index):** KPIs (usuarios, empresas, DB ok/fail, env 6/6), últimos 5 usuarios, estado de sistema de un vistazo + accesos rápidos.
 - **Docker Compose** monta `./web/src` y `./app:/app` (con `node_modules` anónimo) para dev en caliente.
 
 ---

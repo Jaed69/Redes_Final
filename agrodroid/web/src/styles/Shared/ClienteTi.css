@@ -1,0 +1,291 @@
+/* ============================================================
+   Cliente / TI — Shell + componentes derivados de DESIGN.md
+   (Mintlify design language: Inter, mint accent, hairline cards,
+   pill buttons, 12px radius, flat elevation with strategic depth).
+   Token imports live in theme.css; este archivo solo consume vars.
+   ============================================================ */
+
+.app-shell--roled {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.roled-header {
+  height: var(--navbar-h);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md, 16px);
+  padding: 0 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-soft);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.roled-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.roled-header__brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-mint, #00d4a4);
+  box-shadow: 0 0 0 3px rgba(0, 212, 164, 0.18);
+}
+
+.roled-header__user {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.roled-header__btn {
+  background: var(--text-primary, #0a0a0a);
+  color: var(--surface);
+  border: none;
+  border-radius: 9999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.roled-header__btn:hover {
+  background: var(--charcoal, #1c1c1e);
+}
+
+.roled-body {
+  display: flex;
+  flex: 1;
+  min-height: calc(100vh - var(--navbar-h));
+}
+
+.roled-sidebar {
+  width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border-soft);
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.roled-sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.roled-sidebar__link:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.roled-sidebar__link.is-active {
+  background: var(--accent-mint-bg, rgba(0, 212, 164, 0.12));
+  color: var(--accent-mint-deep, #00b48a);
+}
+
+.roled-sidebar__icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+.roled-content {
+  flex: 1;
+  min-width: 0;
+  padding: 28px 32px;
+  overflow-x: hidden;
+}
+
+.roled-content > * {
+  max-width: 1280px;
+  margin-right: auto;
+}
+
+/* Mobile: collapse sidebar into a drawer */
+.roled-toggle {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+@media (max-width: 860px) {
+  .roled-toggle {
+    display: inline-flex;
+  }
+  .roled-sidebar {
+    position: fixed;
+    top: var(--navbar-h);
+    left: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    transition: transform 180ms ease;
+    z-index: 20;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+  .roled-sidebar.is-open {
+    transform: translateX(0);
+  }
+  .roled-scrim {
+    position: fixed;
+    inset: var(--navbar-h) 0 0 0;
+    background: rgba(10, 10, 10, 0.32);
+    z-index: 15;
+  }
+  .roled-content {
+    padding: 20px 16px;
+  }
+}
+
+/* --- View header reused across Cliente/TI --- */
+.view-header {
+  margin-bottom: 20px;
+}
+.view-header h1 {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+.view-header__sub {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* --- Stat grid (KPIs) --- */
+.roled-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+/* --- Grid 2-up for panels --- */
+.roled-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+@media (max-width: 980px) {
+  .roled-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Panels (cards) --- */
+.roled-panel {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.roled-panel__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* --- Tables --- */
+.roled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.roled-table th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.roled-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--hairline-soft, #ededed);
+  color: var(--text-primary);
+}
+.roled-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.roled-table .mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* --- Pill estado (verde / ámbar / rojo) --- */
+.roled-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-mono);
+}
+.roled-pill--ok {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.roled-pill--warn {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.roled-pill--bad {
+  background: var(--critical-bg);
+  color: var(--critical);
+}
+.roled-pill--muted {
+  background: var(--offline-bg);
+  color: var(--offline);
+}
+
+/* --- Empty hint --- */
+.roled-empty {
+  text-align: center;
+  padding: 28px 16px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* --- Chart container --- */
+.roled-chart {
+  width: 100%;
+  height: 260px;
+}

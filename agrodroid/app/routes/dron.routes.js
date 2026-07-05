@@ -1,17 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const verificarToken = require("../middlewares/auth.middleware");
+const { verificarToken, requireRole } = require("../middlewares/auth.middleware");
 
 const dronController = require("../controllers/dron.controller");
 
-router.get("/",verificarToken,dronController.listarDrones); 
-   
+router.get("/",verificarToken,dronController.listarDrones);
+
 router.get("/:id",verificarToken,dronController.obtenerDron);
 
-router.post( "/",verificarToken,dronController.crearDron);
+router.post( "/",verificarToken,requireRole("admin"),dronController.crearDron);
 
-router.put("/:id",verificarToken,dronController.actualizarDron);
+router.put("/:id",verificarToken,requireRole("admin"),dronController.actualizarDron);
 
-router.delete("/:id",verificarToken,dronController.eliminarDron);
+router.delete("/:id",verificarToken,requireRole("admin"),dronController.eliminarDron);
 
 module.exports = router;

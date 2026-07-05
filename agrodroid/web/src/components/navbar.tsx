@@ -99,7 +99,7 @@ export default function Navbar({
           <span />
           <span />
         </button>
-        <span className="navbar__brand">Viña Sensora</span>
+        <span className="navbar__brand">AGRODROID</span>
       </div>
 
       <div className="navbar__center">

@@ -7,9 +7,13 @@ export interface AlertsNotificationsViewProps {
   alertas: Alerta[];
   notificaciones: Notificacion[];
   onMarcarLeida?: (notificacionId: string) => void;
+  onCambiarEstado?: (alertaId: string, estado: "Pendiente" | "En Proceso" | "Resuelta") => Promise<void>;
 }
 
 type Tab = "alertas" | "notificaciones";
+type EstadoAccion = "Pendiente" | "En Proceso" | "Resuelta";
+
+const ESTADOS: EstadoAccion[] = ["Pendiente", "En Proceso", "Resuelta"];
 
 /**
  * Vista 6 — alertas del sistema y notificaciones derivadas, en dos pestañas.
@@ -22,8 +26,10 @@ export default function AlertsNotificationsView({
   alertas,
   notificaciones,
   onMarcarLeida,
+  onCambiarEstado,
 }: AlertsNotificationsViewProps) {
   const [tab, setTab] = useState<Tab>("alertas");
+  const [cambiandoId, setCambiandoId] = useState<string | null>(null);
   const sinLeer = notificaciones.filter((n) => !n.leida).length;
 
   return (
@@ -77,6 +83,28 @@ export default function AlertsNotificationsView({
                   <p className="alert-row__desc">{a.descripcion}</p>
                 </div>
                 <span className={`estado-pill ${tono}`}>{a.estado}</span>
+                {onCambiarEstado && (
+                  <select
+                    value={a.estado}
+                    disabled={cambiandoId === a.id}
+                    onChange={async (e) => {
+                      const nuevo = e.target.value as EstadoAccion;
+                      if (nuevo === a.estado) return;
+                      setCambiandoId(a.id);
+                      try {
+                        await onCambiarEstado(a.id, nuevo);
+                      } finally {
+                        setCambiandoId(null);
+                      }
+                    }}
+                  >
+                    {ESTADOS.map((est) => (
+                      <option key={est} value={est}>
+                        {est}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             );
           })}

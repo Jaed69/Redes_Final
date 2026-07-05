@@ -5,10 +5,12 @@ const obtenerDrones = async () => {
         SELECT
             d.iddron,
             d.nombredron,
+            d.vinedo_idvinedo,
             v.nombrevinedo
         FROM dron d
         JOIN vinedo v
             ON d.vinedo_idvinedo = v.idvinedo
+        ORDER BY d.iddron
     `);
 
     return result.rows;

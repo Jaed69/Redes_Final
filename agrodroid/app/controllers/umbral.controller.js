@@ -25,4 +25,12 @@ const actualizar = async (req, res) => {
     res.json(data);
 };
 
-module.exports = { listar, obtener, crear, actualizar };
+const eliminar = async (req, res) => {
+    const data = await service.eliminarUmbral(req.params.id);
+
+    if (!data) return res.status(404).json({ mensaje: "No encontrado" });
+
+    res.json(data);
+};
+
+module.exports = { listar, obtener, crear, actualizar, eliminar };

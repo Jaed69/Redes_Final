@@ -24,7 +24,7 @@ const mapUsuario = (a: ApiUsuario): UsuarioAdmin => ({
   empresaNombre: a.nombreempresa,
 });
 
-export default function UsuarioView() {
+export default function TiCuentas() {
   const [usuarios, setUsuarios] = useState<UsuarioAdmin[]>([]);
   const [empresas, setEmpresas] = useState<EmpresaAdmin[]>([]);
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -115,11 +115,11 @@ export default function UsuarioView() {
     <div className="admin-view">
       <div className="admin-view__header">
         <div>
-          <h1>Usuarios</h1>
-          <p className="view-header__sub">Gestiona las cuentas de acceso a la plataforma</p>
+          <h1>Cuentas de usuario</h1>
+          <p className="view-header__sub">TI: alta, edición y baja de cuentas de acceso</p>
         </div>
         <button type="button" className="btn btn-primary" onClick={handleNuevo}>
-          + Nuevo usuario
+          + Nueva cuenta
         </button>
       </div>
 
@@ -142,7 +142,7 @@ export default function UsuarioView() {
 
       <ConfirmDialog
         open={aEliminar !== null}
-        message={`¿Seguro que quieres eliminar al usuario "${aEliminar?.nombre}"? Esta acción no se puede deshacer.`}
+        message={`¿Seguro que quieres dar de baja al usuario "${aEliminar?.nombre}"?`}
         onConfirm={handleEliminarConfirmado}
         onCancel={() => setAEliminar(null)}
       />

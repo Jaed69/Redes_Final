@@ -6,6 +6,8 @@ const { verificarToken, requireRole } = require("../middlewares/auth.middleware"
 
 router.get("/", verificarToken, usuarioController.listarUsuarios);
 router.get("/:id", verificarToken, usuarioController.obtenerUsuario);
-router.put("/:id", verificarToken, requireRole("admin"), usuarioController.actualizarUsuario);
+router.post("/", verificarToken, requireRole("admin", "ti"), usuarioController.crearUsuario);
+router.put("/:id", verificarToken, requireRole("admin", "ti"), usuarioController.actualizarUsuario);
+router.delete("/:id", verificarToken, requireRole("admin", "ti"), usuarioController.eliminarUsuario);
 
 module.exports = router;

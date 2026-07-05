@@ -10,6 +10,7 @@ const deteccionRoutes = require("./routes/deteccion.routes");
 const lecturaRoutes = require("./routes/lectura.routes");
 const sensorRoutes = require("./routes/sensor.routes");
 const umbralRoutes = require("./routes/umbral.routes");
+const systemRoutes = require("./routes/system.routes");
 const authRoutes = require("./routes/auth.routes");
 const app = express();
 const cors = require("cors");
@@ -28,6 +29,7 @@ app.use("/detecciones", deteccionRoutes);
 app.use("/lecturas", lecturaRoutes);
 app.use("/sensores", sensorRoutes);
 app.use("/umbrales", umbralRoutes);
+app.use("/system", systemRoutes);
 app.use("/auth", authRoutes);
 
 

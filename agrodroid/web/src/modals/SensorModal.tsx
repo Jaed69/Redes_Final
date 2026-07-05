@@ -1,29 +1,42 @@
 import { useEffect, useState } from "react";
 import Modal from "../components/Modal";
-import { vinedosMock } from "../mockData";
-import type { SensorAdmin } from "../types/models";
+import type { SensorAdmin, VinedoAdmin } from "../types/models";
 
 interface SensorModalProps {
   open: boolean;
   sensor: SensorAdmin | null;
-  onGuardar: (data: Omit<SensorAdmin, "id" | "vinedoNombre" | "estado">) => void;
+  vinedos: VinedoAdmin[];
+  onGuardar: (data: {
+    nombre: string;
+    vinedoId: string;
+    latitud: number;
+    longitud: number;
+  }) => void;
   onClose: () => void;
 }
 
 const VACIO = {
   nombre: "",
-  tipo: "Humedad" as SensorAdmin["tipo"],
-  vinedoId: vinedosMock[0]?.id ?? "",
+  vinedoId: "",
   latitud: 0,
   longitud: 0,
 };
 
-export default function SensorModal({ open, sensor, onGuardar, onClose }: SensorModalProps) {
+export default function SensorModal({ open, sensor, vinedos, onGuardar, onClose }: SensorModalProps) {
   const [form, setForm] = useState(VACIO);
 
   useEffect(() => {
-    setForm(sensor ? { ...sensor } : VACIO);
-  }, [sensor, open]);
+    setForm(
+      sensor
+        ? {
+            nombre: sensor.nombre,
+            vinedoId: sensor.vinedoId,
+            latitud: sensor.latitud,
+            longitud: sensor.longitud,
+          }
+        : { ...VACIO, vinedoId: vinedos[0]?.id ?? "" }
+    );
+  }, [sensor, open, vinedos]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,32 +57,19 @@ export default function SensorModal({ open, sensor, onGuardar, onClose }: Sensor
             />
           </div>
           <div className="admin-form__field">
-            <label htmlFor="sensor-tipo">Tipo</label>
+            <label htmlFor="sensor-vinedo">Viñedo</label>
             <select
-              id="sensor-tipo"
-              value={form.tipo}
-              onChange={(e) => setForm({ ...form, tipo: e.target.value as SensorAdmin["tipo"] })}
+              id="sensor-vinedo"
+              value={form.vinedoId}
+              onChange={(e) => setForm({ ...form, vinedoId: e.target.value })}
             >
-              <option value="Humedad">Humedad</option>
-              <option value="Temperatura">Temperatura</option>
-              <option value="Combinado">Combinado</option>
+              {vinedos.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.nombre}
+                </option>
+              ))}
             </select>
           </div>
-        </div>
-
-        <div className="admin-form__field">
-          <label htmlFor="sensor-vinedo">Viñedo</label>
-          <select
-            id="sensor-vinedo"
-            value={form.vinedoId}
-            onChange={(e) => setForm({ ...form, vinedoId: e.target.value })}
-          >
-            {vinedosMock.map((v) => (
-              <option key={v.id} value={v.id}>
-                {v.nombre}
-              </option>
-            ))}
-          </select>
         </div>
 
         <div className="admin-form__row">
@@ -78,7 +78,7 @@ export default function SensorModal({ open, sensor, onGuardar, onClose }: Sensor
             <input
               id="sensor-lat"
               type="number"
-              step="0.0001"
+              step="0.0000001"
               required
               value={form.latitud}
               onChange={(e) => setForm({ ...form, latitud: Number(e.target.value) })}
@@ -89,7 +89,7 @@ export default function SensorModal({ open, sensor, onGuardar, onClose }: Sensor
             <input
               id="sensor-long"
               type="number"
-              step="0.0001"
+              step="0.0000001"
               required
               value={form.longitud}
               onChange={(e) => setForm({ ...form, longitud: Number(e.target.value) })}

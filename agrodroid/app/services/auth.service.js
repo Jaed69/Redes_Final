@@ -58,14 +58,16 @@ const login = async (data) => {
     // Buscar usuario
     const result = await pool.query(`
         SELECT
-            idusuario,
-            nombreusuario,
-            correo,
-            contrasenia,
-            rol,
-            empresa_idempresa
-        FROM usuario
-        WHERE correo = $1
+            u.idusuario,
+            u.nombreusuario,
+            u.correo,
+            u.contrasenia,
+            u.rol,
+            u.empresa_idempresa,
+            e.nombreempresa
+        FROM usuario u
+        JOIN empresa e ON u.empresa_idempresa = e.idempresa
+        WHERE u.correo = $1
     `, [correo]);
 
     if (result.rows.length === 0) {
@@ -104,7 +106,9 @@ const login = async (data) => {
             id: usuario.idusuario,
             nombre: usuario.nombreusuario,
             correo: usuario.correo,
-            rol: usuario.rol
+            rol: usuario.rol,
+            empresaId: usuario.empresa_idempresa,
+            empresaNombre: usuario.nombreempresa
         }
     };
 };

@@ -5,8 +5,7 @@ import "leaflet/dist/leaflet.css";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import RequireRole from "./components/RequireRole";
-import ComingSoonView from "./pages/Shared/ComingSoonView";
-import { api } from "./services/api";
+import { api, API_BASE_URL } from "./services/api";
 
 import AppLayout from "./pages/Usuario/Applayout";
 import DashboardView from "./pages/Usuario/DashboardView";
@@ -25,6 +24,15 @@ import SensorView from "./pages/Admin/SensorView";
 import UsuarioView from "./pages/Admin/UsuarioView";
 import UmbralView from "./pages/Admin/UmbralView";
 
+import ClienteLayout from "./pages/Cliente/ClienteLayout";
+import ClienteDashboard from "./pages/Cliente/ClienteDashboard";
+import ClienteAlertas from "./pages/Cliente/ClienteAlertas";
+import ClienteReportes from "./pages/Cliente/ClienteReportes";
+
+import TiLayout from "./pages/TI/TiLayout";
+import TiCuentas from "./pages/TI/TiCuentas";
+import TiSistema from "./pages/TI/TiSistema";
+
 import type {
   Alerta,
   DeteccionEnfermedad,
@@ -38,18 +46,13 @@ import type {
 } from "./types/models";
 
 export default function App() {
-  // =========================
-  // AUTH / STATIC
-  // =========================
-  const usuario = JSON.parse(localStorage.getItem("usuario") || "{}") as Usuario;
-
-  const empresa = {} as Empresa;
-
+  const usuario = JSON.parse(localStorage.getItem("usuario") || "{}") as Usuario & {
+    empresaId?: string;
+    empresaNombre?: string;
+  };
+  const empresa = { id: usuario.empresaId ?? "", nombre: usuario.empresaNombre ?? "" } as Empresa;
   const [backendOnline] = useState(true);
 
-  // =========================
-  // DATA STATE
-  // =========================
   const [vinedos, setVinedos] = useState<Vinedo[]>([]);
   const [sensores, setSensores] = useState<Sensor[]>([]);
   const [lecturas, setLecturas] = useState<LecturaSensor[]>([]);
@@ -58,65 +61,126 @@ export default function App() {
   const [alertas, setAlertas] = useState<Alerta[]>([]);
   const [notifs, setNotifs] = useState<Notificacion[]>([]);
 
-  // =========================
-  // UI STATE
-  // =========================
   const [vinedoActivoId, setVinedoActivoId] = useState<string | null>(null);
   const [sensorSeleccionadoId, setSensorSeleccionadoId] = useState<string | null>(null);
 
-  const [rango, setRango] = useState({
-    inicio: "2026-06-01",
-    fin: "2026-07-03",
-  });
+  const [rango, setRango] = useState({ inicio: "2026-06-01", fin: "2026-07-03" });
 
-  // =========================
-  // LOAD DATA
-  // =========================
   useEffect(() => {
-    api.get("/vinedos").then((data: any) =>
+    api.get("/vinedos").then((d: any) =>
       setVinedos(
-        data.map((v: any) => ({
+        d.map((v: any) => ({
           id: String(v.idvinedo),
           nombre: v.nombrevinedo,
           ubicacion: v.ubicacion,
           areaHectareas: parseFloat(v.area_hectareas),
+          empresaNombre: v.nombreempresa,
         }))
       )
     );
   }, []);
 
   useEffect(() => {
-    api.get("/sensores").then((data: any) =>
+    api.get("/sensores").then((d: any) =>
       setSensores(
-        data.map((s: any) => ({
+        d.map((s: any) => ({
           id: String(s.idsensor),
           nombre: s.nombresensor,
           latitud: parseFloat(s.latitud),
           longitud: parseFloat(s.longitud),
+          vinedoId: String(s.vinedo_idvinedo),
           vinedoNombre: s.nombrevinedo,
-          estado: "normal",
+          estado: "sin_datos" as const,
         }))
       )
     );
   }, []);
 
   useEffect(() => {
-    api.get("/alertas").then((data: any) =>
+    api.get("/lecturas").then((d: any) =>
+      setLecturas(
+        d.map((l: any) => ({
+          id: String(l.idlectura),
+          sensorId: String(l.sensor_idsensor),
+          valor: parseFloat(l.valor),
+          fecha: l.fechalectura?.slice(0, 10),
+          hora: l.horalectura?.slice(0, 8),
+        }))
+      )
+    );
+  }, []);
+
+  useEffect(() => {
+    api.get("/drones").then(async (d: any) => {
+      const vinedoIdPorNombre = new Map<string, string>();
+      vinedos.forEach((v) => vinedoIdPorNombre.set(v.nombre, v.id));
+
+      let imagenes: any[] = [];
+      try {
+        imagenes = (await api.get("/imagenes")) as any[];
+      } catch (_) {
+        imagenes = [];
+      }
+
+      const dronesMapped: Dron[] = d.map((dr: any) => ({
+        id: String(dr.iddron),
+        nombre: dr.nombredron,
+        vinedoId: String(dr.vinedo_idvinedo),
+        vinedoNombre: dr.nombrevinedo,
+        imagenes: imagenes
+          .filter((im: any) => String(im.dron_iddron) === String(dr.iddron))
+          .map((im: any) => ({
+            id: String(im.idimagen),
+            dronId: String(im.dron_iddron),
+            url: `${API_BASE_URL}${im.rutaarchivo}`,
+            fecha: im.fechacaptura?.slice(0, 10),
+            hora: im.horacaptura?.slice(0, 8),
+            latitud: parseFloat(im.latitud),
+            longitud: parseFloat(im.longitud),
+            anchoPx: im.ancho,
+            altoPx: im.alto,
+            tamanoArchivo: im.tamanoarchivo,
+          })),
+      }));
+      setDrones(dronesMapped);
+    });
+  }, [vinedos]);
+
+  useEffect(() => {
+    api.get("/detecciones").then((d: any) =>
+      setDetecciones(
+        d.map((det: any) => ({
+          id: String(det.iddeteccion),
+          imagenId: String(det.imagen_idimagen),
+          enfermedad: det.nombreenfermedad ?? "Desconocida",
+          nivelConfianza: parseFloat(det.nivelconfianza),
+          fecha: det.fechadeteccion?.slice(0, 10),
+          descripcion: det.descripcion,
+          imagenUrl: det.rutaarchivo ? `${API_BASE_URL}${det.rutaarchivo}` : undefined,
+        }))
+      )
+    );
+  }, []);
+
+  useEffect(() => {
+    api.get("/alertas").then((d: any) =>
       setAlertas(
-        data.map((a: any) => ({
+        d.map((a: any) => ({
           id: String(a.idalerta),
           tipo: a.tipo,
           estado: a.estado,
           descripcion: a.descripcion,
+          vinedoId: String(a.vinedo_idvinedo),
+          empresaNombre: a.nombreempresa,
         }))
       )
     );
   }, []);
 
   useEffect(() => {
-    api.get("/notificaciones").then((data: any) =>
+    api.get("/notificaciones").then((d: any) =>
       setNotifs(
-        data.map((n: any) => ({
+        d.map((n: any) => ({
           id: String(n.idnotificacion),
           mensaje: n.mensaje,
           fecha: n.fechaenvio,
@@ -129,9 +193,6 @@ export default function App() {
     );
   }, []);
 
-  // =========================
-  // DERIVED DATA
-  // =========================
   const sensoresDelVinedo = useMemo(
     () => sensores.filter((s) => !vinedoActivoId || s.vinedoId === vinedoActivoId),
     [sensores, vinedoActivoId]
@@ -153,9 +214,6 @@ export default function App() {
     [lecturas, sensorSeleccionadoId, rango]
   );
 
-  // =========================
-  // ROUTES
-  // =========================
   return (
     <BrowserRouter>
       <Routes>
@@ -164,7 +222,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* APP */}
+        {/* MONITOR */}
         <Route element={<RequireRole roles={["monitor"]} />}>
           <Route
             path="/dashboard"
@@ -193,8 +251,6 @@ export default function App() {
                 />
               }
             />
-
-
 
             <Route path="mapa" element={<SensorMapView sensores={sensoresDelVinedo} vinedos={vinedos} />} />
 
@@ -228,51 +284,71 @@ export default function App() {
                       prev.map((n) => (n.id === id ? { ...n, leida: true } : n))
                     )
                   }
+                  onCambiarEstado={async (id, estado) => {
+                    try {
+                      await api.put(`/alertas/${id}/estado`, { estado });
+                      setAlertas((prev) => prev.map((a) => (a.id === id ? { ...a, estado } : a)));
+                    } catch (e) {
+                      alert(e instanceof Error ? e.message : "Error al actualizar estado");
+                    }
+                  }}
                 />
               }
             />
           </Route>
         </Route>
 
-        {/* =========================
-          ADMINISTRADOR
-      ========================= */}
-
-      <Route element={<RequireRole roles={["admin"]} />}>
-        <Route
-          path="/admin"
-          element={
-            <AdminLayout
-              usuario={usuario}
-              notificaciones={notifs}
-              backendOnline={backendOnline}
-            />
-          }
-        >
-          <Route index element={<AdminDashboard />} />
-
-          <Route path="empresas" element={<EmpresaView />} />
-
-          <Route path="vinedos" element={<VinedoView />} />
-
-          <Route path="usuarios" element={<UsuarioView />} />
-
-          <Route path="sensores" element={<SensorView />} />
-
-          <Route path="drones" element={<DronView />} />
-
-          <Route path="umbrales" element={<UmbralView />} />
+        {/* ADMIN */}
+        <Route element={<RequireRole roles={["admin"]} />}>
+          <Route
+            path="/admin"
+            element={<AdminLayout usuario={usuario} notificaciones={notifs} backendOnline={backendOnline} />}
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="empresas" element={<EmpresaView />} />
+            <Route path="vinedos" element={<VinedoView />} />
+            <Route path="usuarios" element={<UsuarioView />} />
+            <Route path="sensores" element={<SensorView />} />
+            <Route path="drones" element={<DronView />} />
+            <Route path="umbrales" element={<UmbralView />} />
+          </Route>
         </Route>
-      </Route>
 
-      {/* CLIENTE / TI */}
-      <Route element={<RequireRole roles={["cliente", "ti"]} />}>
-        <Route path="/proximamente" element={<ComingSoonView />} />
-      </Route>
+        {/* CLIENTE */}
+        <Route element={<RequireRole roles={["cliente"]} />}>
+          <Route path="/cliente" element={<ClienteLayout usuario={usuario} empresa={empresa} />}>
+            <Route
+              index
+              element={
+                <ClienteDashboard
+                  vinedos={vinedos}
+                  sensores={sensores}
+                  alertas={alertas}
+                  detecciones={detecciones}
+                  empresaId={empresa.id}
+                />
+              }
+            />
+            <Route
+              path="alertas"
+              element={<ClienteAlertas alertas={alertas} empresaId={empresa.id} vinedos={vinedos} />}
+            />
+            <Route
+              path="reportes"
+              element={<ClienteReportes vinedos={vinedos} alertas={alertas} empresaId={empresa.id} />}
+            />
+          </Route>
+        </Route>
 
+        {/* TI */}
+        <Route element={<RequireRole roles={["ti"]} />}>
+          <Route path="/ti" element={<TiLayout usuario={usuario} />}>
+            <Route index element={<TiCuentas />} />
+            <Route path="cuentas" element={<TiCuentas />} />
+            <Route path="sistema" element={<TiSistema />} />
+          </Route>
+        </Route>
       </Routes>
-
-      
     </BrowserRouter>
   );
 }

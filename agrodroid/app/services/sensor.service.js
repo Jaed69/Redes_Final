@@ -7,10 +7,12 @@ const obtenerSensores = async () => {
             s.nombresensor,
             s.latitud,
             s.longitud,
+            s.vinedo_idvinedo,
             v.nombrevinedo
         FROM sensor s
         JOIN vinedo v
             ON s.vinedo_idvinedo = v.idvinedo
+        ORDER BY s.idsensor
     `);
 
     return result.rows;

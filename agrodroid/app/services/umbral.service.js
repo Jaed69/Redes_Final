@@ -69,9 +69,20 @@ const actualizarUmbral = async (id, data) => {
     return result.rows[0];
 };
 
+const eliminarUmbral = async (id) => {
+    const result = await pool.query(`
+        DELETE FROM umbral
+        WHERE idumbral = $1
+        RETURNING *
+    `, [id]);
+
+    return result.rows[0];
+};
+
 module.exports = {
     obtenerUmbrales,
     obtenerUmbralPorId,
     crearUmbral,
-    actualizarUmbral
+    actualizarUmbral,
+    eliminarUmbral
 };

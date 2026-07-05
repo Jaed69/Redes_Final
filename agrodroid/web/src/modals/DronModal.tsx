@@ -1,28 +1,30 @@
 import { useEffect, useState } from "react";
 import Modal from "../components/Modal";
-import { vinedosMock } from "../mockData";
-import type { DronAdmin } from "../types/models";
+import type { DronAdmin, VinedoAdmin } from "../types/models";
 
 interface DronModalProps {
   open: boolean;
   dron: DronAdmin | null;
-  onGuardar: (data: Omit<DronAdmin, "id" | "vinedoNombre" | "bateria">) => void;
+  vinedos: VinedoAdmin[];
+  onGuardar: (data: { nombre: string; vinedoId: string }) => void;
   onClose: () => void;
 }
 
 const VACIO = {
-  codigo: "",
-  modelo: "",
-  vinedoId: vinedosMock[0]?.id ?? "",
-  estado: "Disponible" as DronAdmin["estado"],
+  nombre: "",
+  vinedoId: "",
 };
 
-export default function DronModal({ open, dron, onGuardar, onClose }: DronModalProps) {
+export default function DronModal({ open, dron, vinedos, onGuardar, onClose }: DronModalProps) {
   const [form, setForm] = useState(VACIO);
 
   useEffect(() => {
-    setForm(dron ? { ...dron } : VACIO);
-  }, [dron, open]);
+    setForm(
+      dron
+        ? { nombre: dron.nombre, vinedoId: dron.vinedoId }
+        : { ...VACIO, vinedoId: vinedos[0]?.id ?? "" }
+    );
+  }, [dron, open, vinedos]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,54 +34,29 @@ export default function DronModal({ open, dron, onGuardar, onClose }: DronModalP
   return (
     <Modal open={open} title={dron ? "Editar dron" : "Nuevo dron"} onClose={onClose}>
       <form className="admin-form" onSubmit={handleSubmit}>
-        <div className="admin-form__row">
-          <div className="admin-form__field">
-            <label htmlFor="dron-codigo">Código</label>
-            <input
-              id="dron-codigo"
-              required
-              value={form.codigo}
-              onChange={(e) => setForm({ ...form, codigo: e.target.value })}
-            />
-          </div>
-          <div className="admin-form__field">
-            <label htmlFor="dron-modelo">Modelo</label>
-            <input
-              id="dron-modelo"
-              required
-              value={form.modelo}
-              onChange={(e) => setForm({ ...form, modelo: e.target.value })}
-            />
-          </div>
+        <div className="admin-form__field">
+          <label htmlFor="dron-nombre">Nombre</label>
+          <input
+            id="dron-nombre"
+            required
+            value={form.nombre}
+            onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+          />
         </div>
 
-        <div className="admin-form__row">
-          <div className="admin-form__field">
-            <label htmlFor="dron-vinedo">Viñedo</label>
-            <select
-              id="dron-vinedo"
-              value={form.vinedoId}
-              onChange={(e) => setForm({ ...form, vinedoId: e.target.value })}
-            >
-              {vinedosMock.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.nombre}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="admin-form__field">
-            <label htmlFor="dron-estado">Estado</label>
-            <select
-              id="dron-estado"
-              value={form.estado}
-              onChange={(e) => setForm({ ...form, estado: e.target.value as DronAdmin["estado"] })}
-            >
-              <option value="Disponible">Disponible</option>
-              <option value="En vuelo">En vuelo</option>
-              <option value="Mantenimiento">Mantenimiento</option>
-            </select>
-          </div>
+        <div className="admin-form__field">
+          <label htmlFor="dron-vinedo">Viñedo</label>
+          <select
+            id="dron-vinedo"
+            value={form.vinedoId}
+            onChange={(e) => setForm({ ...form, vinedoId: e.target.value })}
+          >
+            {vinedos.map((v) => (
+              <option key={v.id} value={v.id}>
+                {v.nombre}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="admin-form__actions">

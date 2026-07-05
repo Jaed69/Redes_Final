@@ -13,11 +13,11 @@ Agrodroid goes from "CRUD parcialmente conectado + panel admin con datos mock" a
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Seguridad, Roles y Base de API Compartida** - Secretos y autorización corregidos, 4 roles definidos, enrutamiento por rol y cliente HTTP centralizado — la base que todo lo demás necesita
-- [ ] **Phase 2: Panel Admin — Datos Reales** - El panel Admin deja de usar `mockData.ts` y opera contra la base de datos real
-- [ ] **Phase 3: Monitor de Campo — Tiempo Real y Alertas** - El operador/monitor ve sensores/drones/lecturas en vivo y gestiona el ciclo de vida de las alertas
-- [ ] **Phase 4: Cliente/Productor — Vista de Solo Lectura y Reportes** - El productor ve todos los viñedos de su empresa y compara desempeño, sin poder mutar nada
-- [ ] **Phase 5: TI — Cuentas y Configuración de Sistema** - TI administra cuentas de usuario y consulta el estado del sistema, separado del panel de negocio
+- [x] **Phase 1: Seguridad, Roles y Base de API Compartida** - Secretos y autorización corregidos, 4 roles definidos, enrutamiento por rol y cliente HTTP centralizado — la base que todo lo demás necesita
+- [x] **Phase 2: Panel Admin — Datos Reales** - El panel Admin deja de usar `mockData.ts` y opera contra la base de datos real
+- [x] **Phase 3: Monitor de Campo — Tiempo Real y Alertas** - El operador/monitor ve sensores/drones/lecturas en vivo y gestiona el ciclo de vida de las alertas
+- [x] **Phase 4: Cliente/Productor — Vista de Solo Lectura y Reportes** - El productor ve todos los viñedos de su empresa y compara desempeño, sin poder mutar nada
+- [x] **Phase 5: TI — Cuentas y Configuración de Sistema** - TI administra cuentas de usuario y consulta el estado del sistema, separado del panel de negocio
 
 ## Phase Details
 
@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Crear una empresa (`POST /empresas`) sin token válido es rechazado, y un usuario autenticado que intenta una mutación fuera de los permisos de su rol recibe 403.
   5. Todas las llamadas de red del frontend (vistas de operador existentes y, en adelante, vistas Admin) pasan por un único cliente de API con base URL configurable, no strings `localhost:3000` hardcodeados.
 
-**Plans**: 4/5 plans executed
+**Plans**: 5/5 plans executed
 Plans:
 **Wave 1**
 
@@ -49,7 +49,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 01-05-PLAN.md — Verificación end-to-end del walking skeleton (script automatizado + checkpoint humano)
+- [x] 01-05-PLAN.md — Verificación end-to-end del walking skeleton (script automatizado + checkpoint humano) — extendido con DELETE/PUT estado/POST usuario/GET system status (10 checks)
 
 **UI hint**: yes
 
@@ -120,8 +120,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Seguridad, Roles y Base de API Compartida | 4/5 | In Progress|  |
-| 2. Panel Admin — Datos Reales | 0/TBD | Not started | - |
-| 3. Monitor de Campo — Tiempo Real y Alertas | 0/TBD | Not started | - |
-| 4. Cliente/Productor — Vista de Solo Lectura y Reportes | 0/TBD | Not started | - |
-| 5. TI — Cuentas y Configuración de Sistema | 0/TBD | Not started | - |
+| 1. Seguridad, Roles y Base de API Compartida | 5/5 | Done | 2026-07-05 |
+| 2. Panel Admin — Datos Reales | MVP | Done | 2026-07-05 |
+| 3. Monitor de Campo — Tiempo Real y Alertas | MVP | Done | 2026-07-05 |
+| 4. Cliente/Productor — Vista de Solo Lectura y Reportes | MVP | Done | 2026-07-05 |
+| 5. TI — Cuentas y Configuración de Sistema | MVP | Done | 2026-07-05 |

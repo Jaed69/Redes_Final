@@ -31,8 +31,10 @@ const Login: React.FC = () => {
         navigate("/dashboard");
         break;
       case "cliente":
+        navigate("/cliente");
+        break;
       case "ti":
-        navigate("/proximamente");
+        navigate("/ti/cuentas");
         break;
       default:
         navigate("/dashboard");

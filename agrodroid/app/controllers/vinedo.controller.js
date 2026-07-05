@@ -49,9 +49,25 @@ const actualizarVinedo = async (req, res) => {
     }
 };
 
+const eliminarVinedo = async (req, res) => {
+    try {
+        const data = await vinedoService.eliminarVinedo(req.params.id);
+
+        if (!data) {
+            return res.status(404).json({ mensaje: "No encontrado" });
+        }
+
+        res.json(data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: "Error eliminando viñedo" });
+    }
+};
+
 module.exports = {
     listarVinedos,
     obtenerVinedo,
     crearVinedo,
-    actualizarVinedo
+    actualizarVinedo,
+    eliminarVinedo
 };

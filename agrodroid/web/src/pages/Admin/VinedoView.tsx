@@ -1,44 +1,63 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DataTable, { type DataTableColumn } from "../../components/DataTable";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import VinedoModal from "../../modals/VinedoModal";
-import { empresasMock, vinedosMock } from "../../mockData";
-import type { VinedoAdmin } from "../../types/models";
-import "../../styles/admin/shared.css";
+import { api } from "../../services/api";
+import type { EmpresaAdmin, VinedoAdmin } from "../../types/models";
+import "../../styles/Admin/Shared.css";
 
-function nombreEmpresa(empresaId: string): string {
-  return empresasMock.find((e) => e.id === empresaId)?.nombre ?? "—";
-}
+type ApiVinedo = {
+  idvinedo: number;
+  nombrevinedo: string;
+  ubicacion: string;
+  area_hectareas: string;
+  empresa_idempresa: number;
+  nombreempresa: string;
+};
+
+const mapVinedo = (a: ApiVinedo): VinedoAdmin => ({
+  id: String(a.idvinedo),
+  nombre: a.nombrevinedo,
+  ubicacion: a.ubicacion,
+  areaHectareas: parseFloat(a.area_hectareas),
+  empresaId: String(a.empresa_idempresa),
+  empresaNombre: a.nombreempresa,
+});
 
 export default function VinedoView() {
-  const [vinedos, setVinedos] = useState<VinedoAdmin[]>(vinedosMock);
+  const [vinedos, setVinedos] = useState<VinedoAdmin[]>([]);
+  const [empresas, setEmpresas] = useState<EmpresaAdmin[]>([]);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [editando, setEditando] = useState<VinedoAdmin | null>(null);
   const [aEliminar, setAEliminar] = useState<VinedoAdmin | null>(null);
 
+  const cargar = async () => {
+    try {
+      const [vData, eData] = await Promise.all([
+        api.get("/vinedos") as Promise<ApiVinedo[]>,
+        api.get("/empresas") as Promise<{ idempresa: number; nombreempresa: string }[]>,
+      ]);
+      setVinedos(vData.map(mapVinedo));
+      setEmpresas(
+        eData.map((e) => ({ id: String(e.idempresa), nombre: e.nombreempresa, ruc: "", direccion: "" }))
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    cargar();
+  }, []);
+
   const columnas: DataTableColumn<VinedoAdmin>[] = [
     { key: "nombre", label: "Nombre", render: (v) => v.nombre },
     { key: "empresaNombre", label: "Empresa", render: (v) => v.empresaNombre },
-    {
-      key: "ubicacion",
-      label: "Ubicación",
-      render: (v) => (
-        <span className="mono-cell">
-          {v.latitud.toFixed(4)}, {v.longitud.toFixed(4)}
-        </span>
-      ),
-    },
+    { key: "ubicacion", label: "Ubicación", render: (v) => v.ubicacion },
     { key: "areaHectareas", label: "Área (ha)", render: (v) => v.areaHectareas.toFixed(2) },
-    {
-      key: "estado",
-      label: "Estado",
-      render: (v) => (
-        <span className={`estado-pill ${v.estado === "Activo" ? "normal" : "offline"}`}>{v.estado}</span>
-      ),
-    },
   ];
 
-  const handleNuevo = () => {
+  const handleNueva = () => {
     setEditando(null);
     setModalAbierto(true);
   };
@@ -48,20 +67,39 @@ export default function VinedoView() {
     setModalAbierto(true);
   };
 
-  const handleGuardar = (data: Omit<VinedoAdmin, "id" | "empresaNombre">) => {
-    const empresaNombre = nombreEmpresa(data.empresaId);
-    if (editando) {
-      setVinedos((prev) =>
-        prev.map((v) => (v.id === editando.id ? { ...editando, ...data, empresaNombre } : v))
-      );
-    } else {
-      setVinedos((prev) => [...prev, { ...data, empresaNombre, id: crypto.randomUUID() }]);
+  const handleGuardar = async (data: {
+    nombre: string;
+    ubicacion: string;
+    areaHectareas: number;
+    empresaId: string;
+  }) => {
+    try {
+      const body = {
+        nombreVinedo: data.nombre,
+        ubicacion: data.ubicacion,
+        area_hectareas: data.areaHectareas,
+        Empresa_idEmpresa: Number(data.empresaId),
+      };
+      if (editando) {
+        await api.put(`/vinedos/${editando.id}`, body);
+      } else {
+        await api.post("/vinedos", body);
+      }
+      await cargar();
+      setModalAbierto(false);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Error al guardar viñedo");
     }
-    setModalAbierto(false);
   };
 
-  const handleEliminarConfirmado = () => {
-    if (aEliminar) setVinedos((prev) => prev.filter((v) => v.id !== aEliminar.id));
+  const handleEliminarConfirmado = async () => {
+    if (!aEliminar) return;
+    try {
+      await api.del(`/vinedos/${aEliminar.id}`);
+      await cargar();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Error al eliminar viñedo");
+    }
     setAEliminar(null);
   };
 
@@ -72,7 +110,7 @@ export default function VinedoView() {
           <h1>Viñedos</h1>
           <p className="view-header__sub">Gestiona los viñedos de todas las empresas</p>
         </div>
-        <button type="button" className="btn btn-primary" onClick={handleNuevo}>
+        <button type="button" className="btn btn-primary" onClick={handleNueva}>
           + Nuevo viñedo
         </button>
       </div>
@@ -80,7 +118,7 @@ export default function VinedoView() {
       <DataTable
         columns={columnas}
         rows={vinedos}
-        searchKeys={["nombre", "empresaNombre"]}
+        searchKeys={["nombre", "empresaNombre", "ubicacion"]}
         onEdit={handleEditar}
         onDelete={setAEliminar}
         emptyMessage="No hay viñedos registrados."
@@ -89,6 +127,7 @@ export default function VinedoView() {
       <VinedoModal
         open={modalAbierto}
         vinedo={editando}
+        empresas={empresas}
         onGuardar={handleGuardar}
         onClose={() => setModalAbierto(false)}
       />

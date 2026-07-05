@@ -3,11 +3,12 @@ const pool = require("../config/db");
 // GET ALL
 const obtenerVinedos = async () => {
     const result = await pool.query(`
-        SELECT 
+        SELECT
             v.idvinedo,
             v.nombrevinedo,
             v.ubicacion,
             v.area_hectareas,
+            v.empresa_idempresa,
             e.nombreempresa
         FROM vinedo v
         JOIN empresa e ON v.empresa_idempresa = e.idempresa
@@ -84,9 +85,20 @@ const actualizarVinedo = async (id, data) => {
     return result.rows[0];
 };
 
+const eliminarVinedo = async (id) => {
+    const result = await pool.query(`
+        DELETE FROM vinedo
+        WHERE idvinedo = $1
+        RETURNING *
+    `, [id]);
+
+    return result.rows[0];
+};
+
 module.exports = {
     obtenerVinedos,
     obtenerVinedoPorId,
     crearVinedo,
-    actualizarVinedo
+    actualizarVinedo,
+    eliminarVinedo
 };

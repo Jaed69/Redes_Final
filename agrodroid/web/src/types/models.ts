@@ -257,6 +257,8 @@ export interface Alerta {
   hora?: string;
   estado: EstadoAlertaNombre;
   origenNombre?: string; // hoy no viene resuelto desde el backend
+  vinedoId?: string;
+  empresaNombre?: string;
 }
 
 /** El backend no tiene columna "leida" (gap 4): se gestiona en cliente. */
@@ -463,8 +465,6 @@ export interface EmpresaAdmin {
   nombre: string;
   ruc: string;
   direccion: string;
-  responsable: string;
-  estado: EstadoGenerico;
 }
 
 export interface VinedoAdmin {
@@ -472,49 +472,40 @@ export interface VinedoAdmin {
   nombre: string;
   empresaId: string;
   empresaNombre: string;
-  latitud: number;
-  longitud: number;
+  ubicacion: string;
   areaHectareas: number;
-  estado: EstadoGenerico;
 }
 
 export interface UsuarioAdmin {
   id: string;
   nombre: string;
   correo: string;
-  rol: "Administrador" | "Usuario";
+  rol: string;
   empresaId: string;
   empresaNombre: string;
-  estado: EstadoGenerico;
 }
 
 export interface SensorAdmin {
   id: string;
   nombre: string;
-  tipo: "Humedad" | "Temperatura" | "Combinado";
   vinedoId: string;
   vinedoNombre: string;
-  estado: EstadoGenerico;
   latitud: number;
   longitud: number;
 }
 
 export interface DronAdmin {
   id: string;
-  codigo: string;
-  modelo: string;
+  nombre: string;
   vinedoId: string;
   vinedoNombre: string;
-  estado: "En vuelo" | "Disponible" | "Mantenimiento";
-  bateria: number;
 }
 
 export interface UmbralAdmin {
   id: string;
   sensorId: string;
   sensorNombre: string;
-  variable: "Humedad" | "Temperatura";
   valorMinimo: number;
   valorMaximo: number;
-  estado: EstadoGenerico;
+  descripcion: string;
 }

@@ -5,8 +5,8 @@ import type { Usuario } from "../types/models";
 const RUTA_INICIO_POR_ROL: Record<string, string> = {
   admin: "/admin",
   monitor: "/dashboard",
-  cliente: "/proximamente",
-  ti: "/proximamente",
+  cliente: "/cliente",
+  ti: "/ti/cuentas",
 };
 
 type RequireRoleProps = {

@@ -45,12 +45,19 @@ const obtenerAlertas = async () => {
             a.idalerta,
             a.descripcion,
             ea.nombreestado AS estado,
-            ta.nombretipo AS tipo
+            ta.nombretipo AS tipo,
+            a.vinedo_idvinedo,
+            e.nombreempresa
         FROM alerta a
         JOIN estadoalerta ea
             ON a.estadoalerta_idestado = ea.idestado
         JOIN tipoalerta ta
             ON a.tipoalerta_idtipo = ta.idtipo
+        JOIN vinedo v
+            ON a.vinedo_idvinedo = v.idvinedo
+        JOIN empresa e
+            ON v.empresa_idempresa = e.idempresa
+        ORDER BY a.idalerta
     `);
 
     return result.rows;
@@ -76,7 +83,22 @@ const obtenerAlertaPorId = async (id) => {
     return result.rows[0];
 };
 
-const actualizarEstadoAlerta = async (id, estadoId) => {
+const actualizarEstadoAlerta = async (id, estadoInput) => {
+    let estadoId;
+
+    if (typeof estadoInput === "string") {
+        const lookup = await pool.query(
+            "SELECT idestado FROM estadoalerta WHERE nombreestado = $1",
+            [estadoInput]
+        );
+        if (lookup.rows.length === 0) {
+            throw new Error(`Estado de alerta desconocido: ${estadoInput}`);
+        }
+        estadoId = lookup.rows[0].idestado;
+    } else {
+        estadoId = estadoInput;
+    }
+
     const result = await pool.query(`
         UPDATE alerta
         SET estadoalerta_idestado = $1

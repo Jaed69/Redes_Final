@@ -45,9 +45,10 @@ const obtenerAlerta = async (req, res) => {
 const actualizarEstado = async (req, res) => {
     try {
         const { id } = req.params;
-        const { estadoalerta_idestado } = req.body;
+        const body = req.body || {};
+        const estadoInput = body.estado ?? body.estadoalerta_idestado;
 
-        const alerta = await alertaService.actualizarEstadoAlerta(id, estadoalerta_idestado);
+        const alerta = await alertaService.actualizarEstadoAlerta(id, estadoInput);
 
         if (!alerta) {
             return res.status(404).json({ mensaje: "Alerta no encontrada" });
@@ -57,7 +58,10 @@ const actualizarEstado = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ mensaje: "Error actualizando estado de alerta" });
+        const status = error.message && error.message.includes("Estado de alerta desconocido")
+            ? 400
+            : 500;
+        res.status(status).json({ mensaje: error.message || "Error actualizando estado de alerta" });
     }
 };
 

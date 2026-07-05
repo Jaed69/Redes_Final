@@ -1,30 +1,43 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DataTable, { type DataTableColumn } from "../../components/DataTable";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import EmpresaModal from "../../modals/EmpresaModal";
-import { empresasMock } from "../../mockData";
+import { api } from "../../services/api";
 import type { EmpresaAdmin } from "../../types/models";
-import "../../styles/admin/shared.css";
+import "../../styles/Admin/Shared.css";
 
-/** Vista CRUD de Empresas. Reemplaza el useState inicial por tu fetch real cuando conectes la API. */
+type ApiEmpresa = { idempresa: number; ruc: string; nombreempresa: string; direccion: string };
+
+const mapEmpresa = (a: ApiEmpresa): EmpresaAdmin => ({
+  id: String(a.idempresa),
+  nombre: a.nombreempresa,
+  ruc: a.ruc,
+  direccion: a.direccion,
+});
+
 export default function EmpresaView() {
-  const [empresas, setEmpresas] = useState<EmpresaAdmin[]>(empresasMock);
+  const [empresas, setEmpresas] = useState<EmpresaAdmin[]>([]);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [editando, setEditando] = useState<EmpresaAdmin | null>(null);
   const [aEliminar, setAEliminar] = useState<EmpresaAdmin | null>(null);
+
+  const cargar = async () => {
+    try {
+      const data = (await api.get("/empresas")) as ApiEmpresa[];
+      setEmpresas(data.map(mapEmpresa));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    cargar();
+  }, []);
 
   const columnas: DataTableColumn<EmpresaAdmin>[] = [
     { key: "nombre", label: "Nombre", render: (e) => e.nombre },
     { key: "ruc", label: "RUC", render: (e) => <span className="mono-cell">{e.ruc}</span> },
     { key: "direccion", label: "Dirección", render: (e) => e.direccion },
-    { key: "responsable", label: "Responsable", render: (e) => e.responsable },
-    {
-      key: "estado",
-      label: "Estado",
-      render: (e) => (
-        <span className={`estado-pill ${e.estado === "Activo" ? "normal" : "offline"}`}>{e.estado}</span>
-      ),
-    },
   ];
 
   const handleNueva = () => {
@@ -37,17 +50,36 @@ export default function EmpresaView() {
     setModalAbierto(true);
   };
 
-  const handleGuardar = (data: Omit<EmpresaAdmin, "id">) => {
-    if (editando) {
-      setEmpresas((prev) => prev.map((e) => (e.id === editando.id ? { ...editando, ...data } : e)));
-    } else {
-      setEmpresas((prev) => [...prev, { ...data, id: crypto.randomUUID() }]);
+  const handleGuardar = async (data: { nombre: string; ruc: string; direccion: string }) => {
+    try {
+      if (editando) {
+        await api.put(`/empresas/${editando.id}`, {
+          ruc: data.ruc,
+          nombreEmpresa: data.nombre,
+          direccion: data.direccion,
+        });
+      } else {
+        await api.post("/empresas", {
+          ruc: data.ruc,
+          nombreEmpresa: data.nombre,
+          direccion: data.direccion,
+        });
+      }
+      await cargar();
+      setModalAbierto(false);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Error al guardar empresa");
     }
-    setModalAbierto(false);
   };
 
-  const handleEliminarConfirmado = () => {
-    if (aEliminar) setEmpresas((prev) => prev.filter((e) => e.id !== aEliminar.id));
+  const handleEliminarConfirmado = async () => {
+    if (!aEliminar) return;
+    try {
+      await api.del(`/empresas/${aEliminar.id}`);
+      await cargar();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Error al eliminar empresa");
+    }
     setAEliminar(null);
   };
 
@@ -66,7 +98,7 @@ export default function EmpresaView() {
       <DataTable
         columns={columnas}
         rows={empresas}
-        searchKeys={["nombre", "ruc", "responsable"]}
+        searchKeys={["nombre", "ruc", "direccion"]}
         onEdit={handleEditar}
         onDelete={setAEliminar}
         emptyMessage="No hay empresas registradas."

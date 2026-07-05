@@ -5,23 +5,25 @@ import type { EmpresaAdmin } from "../types/models";
 interface EmpresaModalProps {
   open: boolean;
   empresa: EmpresaAdmin | null;
-  onGuardar: (data: Omit<EmpresaAdmin, "id">) => void;
+  onGuardar: (data: { nombre: string; ruc: string; direccion: string }) => void;
   onClose: () => void;
 }
 
-const VACIO: Omit<EmpresaAdmin, "id"> = {
+const VACIO = {
   nombre: "",
   ruc: "",
   direccion: "",
-  responsable: "",
-  estado: "Activo",
 };
 
 export default function EmpresaModal({ open, empresa, onGuardar, onClose }: EmpresaModalProps) {
   const [form, setForm] = useState(VACIO);
 
   useEffect(() => {
-    setForm(empresa ? { ...empresa } : VACIO);
+    setForm(
+      empresa
+        ? { nombre: empresa.nombre, ruc: empresa.ruc, direccion: empresa.direccion }
+        : VACIO
+    );
   }, [empresa, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,46 +46,26 @@ export default function EmpresaModal({ open, empresa, onGuardar, onClose }: Empr
 
         <div className="admin-form__row">
           <div className="admin-form__field">
-            <label htmlFor="empresa-ruc">RUC</label>
+            <label htmlFor="empresa-ruc">RUC (11 dígitos)</label>
             <input
               id="empresa-ruc"
               required
               maxLength={11}
+              pattern="\d{11}"
+              inputMode="numeric"
               value={form.ruc}
-              onChange={(e) => setForm({ ...form, ruc: e.target.value })}
+              onChange={(e) => setForm({ ...form, ruc: e.target.value.replace(/\D/g, "") })}
             />
           </div>
           <div className="admin-form__field">
-            <label htmlFor="empresa-responsable">Responsable</label>
+            <label htmlFor="empresa-direccion">Dirección</label>
             <input
-              id="empresa-responsable"
+              id="empresa-direccion"
               required
-              value={form.responsable}
-              onChange={(e) => setForm({ ...form, responsable: e.target.value })}
+              value={form.direccion}
+              onChange={(e) => setForm({ ...form, direccion: e.target.value })}
             />
           </div>
-        </div>
-
-        <div className="admin-form__field">
-          <label htmlFor="empresa-direccion">Dirección</label>
-          <input
-            id="empresa-direccion"
-            required
-            value={form.direccion}
-            onChange={(e) => setForm({ ...form, direccion: e.target.value })}
-          />
-        </div>
-
-        <div className="admin-form__field">
-          <label htmlFor="empresa-estado">Estado</label>
-          <select
-            id="empresa-estado"
-            value={form.estado}
-            onChange={(e) => setForm({ ...form, estado: e.target.value as EmpresaAdmin["estado"] })}
-          >
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
         </div>
 
         <div className="admin-form__actions">

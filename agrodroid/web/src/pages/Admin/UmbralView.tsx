@@ -1,33 +1,74 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DataTable, { type DataTableColumn } from "../../components/DataTable";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import UmbralModal from "../../modals/UmbralModal";
-import { sensoresMock, umbralesMock } from "../../mockData";
-import type { UmbralAdmin } from "../../types/models";
-import "../../styles/admin/shared.css";
+import { api } from "../../services/api";
+import type { SensorAdmin, UmbralAdmin } from "../../types/models";
+import "../../styles/Admin/Shared.css";
 
-function nombreSensor(sensorId: string): string {
-  return sensoresMock.find((s) => s.id === sensorId)?.nombre ?? "—";
-}
+type ApiUmbral = {
+  idumbral: number;
+  valorminimo: string;
+  valormaximo: string;
+  descripcion: string;
+  sensor_idsensor: number;
+};
+
+const mapUmbral = (a: ApiUmbral, sensorNombre: string): UmbralAdmin => ({
+  id: String(a.idumbral),
+  sensorId: String(a.sensor_idsensor),
+  sensorNombre,
+  valorMinimo: parseFloat(a.valorminimo),
+  valorMaximo: parseFloat(a.valormaximo),
+  descripcion: a.descripcion,
+});
 
 export default function UmbralView() {
-  const [umbrales, setUmbrales] = useState<UmbralAdmin[]>(umbralesMock);
+  const [umbrales, setUmbrales] = useState<UmbralAdmin[]>([]);
+  const [sensores, setSensores] = useState<SensorAdmin[]>([]);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [editando, setEditando] = useState<UmbralAdmin | null>(null);
   const [aEliminar, setAEliminar] = useState<UmbralAdmin | null>(null);
 
+  const cargar = async () => {
+    try {
+      const [uData, sData] = await Promise.all([
+        api.get("/umbrales") as Promise<ApiUmbral[]>,
+        api.get("/sensores") as Promise<{
+          idsensor: number;
+          nombresensor: string;
+          latitud: string;
+          longitud: string;
+          vinedo_idvinedo: number;
+          nombrevinedo: string;
+        }[]>,
+      ]);
+      const sensoresMap = new Map(sData.map((s) => [String(s.idsensor), s.nombresensor]));
+      setSensores(
+        sData.map((s) => ({
+          id: String(s.idsensor),
+          nombre: s.nombresensor,
+          vinedoId: String(s.vinedo_idvinedo),
+          vinedoNombre: s.nombrevinedo,
+          latitud: parseFloat(s.latitud),
+          longitud: parseFloat(s.longitud),
+        }))
+      );
+      setUmbrales(uData.map((u) => mapUmbral(u, sensoresMap.get(String(u.sensor_idsensor)) ?? "—")));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    cargar();
+  }, []);
+
   const columnas: DataTableColumn<UmbralAdmin>[] = [
     { key: "sensorNombre", label: "Sensor", render: (u) => u.sensorNombre },
-    { key: "variable", label: "Variable", render: (u) => u.variable },
+    { key: "descripcion", label: "Descripción", render: (u) => u.descripcion },
     { key: "valorMinimo", label: "Valor mínimo", render: (u) => <span className="mono-cell">{u.valorMinimo}</span> },
     { key: "valorMaximo", label: "Valor máximo", render: (u) => <span className="mono-cell">{u.valorMaximo}</span> },
-    {
-      key: "estado",
-      label: "Estado",
-      render: (u) => (
-        <span className={`estado-pill ${u.estado === "Activo" ? "normal" : "offline"}`}>{u.estado}</span>
-      ),
-    },
   ];
 
   const handleNuevo = () => {
@@ -40,20 +81,42 @@ export default function UmbralView() {
     setModalAbierto(true);
   };
 
-  const handleGuardar = (data: Omit<UmbralAdmin, "id" | "sensorNombre" | "estado">) => {
-    const sensorNombre = nombreSensor(data.sensorId);
-    if (editando) {
-      setUmbrales((prev) =>
-        prev.map((u) => (u.id === editando.id ? { ...editando, ...data, sensorNombre } : u))
-      );
-    } else {
-      setUmbrales((prev) => [...prev, { ...data, sensorNombre, estado: "Activo", id: crypto.randomUUID() }]);
+  const handleGuardar = async (data: {
+    sensorId: string;
+    valorMinimo: number;
+    valorMaximo: number;
+    descripcion: string;
+  }) => {
+    try {
+      if (editando) {
+        await api.put(`/umbrales/${editando.id}`, {
+          valorMinimo: data.valorMinimo,
+          valorMaximo: data.valorMaximo,
+          descripcion: data.descripcion,
+        });
+      } else {
+        await api.post("/umbrales", {
+          valorMinimo: data.valorMinimo,
+          valorMaximo: data.valorMaximo,
+          descripcion: data.descripcion,
+          Sensor_idSensor: Number(data.sensorId),
+        });
+      }
+      await cargar();
+      setModalAbierto(false);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Error al guardar umbral");
     }
-    setModalAbierto(false);
   };
 
-  const handleEliminarConfirmado = () => {
-    if (aEliminar) setUmbrales((prev) => prev.filter((u) => u.id !== aEliminar.id));
+  const handleEliminarConfirmado = async () => {
+    if (!aEliminar) return;
+    try {
+      await api.del(`/umbrales/${aEliminar.id}`);
+      await cargar();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Error al eliminar umbral");
+    }
     setAEliminar(null);
   };
 
@@ -72,7 +135,7 @@ export default function UmbralView() {
       <DataTable
         columns={columnas}
         rows={umbrales}
-        searchKeys={["sensorNombre", "variable"]}
+        searchKeys={["sensorNombre", "descripcion"]}
         onEdit={handleEditar}
         onDelete={setAEliminar}
         emptyMessage="No hay umbrales configurados."
@@ -81,6 +144,7 @@ export default function UmbralView() {
       <UmbralModal
         open={modalAbierto}
         umbral={editando}
+        sensores={sensores}
         onGuardar={handleGuardar}
         onClose={() => setModalAbierto(false)}
       />

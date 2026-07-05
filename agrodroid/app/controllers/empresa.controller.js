@@ -53,9 +53,25 @@ const actualizarEmpresa = async (req, res) => {
     }
 };
 
+const eliminarEmpresa = async (req, res) => {
+    try {
+        const data = await empresaService.eliminarEmpresa(req.params.id);
+
+        if (!data) {
+            return res.status(404).json({ mensaje: "No encontrada" });
+        }
+
+        res.json(data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: "Error eliminando empresa" });
+    }
+};
+
 module.exports = {
     listarEmpresas,
     obtenerEmpresa,
     crearEmpresa,
     actualizarEmpresa,
+    eliminarEmpresa,
 };

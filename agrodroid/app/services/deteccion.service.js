@@ -3,7 +3,20 @@ const pool = require("../config/db");
 // GET todos
 const obtenerDetecciones = async () => {
     const result = await pool.query(`
-        SELECT * FROM deteccionenfermedad
+        SELECT
+            d.iddeteccion,
+            d.nivelconfianza,
+            d.descripcion,
+            d.fechadeteccion,
+            d.imagen_idimagen,
+            d.tipoenfermedad_idenfermedad,
+            te.nombreenfermedad,
+            im.rutaarchivo
+        FROM deteccionenfermedad d
+        LEFT JOIN tipoenfermedad te
+            ON d.tipoenfermedad_idenfermedad = te.idenfermedad
+        LEFT JOIN imagen im
+            ON d.imagen_idimagen = im.idimagen
     `);
     return result.rows;
 };

@@ -1,12 +1,18 @@
 import { useEffect, useState } from "react";
 import Modal from "../components/Modal";
-import { empresasMock } from "../mockData";
-import type { UsuarioAdmin } from "../types/models";
+import type { EmpresaAdmin, UsuarioAdmin } from "../types/models";
 
 interface UsuarioModalProps {
   open: boolean;
   usuario: UsuarioAdmin | null;
-  onGuardar: (data: Omit<UsuarioAdmin, "id" | "empresaNombre"> & { contrasenia?: string }) => void;
+  empresas: EmpresaAdmin[];
+  onGuardar: (data: {
+    nombre: string;
+    correo: string;
+    contrasenia: string;
+    rol: string;
+    empresaId: string;
+  }) => void;
   onClose: () => void;
 }
 
@@ -14,17 +20,33 @@ const VACIO = {
   nombre: "",
   correo: "",
   contrasenia: "",
-  rol: "Usuario" as UsuarioAdmin["rol"],
-  empresaId: empresasMock[0]?.id ?? "",
-  estado: "Activo" as UsuarioAdmin["estado"],
+  rol: "monitor",
+  empresaId: "",
 };
 
-export default function UsuarioModal({ open, usuario, onGuardar, onClose }: UsuarioModalProps) {
+const ROLES = [
+  { value: "admin", label: "Administrador" },
+  { value: "monitor", label: "Operador / Monitor" },
+  { value: "cliente", label: "Cliente / Productor" },
+  { value: "ti", label: "TI" },
+];
+
+export default function UsuarioModal({ open, usuario, empresas, onGuardar, onClose }: UsuarioModalProps) {
   const [form, setForm] = useState(VACIO);
 
   useEffect(() => {
-    setForm(usuario ? { ...usuario, contrasenia: "" } : VACIO);
-  }, [usuario, open]);
+    setForm(
+      usuario
+        ? {
+            nombre: usuario.nombre,
+            correo: usuario.correo,
+            contrasenia: "",
+            rol: usuario.rol,
+            empresaId: usuario.empresaId,
+          }
+        : { ...VACIO, empresaId: empresas[0]?.id ?? "" }
+    );
+  }, [usuario, open, empresas]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,10 +97,13 @@ export default function UsuarioModal({ open, usuario, onGuardar, onClose }: Usua
             <select
               id="usuario-rol"
               value={form.rol}
-              onChange={(e) => setForm({ ...form, rol: e.target.value as UsuarioAdmin["rol"] })}
+              onChange={(e) => setForm({ ...form, rol: e.target.value })}
             >
-              <option value="Usuario">Usuario</option>
-              <option value="Administrador">Administrador</option>
+              {ROLES.map((r) => (
+                <option key={r.value} value={r.value}>
+                  {r.label}
+                </option>
+              ))}
             </select>
           </div>
           <div className="admin-form__field">
@@ -88,25 +113,13 @@ export default function UsuarioModal({ open, usuario, onGuardar, onClose }: Usua
               value={form.empresaId}
               onChange={(e) => setForm({ ...form, empresaId: e.target.value })}
             >
-              {empresasMock.map((emp) => (
+              {empresas.map((emp) => (
                 <option key={emp.id} value={emp.id}>
                   {emp.nombre}
                 </option>
               ))}
             </select>
           </div>
-        </div>
-
-        <div className="admin-form__field">
-          <label htmlFor="usuario-estado">Estado</label>
-          <select
-            id="usuario-estado"
-            value={form.estado}
-            onChange={(e) => setForm({ ...form, estado: e.target.value as UsuarioAdmin["estado"] })}
-          >
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
         </div>
 
         <div className="admin-form__actions">

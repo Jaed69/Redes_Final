@@ -1,0 +1,22 @@
+# opencode / agent tooling (local, not project)
+.agents/
+install.sh
+skills-lock.json
+
+# caches
+.cache/
+.opencode/
+
+# editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Excel lockfiles
+~$*.xlsx
+~$*.xls

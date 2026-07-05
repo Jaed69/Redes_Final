@@ -8,5 +8,6 @@ router.get("/", verificarToken, controller.listar);
 router.get("/:id", verificarToken, controller.obtener);
 router.post("/", verificarToken, requireRole("admin"), controller.crear);
 router.put("/:id", verificarToken, requireRole("admin"), controller.actualizar);
+router.delete("/:id", verificarToken, requireRole("admin"), controller.eliminar);
 
 module.exports = router;

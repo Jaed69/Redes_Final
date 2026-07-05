@@ -101,9 +101,21 @@ const actualizarEmpresa = async (id, data) => {
     return result.rows[0];
 };
 
+// DELETE
+const eliminarEmpresa = async (id) => {
+    const result = await pool.query(`
+        DELETE FROM empresa
+        WHERE idempresa = $1
+        RETURNING *
+    `, [id]);
+
+    return result.rows[0];
+};
+
 module.exports = {
     obtenerEmpresas,
     obtenerEmpresaPorId,
     crearEmpresa,
-    actualizarEmpresa
+    actualizarEmpresa,
+    eliminarEmpresa
 };

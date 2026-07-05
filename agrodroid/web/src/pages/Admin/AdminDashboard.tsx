@@ -1,19 +1,94 @@
+import { useEffect, useState } from "react";
 import StatCard from "../../components/StatCard";
-import { dronesMock, empresasMock, sensoresMock, usuariosMock, vinedosMock } from "../../mockData";
+import { api } from "../../services/api";
 import "../../styles/Admin/AdminDashboard.css";
 
+type Counts = {
+  empresas: number;
+  vinedos: number;
+  usuarios: number;
+  sensores: number;
+  drones: number;
+  alertas: number;
+};
 
-/** Mock de alertas recientes solo para esta vista (no existe un módulo de alertas en el admin todavía). */
-const alertasRecientesMock = [
-  { id: "1", descripcion: "Humedad del suelo fuera de rango en Viñedo Santa Rosa", fecha: "2026-07-03", estado: "critico" as const },
-  { id: "2", descripcion: "Detección de Oidio en Viñedo San José", fecha: "2026-07-02", estado: "en_proceso" as const },
-  { id: "3", descripcion: "Batería baja en dron W_Norte_2", fecha: "2026-07-01", estado: "resuelto" as const },
-];
+type AlertaResumen = {
+  id: string;
+  descripcion: string;
+  estado: string;
+  tipo: string;
+};
 
-/** Vista principal del panel de administrador: indicadores globales de la plataforma. */
+type UsuarioResumen = {
+  id: string;
+  nombre: string;
+  correo: string;
+  empresaNombre: string;
+};
+
+const EMPTY: Counts = {
+  empresas: 0,
+  vinedos: 0,
+  usuarios: 0,
+  sensores: 0,
+  drones: 0,
+  alertas: 0,
+};
+
 export default function AdminDashboard() {
-  const usuariosRecientes = [...usuariosMock].slice(-5).reverse();
-  const sensoresOffline = sensoresMock.filter((s) => s.estado === "Inactivo");
+  const [counts, setCounts] = useState<Counts>(EMPTY);
+  const [alertas, setAlertas] = useState<AlertaResumen[]>([]);
+  const [usuariosRecientes, setUsuariosRecientes] = useState<UsuarioResumen[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [empresas, vinedos, usuarios, sensores, drones, alertasApi] = await Promise.all([
+          api.get("/empresas") as Promise<unknown[]>,
+          api.get("/vinedos") as Promise<unknown[]>,
+          api.get("/usuarios") as Promise<{ idusuario: number; nombreusuario: string; correo: string; nombreempresa: string }[]>,
+          api.get("/sensores") as Promise<unknown[]>,
+          api.get("/drones") as Promise<unknown[]>,
+          api.get("/alertas") as Promise<{ idalerta: number; descripcion: string; estado: string; tipo: string }[]>,
+        ]);
+
+        setCounts({
+          empresas: empresas.length,
+          vinedos: vinedos.length,
+          usuarios: usuarios.length,
+          sensores: sensores.length,
+          drones: drones.length,
+          alertas: alertasApi.length,
+        });
+
+        setUsuariosRecientes(
+          usuarios
+            .slice(-5)
+            .reverse()
+            .map((u) => ({
+              id: String(u.idusuario),
+              nombre: u.nombreusuario,
+              correo: u.correo,
+              empresaNombre: u.nombreempresa,
+            }))
+        );
+
+        setAlertas(
+          alertasApi
+            .slice(-5)
+            .reverse()
+            .map((a) => ({
+              id: String(a.idalerta),
+              descripcion: a.descripcion,
+              estado: a.estado,
+              tipo: a.tipo,
+            }))
+        );
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, []);
 
   return (
     <div className="admin-dashboard">
@@ -23,23 +98,18 @@ export default function AdminDashboard() {
       </header>
 
       <section className="admin-dashboard__kpis">
-        <StatCard label="Empresas" value={empresasMock.length} tone="vine" icon="🏢" />
-        <StatCard label="Viñedos" value={vinedosMock.length} tone="vine" icon="🌱" />
-        <StatCard label="Usuarios registrados" value={usuariosMock.length} tone="water" icon="👤" />
-        <StatCard label="Sensores instalados" value={sensoresMock.length} tone="water" icon="📡" />
-        <StatCard label="Drones registrados" value={dronesMock.length} tone="copper" icon="🚁" />
-        <StatCard
-          label="Alertas activas"
-          value={alertasRecientesMock.filter((a) => a.estado !== "resuelto").length}
-          tone="critical"
-          icon="🚨"
-        />
+        <StatCard label="Empresas" value={counts.empresas} tone="vine" icon="🏢" />
+        <StatCard label="Viñedos" value={counts.vinedos} tone="vine" icon="🌱" />
+        <StatCard label="Usuarios" value={counts.usuarios} tone="water" icon="👤" />
+        <StatCard label="Sensores" value={counts.sensores} tone="water" icon="📡" />
+        <StatCard label="Drones" value={counts.drones} tone="copper" icon="🚁" />
+        <StatCard label="Alertas" value={counts.alertas} tone="critical" icon="🚨" />
       </section>
 
       <section className="admin-dashboard__grid">
         <div className="panel admin-dashboard__panel">
           <div className="panel-header">
-            <span className="panel-title">Últimos usuarios registrados</span>
+            <span className="panel-title">Últimos usuarios</span>
           </div>
           <div className="table-wrap">
             <table className="data-table">
@@ -48,7 +118,6 @@ export default function AdminDashboard() {
                   <th>Nombre</th>
                   <th>Correo</th>
                   <th>Empresa</th>
-                  <th>Estado</th>
                 </tr>
               </thead>
               <tbody>
@@ -57,16 +126,11 @@ export default function AdminDashboard() {
                     <td>{u.nombre}</td>
                     <td className="mono-cell">{u.correo}</td>
                     <td>{u.empresaNombre}</td>
-                    <td>
-                      <span className={`estado-pill ${u.estado === "Activo" ? "normal" : "offline"}`}>
-                        {u.estado}
-                      </span>
-                    </td>
                   </tr>
                 ))}
                 {usuariosRecientes.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="empty-hint">
+                    <td colSpan={3} className="empty-hint">
                       No hay usuarios registrados.
                     </td>
                   </tr>
@@ -85,58 +149,22 @@ export default function AdminDashboard() {
               <thead>
                 <tr>
                   <th>Descripción</th>
-                  <th>Fecha</th>
+                  <th>Tipo</th>
                   <th>Estado</th>
                 </tr>
               </thead>
               <tbody>
-                {alertasRecientesMock.map((a) => (
+                {alertas.map((a) => (
                   <tr key={a.id}>
                     <td className="data-table__desc">{a.descripcion}</td>
-                    <td className="mono-cell">{a.fecha}</td>
-                    <td>
-                      <span className={`estado-pill ${a.estado}`}>
-                        <span className={`status-dot ${a.estado}`} />
-                        {a.estado.replace("_", " ")}
-                      </span>
-                    </td>
+                    <td>{a.tipo}</td>
+                    <td>{a.estado}</td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="panel admin-dashboard__panel admin-dashboard__panel--full">
-          <div className="panel-header">
-            <span className="panel-title">Sensores offline</span>
-            <span className="eyebrow">{sensoresOffline.length} sensores</span>
-          </div>
-          <div className="table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Tipo</th>
-                  <th>Viñedo</th>
-                  <th>Coordenadas</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sensoresOffline.map((s) => (
-                  <tr key={s.id}>
-                    <td>{s.nombre}</td>
-                    <td>{s.tipo}</td>
-                    <td>{s.vinedoNombre}</td>
-                    <td className="mono-cell">
-                      {s.latitud.toFixed(4)}, {s.longitud.toFixed(4)}
-                    </td>
-                  </tr>
-                ))}
-                {sensoresOffline.length === 0 && (
+                {alertas.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="empty-hint">
-                      Todos los sensores están en línea.
+                    <td colSpan={3} className="empty-hint">
+                      No hay alertas registradas.
                     </td>
                   </tr>
                 )}

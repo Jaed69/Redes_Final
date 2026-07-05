@@ -9,6 +9,6 @@ router.get("/:id", verificarToken, controller.obtenerAlerta);
 
 router.post("/", verificarToken, requireRole("admin"), controller.crearAlerta);
 
-router.put("/:id/estado", verificarToken, requireRole("admin"), controller.actualizarEstado);
+router.put("/:id/estado", verificarToken, requireRole("admin", "monitor"), controller.actualizarEstado);
 
 module.exports = router;

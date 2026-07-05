@@ -39,17 +39,28 @@ const obtenerUsuario = async (req, res) => {
     }
 };
 
+const crearUsuario = async (req, res) => {
+    try {
+        const usuario = await usuarioService.crearUsuario(req.body);
+        res.status(201).json(usuario);
+    } catch (error) {
+        console.error(error);
+        res.status(400).json({ mensaje: error.message });
+    }
+};
+
 const actualizarUsuario = async (req, res) => {
     try {
         const { id } = req.params;
-        const { nombreUsuario, correo, rol } = req.body;
 
         const usuarioActualizado = await usuarioService.actualizarUsuario(
             id,
-            nombreUsuario,
-            correo,
-            rol
+            req.body
         );
+
+        if (!usuarioActualizado) {
+            return res.status(404).json({ mensaje: "Usuario no encontrado" });
+        }
 
         res.status(200).json(usuarioActualizado);
 
@@ -59,8 +70,27 @@ const actualizarUsuario = async (req, res) => {
     }
 };
 
+const eliminarUsuario = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const usuario = await usuarioService.eliminarUsuario(id);
+
+        if (!usuario) {
+            return res.status(404).json({ mensaje: "Usuario no encontrado" });
+        }
+
+        res.status(200).json(usuario);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: "Error eliminando usuario" });
+    }
+};
+
 module.exports = {
     listarUsuarios,
     obtenerUsuario,
-    actualizarUsuario
+    crearUsuario,
+    actualizarUsuario,
+    eliminarUsuario
 };

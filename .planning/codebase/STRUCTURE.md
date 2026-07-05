@@ -5,175 +5,176 @@
 ## Directory Layout
 
 ```
-Redes_Final/                       # repo root
-├── .agents/                       # GSD/agent tooling config (not app code)
-├── .planning/                     # GSD planning docs (this analysis lives here)
-└── agrodroid/                     # main application monorepo-style folder
-    ├── docker-compose.yml         # orchestrates db + app services
-    ├── app/                       # Node/Express REST API
-    │   ├── server.js              # entry point — mounts routers, starts listener
-    │   ├── dockerfile             # container build for the API
-    │   ├── package.json           # deps: express, pg, bcrypt, jsonwebtoken, cors
-    │   ├── config/
-    │   │   └── db.js              # shared pg.Pool, reads DB_* env vars
-    │   ├── routes/                # one <resource>.routes.js per domain resource
-    │   ├── controllers/           # one <resource>.controller.js per domain resource
-    │   ├── services/              # one <resource>.service.js per domain resource (SQL)
-    │   └── middlewares/
-    │       └── auth.middleware.js # verificarToken JWT guard
-    ├── db/
-    │   └── init.sql               # schema + seed, mounted into Postgres container
-    └── web/                       # React + TypeScript + Vite SPA
-        ├── package.json           # deps: react 19, react-router-dom 7, leaflet, recharts
-        ├── public/                # static assets served as-is
-        └── src/
-            ├── main.tsx           # React root mount
-            ├── App.tsx            # router + top-level data fetching/state
-            ├── App.css / index.css
-            ├── assets/            # images (hero.png, react.svg, vite.svg)
-            ├── components/        # shared, prop-driven UI (Navbar, Sidebar, StatCard, DataReadOut)
-            ├── pages/
-            │   ├── Auth/          # Login.tsx, Register.tsx (public routes)
-            │   ├── UserDashboard.tsx
-            │   └── Usuario/       # Applayout.tsx + one view per feature
-            ├── services/
-            │   └── api.ts         # intended API client (currently unused/empty)
-            ├── styles/
-            │   ├── Auth/          # Login.css, Register.css
-            │   ├── Usuario/       # per-view + shared.css + theme.css
-            │   └── UserDashboard.css
-            └── types/
-                └── models.ts      # TS interfaces for all domain entities
+agrodroid/
+├── app/                          # Express + Node REST API
+│   ├── config/db.js              # Postgres pool config
+│   ├── controllers/*.controller.js
+│   ├── services/*.service.js
+│   ├── routes/*.routes.js
+│   ├── middlewares/auth.middleware.js
+│   ├── server.js                 # API entry point (port 3000)
+│   ├── package.json
+│   └── dockerfile
+├── db/
+│   └── init.sql                  # Postgres schema + seed
+├── docker-compose.yml            # Orchestrates db, app, web (web block has an indentation bug — see ARCHITECTURE.md)
+└── web/                          # React + Vite + TypeScript SPA
+    ├── dockerfile                # NEW — node:20 dev-server image, `npm run dev -- --host 0.0.0.0`, exposes 5173
+    ├── package.json
+    ├── vite.config.ts
+    ├── tsconfig*.json
+    ├── eslint.config.js
+    ├── index.html
+    └── src/
+        ├── main.tsx               # React root
+        ├── App.tsx                # Route table + operator data fetching
+        ├── App.css / index.css
+        ├── mockData.ts            # NEW — fixture arrays for the Admin panel (empresasMock, vinedosMock, sensoresMock, dronesMock, umbralesMock, usuariosMock)
+        ├── types/models.ts        # Operator types (Empresa, Vinedo, Sensor, Dron, ...) + Admin types (EmpresaAdmin, VinedoAdmin, ...)
+        ├── services/
+        │   └── api.ts             # Placeholder — currently empty, intended home for a shared HTTP client
+        ├── components/
+        │   ├── navbar.tsx, Sidebar.tsx        # Operator chrome
+        │   ├── AdminNavbar.tsx, AdminSidebar.tsx  # NEW — Admin chrome
+        │   ├── DataTable.tsx      # NEW — generic typed table shared by all Admin views
+        │   ├── Modal.tsx          # NEW — generic modal shell
+        │   ├── ConfirmDialog.tsx  # NEW — generic delete-confirmation dialog
+        │   ├── StatCard.tsx, DataReadOut.tsx
+        ├── modals/                # NEW — one form component per Admin entity
+        │   ├── EmpresaModal.tsx
+        │   ├── VinedoModal.tsx
+        │   ├── SensorModal.tsx
+        │   ├── DronModal.tsx
+        │   ├── UmbralModal.tsx
+        │   └── UsuarioModal.tsx
+        ├── pages/
+        │   ├── Auth/              # Login.tsx, Register.tsx (public routes)
+        │   ├── Usuario/           # Operator app: Applayout, DashboardView, SensorMapView,
+        │   │                        SensorReadingsView, DronesView, DiseaseDetectionView,
+        │   │                        AlertsNotificationView
+        │   ├── UserDashboard.tsx
+        │   └── Admin/             # NEW — Admin panel, routed under `/admin/*`
+        │       ├── AdminLayout.tsx       # Shell (reuses `.app-shell` CSS from operator)
+        │       ├── AdminDashboard.tsx    # Stat cards from mockData
+        │       ├── EmpresaView.tsx       # CRUD, reads/writes empresasMock
+        │       ├── VinedoView.tsx        # CRUD, reads/writes vinedosMock
+        │       ├── SensorView.tsx        # CRUD, reads/writes sensoresMock
+        │       ├── DronView.tsx          # CRUD, reads/writes dronesMock
+        │       ├── UmbralView.tsx        # CRUD, reads/writes umbralesMock
+        │       └── UsuarioView.tsx       # CRUD, reads/writes usuariosMock
+        └── styles/
+            ├── Usuario/            # Operator CSS (theme.css, Navbar.css, Sidebar.css, ...)
+            ├── Auth/               # Login.css, Register.css
+            ├── Admin/              # NEW — AdminDashboard.css, Modal.css, Shared.css
+            └── UserDashboard.css
 ```
 
 ## Directory Purposes
 
-**`agrodroid/app/routes/`:**
-- Purpose: Declare HTTP endpoints and wire middleware per resource.
-- Contains: `alerta.routes.js`, `auth.routes.js`, `deteccion.routes.js`, `dron.routes.js`, `empresa.routes.js`, `imagen.routes.js`, `lectura.routes.js`, `notificacion.routes.js`, `sensor.routes.js`, `umbral.routes.js`, `usuario.routes.js`, `vinedo.routes.js`.
-- Key files: `auth.routes.js` (public: register/login), all others require `verificarToken` on most/all routes.
-- Note: `routes.zip` present here (`agrodroid/app/routes/routes.zip`) — stray archive, not required at runtime.
-
-**`agrodroid/app/controllers/`:**
-- Purpose: HTTP-facing handlers; one function per action, per resource.
-- Contains: matches the routes list 1:1 (`<resource>.controller.js`).
-- Note: `controllers.zip` present — stray archive.
-
-**`agrodroid/app/services/`:**
-- Purpose: Business logic + direct Postgres access via `pg.Pool`.
-- Contains: matches controllers 1:1 (`<resource>.service.js`).
-- Note: `services.zip` present — stray archive.
-
-**`agrodroid/app/config/`:**
-- Purpose: Shared infrastructure config.
-- Contains: `db.js` only (Postgres connection pool).
-
-**`agrodroid/app/middlewares/`:**
-- Purpose: Cross-cutting request handling.
-- Contains: `auth.middleware.js` (JWT verification) — only middleware in the project.
+**`agrodroid/app/`:**
+- Purpose: Express REST API serving all domain resources over HTTP on port 3000.
+- Contains: one `routes/*.routes.js` + `controllers/*.controller.js` + `services/*.service.js` triplet per resource (alerta, auth, deteccion, dron, empresa, imagen, lectura, notificacion, sensor, umbral, usuario, vinedo).
+- Key files: `server.js` (mounts routes), `config/db.js` (Postgres pool), `middlewares/auth.middleware.js` (JWT check), `dockerfile` (node:22-alpine image).
 
 **`agrodroid/db/`:**
-- Purpose: Database schema/seed definition consumed by Docker at first container boot.
-- Contains: `init.sql` (14 tables).
-
-**`agrodroid/web/src/pages/Auth/`:**
-- Purpose: Unauthenticated entry screens.
-- Contains: `Login.tsx`, `Register.tsx`.
+- Purpose: database schema and seed data.
+- Contains: `init.sql`, auto-loaded by the `db` service's Postgres container via `docker-entrypoint-initdb.d`.
 
 **`agrodroid/web/src/pages/Usuario/`:**
-- Purpose: Authenticated app screens, rendered inside `Applayout.tsx` via `<Outlet/>`.
-- Contains: `Applayout.tsx` (shell), `DashboardView.tsx`, `SensorMapView.tsx` (Leaflet map), `SensorReadingsView.tsx` (Recharts), `DronesView.tsx`, `DiseaseDetectionView.tsx`, `AlertsNotificationView.tsx`.
+- Purpose: field-operator-facing app screens, fed real data from `App.tsx`'s `fetch()` calls.
+- Contains: `Applayout.tsx` (shell), `DashboardView.tsx`, `SensorMapView.tsx`, `SensorReadingsView.tsx`, `DronesView.tsx`, `DiseaseDetectionView.tsx`, `AlertsNotificationView.tsx`.
 
-**`agrodroid/web/src/components/`:**
-- Purpose: Reusable presentational pieces shared across views.
-- Contains: `navbar.tsx` (lowercase — see naming note below), `Sidebar.tsx`, `StatCard.tsx`, `DataReadOut.tsx`.
+**`agrodroid/web/src/pages/Admin/` (NEW):**
+- Purpose: back-office CRUD screens for administering Empresa/Vinedo/Sensor/Dron/Umbral/Usuario records, plus an aggregate dashboard.
+- Contains: `AdminLayout.tsx`, `AdminDashboard.tsx`, `EmpresaView.tsx`, `VinedoView.tsx`, `SensorView.tsx`, `DronView.tsx`, `UmbralView.tsx`, `UsuarioView.tsx`.
+- Data source: **`agrodroid/web/src/mockData.ts` only** — none of these views import `services/api.ts` or call `fetch`. Confirmed via import grep: every file in this directory and in `modals/` imports from `../../mockData`.
+- Routed at `/admin`, `/admin/empresas`, `/admin/vinedos`, `/admin/usuarios`, `/admin/sensores`, `/admin/drones`, `/admin/umbrales` in `agrodroid/web/src/App.tsx`.
+
+**`agrodroid/web/src/modals/` (NEW):**
+- Purpose: create/edit form components, one per Admin entity, opened inside the shared `Modal.tsx` shell.
+- Contains: `EmpresaModal.tsx`, `VinedoModal.tsx`, `SensorModal.tsx`, `DronModal.tsx`, `UmbralModal.tsx`, `UsuarioModal.tsx`.
+
+**`agrodroid/web/src/mockData.ts` (NEW):**
+- Purpose: static fixture arrays typed against `types/models.ts`'s `*Admin` interfaces, currently the sole data source for the entire Admin panel.
+- Generated: No (hand-authored); Committed: Yes.
+- Explicit in-file comment flags it as a stand-in for real API calls.
 
 **`agrodroid/web/src/services/`:**
-- Purpose: Intended location for API client abstraction.
-- Contains: `api.ts` — currently not used by `App.tsx` (which fetches directly); treat as the place to add a real API client.
+- Purpose: intended home for a shared HTTP client.
+- Contains: `api.ts` — present but empty; not yet imported anywhere.
 
-**`agrodroid/web/src/styles/`:**
-- Purpose: Per-view/per-feature CSS, mirrors the `pages/` structure (`Auth/`, `Usuario/`).
-- Contains: `theme.css` and `shared.css` for cross-view tokens/utilities under `Usuario/`.
-
-**`agrodroid/web/src/types/`:**
-- Purpose: Single source of truth for domain TypeScript interfaces.
-- Contains: `models.ts` — `Usuario`, `Empresa`, `Vinedo`, `Sensor`, `LecturaSensor`, `Dron`, `DeteccionEnfermedad`, `Alerta`, `Notificacion`.
+**`agrodroid/web/src/styles/Admin/` (NEW):**
+- Purpose: Admin-specific stylesheets.
+- Contains: `AdminDashboard.css`, `Modal.css`, `Shared.css`.
 
 ## Key File Locations
 
 **Entry Points:**
-- `agrodroid/app/server.js`: API bootstrap, router mounting, port 3000 listener.
-- `agrodroid/web/src/main.tsx`: React root mount.
-- `agrodroid/web/src/App.tsx`: Route table + all initial data fetching.
+- `agrodroid/web/src/main.tsx`: React root mount
+- `agrodroid/web/src/App.tsx`: route table, operator data fetching
+- `agrodroid/app/server.js`: Express API entry, route mounting
 
 **Configuration:**
-- `agrodroid/docker-compose.yml`: service definitions, env vars (`DB_*`, `JWT_SECRET` — note `JWT_SECRET` is defined but unused by code).
-- `agrodroid/app/config/db.js`: Postgres pool.
-- `agrodroid/app/dockerfile`: API container build.
+- `agrodroid/docker-compose.yml`: db/app/web orchestration (web block currently mis-indented — see ARCHITECTURE.md Architectural Constraints)
+- `agrodroid/web/dockerfile` (NEW): dev-mode Vite container, `EXPOSE 5173`, `CMD npm run dev -- --host 0.0.0.0`
+- `agrodroid/app/dockerfile`: `node:22-alpine`, `EXPOSE 3000`, `CMD npm start`
+- `agrodroid/web/vite.config.ts`, `agrodroid/web/tsconfig*.json`, `agrodroid/web/eslint.config.js`
 
 **Core Logic:**
-- `agrodroid/app/controllers/*.controller.js` + `agrodroid/app/services/*.service.js`: all business logic.
-- `agrodroid/app/middlewares/auth.middleware.js`: auth gate.
+- `agrodroid/app/routes/`, `agrodroid/app/controllers/`, `agrodroid/app/services/`: backend business logic per resource
+- `agrodroid/web/src/pages/Usuario/`: operator UI logic
+- `agrodroid/web/src/pages/Admin/`: admin UI logic (mock-data-backed)
 
 **Testing:**
-- Not detected — no test files, test runner config, or `test`/`__tests__` directories found anywhere in `agrodroid/`.
+- Not detected — no test files or test runner config found in `agrodroid/app/` or `agrodroid/web/`.
 
 ## Naming Conventions
 
-**Files (backend, `agrodroid/app/`):**
-- Pattern: `<resource-in-spanish>.<layer>.js`, all lowercase, singular Spanish nouns.
-- Example: `vinedo.routes.js`, `vinedo.controller.js`, `vinedo.service.js` (vineyard); `dron.*.js`, `sensor.*.js`, `alerta.*.js`.
+**Files:**
+- Backend: `<resource>.routes.js`, `<resource>.controller.js`, `<resource>.service.js` (lowercase, dot-suffixed by layer).
+- Frontend pages: PascalCase, `<Feature>View.tsx` for content screens (e.g. `EmpresaView.tsx`, `SensorMapView.tsx`), `<Feature>Layout.tsx` for shells.
+- Frontend Admin modal forms: `<Entity>Modal.tsx` (e.g. `VinedoModal.tsx`).
+- Domain language: Spanish nouns throughout (Empresa, Vinedo, Sensor, Dron, Umbral, Usuario, Alerta, Notificacion), consistent between backend and frontend.
 
-**Files (frontend, `agrodroid/web/src/`):**
-- Pattern: PascalCase for React components/views (`DashboardView.tsx`, `SensorMapView.tsx`, `StatCard.tsx`), camelCase for non-component modules (`api.ts`, `models.ts`).
-- Inconsistency: `components/navbar.tsx` is lowercase while every other component file (`Sidebar.tsx`, `StatCard.tsx`, `DataReadOut.tsx`) is PascalCase, and `Applayout.tsx` uses inconsistent internal casing (`App` + lowercase `layout` — should be `AppLayout.tsx` per its own exported symbol `AppLayout`).
+**Types:**
+- Operator-facing: bare entity name (`Empresa`, `Vinedo`, `Sensor`, `Dron`).
+- Admin-facing: entity name + `Admin` suffix (`EmpresaAdmin`, `VinedoAdmin`, `SensorAdmin`, `DronAdmin`, `UmbralAdmin`, `UsuarioAdmin`), all declared in `agrodroid/web/src/types/models.ts`.
 
 **Directories:**
-- Backend: plural, lowercase, functional (`routes/`, `controllers/`, `services/`, `middlewares/`, `config/`).
-- Frontend: PascalCase for feature-grouping page directories (`pages/Auth/`, `pages/Usuario/`, `styles/Auth/`, `styles/Usuario/`), lowercase for generic dirs (`components/`, `services/`, `types/`, `styles/`, `assets/`).
-
-**Functions (backend):**
-- Spanish verb-based, e.g. `listar`, `obtener`, `crear`, `actualizar`, `eliminar`, or resource-suffixed variants (`listarAlertas`, `crearDron`, `actualizarEstado`).
+- Frontend `pages/` split by audience: `Auth/`, `Usuario/`, `Admin/` — mirrored in `styles/Auth/`, `styles/Usuario/`, `styles/Admin/`.
 
 ## Where to Add New Code
 
-**New backend resource (e.g. "cultivo"):**
-- Route: `agrodroid/app/routes/cultivo.routes.js` (follow existing router pattern, attach `verificarToken` as needed)
-- Controller: `agrodroid/app/controllers/cultivo.controller.js`
-- Service: `agrodroid/app/services/cultivo.service.js`
-- Mount in: `agrodroid/app/server.js` (`require` + `app.use("/cultivos", cultivoRoutes)`)
-- Schema: add `CREATE TABLE` to `agrodroid/db/init.sql`
+**New Admin entity view (CRUD):**
+- Page: `agrodroid/web/src/pages/Admin/<Entity>View.tsx`, following the `EmpresaView.tsx` pattern (`useState` seeded from a new `mockData.ts` export, `DataTable` + `Modal` + `<Entity>Modal` + `ConfirmDialog`).
+- Form: `agrodroid/web/src/modals/<Entity>Modal.tsx`.
+- Types: add `<Entity>Admin` interface to `agrodroid/web/src/types/models.ts`.
+- Mock fixture: add `<entity>Mock` array to `agrodroid/web/src/mockData.ts` (until API wiring lands).
+- Route: register under `/admin/<entities>` inside the `<Route path="/admin" element={<AdminLayout .../>}>` block in `App.tsx`.
+- Sidebar link: `agrodroid/web/src/components/AdminSidebar.tsx`.
 
-**New frontend feature view:**
-- Component: `agrodroid/web/src/pages/Usuario/<Feature>View.tsx`
-- Styles: `agrodroid/web/src/styles/Usuario/<Feature>View.css`
-- Route: add `<Route path="..." element={<...View .../>} />` inside the authenticated block in `agrodroid/web/src/App.tsx`
-- Types: extend `agrodroid/web/src/types/models.ts` if new domain shape is introduced
-- Data fetching: add a `useEffect` fetch block in `App.tsx` (current convention) or, preferably, extend `agrodroid/web/src/services/api.ts` to centralize it.
+**Wiring an existing Admin view to the real API (recommended next step):**
+- Implement a client in `agrodroid/web/src/services/api.ts` (currently empty).
+- Replace `useState(xMock)` in the target `pages/Admin/<Entity>View.tsx` with a `useEffect` fetch, following the mapping pattern already used for operator data in `App.tsx` (`fetch(...).then(r => r.json()).then(data => data.map(...))`).
+- Reconcile the `<Entity>Admin` type with the operator `<Entity>` type in `types/models.ts` so both consume the same backend shape.
 
-**Shared frontend UI:**
-- Location: `agrodroid/web/src/components/` (PascalCase filename to match existing convention, except the pre-existing `navbar.tsx` outlier).
+**New backend resource:**
+- Add `agrodroid/app/routes/<resource>.routes.js`, `controllers/<resource>.controller.js`, `services/<resource>.service.js`.
+- Mount the route in `agrodroid/app/server.js`.
 
-**Backend cross-cutting logic (new middleware):**
-- Location: `agrodroid/app/middlewares/<name>.middleware.js`, required directly inside relevant `*.routes.js` files (no central middleware registry exists).
+**Shared Admin UI primitives:**
+- Add to `agrodroid/web/src/components/` (e.g. new generic widgets used across multiple Admin views), following `DataTable.tsx` / `Modal.tsx` / `ConfirmDialog.tsx` as the generic-typed-component precedent.
 
 ## Special Directories
 
-**`agrodroid/app/node_modules/`:**
-- Purpose: npm dependencies for the API.
-- Generated: Yes
-- Committed: Not verified — should be gitignored; do not analyze/edit.
+**`agrodroid/web/src/mockData.ts` (NEW):**
+- Purpose: temporary data layer for the entire Admin panel.
+- Generated: No; Committed: Yes.
+- Note: treat as dev-only fixture; do not extend it as if it were a permanent data source — it is explicitly marked for replacement in its own doc comment.
 
-**`agrodroid/web/public/`:**
-- Purpose: Static assets served unprocessed by Vite.
-- Generated: No
-- Committed: Yes
-
-**Stray `.zip` archives (`agrodroid/app/{routes,controllers,services}/*.zip`):**
-- Purpose: Unknown/legacy — appear to be backup snapshots of those directories.
-- Generated: Unclear
-- Committed: Yes (present in working tree) — recommend removing or relocating out of source directories since they are not required by `server.js` or `package.json`.
+**`agrodroid/db/init.sql`:**
+- Purpose: schema + seed, mounted read-only into the Postgres container at startup.
+- Generated: No; Committed: Yes.
 
 ---
 

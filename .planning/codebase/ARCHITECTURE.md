@@ -7,192 +7,172 @@
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│              React SPA (Vite + TypeScript)                   │
-│  `agrodroid/web/src/`                                         │
-├──────────────────┬──────────────────┬───────────────────────┤
-│   Auth pages     │  Usuario views   │   Shared components   │
-│ `src/pages/Auth` │`src/pages/Usuario`│  `src/components/`    │
-└────────┬─────────┴────────┬─────────┴──────────┬────────────┘
-         │  fetch()/localStorage token           │
-         ▼                  ▼                     ▼
+│                     React SPA (web/)                         │
+├──────────────────────────┬───────────────────────────────────┤
+│  Operator App            │  Admin Panel (NEW)                │
+│  `web/src/pages/Usuario` │  `web/src/pages/Admin`             │
+│  fetches real API        │  reads/writes `mockData.ts` only  │
+└────────────┬──────────────┴───────────┬───────────────────────┘
+             │ fetch(`http://localhost:3000/...`)  │ (no network calls)
+             ▼                                      ▼
 ┌─────────────────────────────────────────────────────────────┐
-│         Express REST API  `agrodroid/app/`                   │
-│  routes/ → middlewares/ → controllers/ → services/            │
-└────────┬──────────────────────────────────────────────────────┘
-         │  pg.Pool (raw SQL)
-         ▼
+│                Express API (app/, port 3000)                 │
+│  `app/server.js` → routes → controllers → services           │
+└────────────┬───────────────────────────────────────────────────┘
+             ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  PostgreSQL 16  (docker service `db`)                         │
-│  Schema: `agrodroid/db/init.sql`                               │
+│                 PostgreSQL (db/init.sql)                      │
 └─────────────────────────────────────────────────────────────┘
 ```
-
-Deployment is orchestrated by `agrodroid/docker-compose.yml`, which defines two services: `db` (Postgres 16, seeded from `agrodroid/db/init.sql`) and `app` (Node/Express API built from `agrodroid/app/dockerfile`, port 3000). The `web/` frontend is not in docker-compose — it runs separately via Vite dev server / static build and talks to the API at a hardcoded `http://localhost:3000` base URL.
 
 ## Component Responsibilities
 
 | Component | Responsibility | File |
 |-----------|----------------|------|
-| Express bootstrap | Mounts all routers, CORS, JSON body parsing, port listen | `agrodroid/app/server.js` |
-| Routes | Declare REST endpoints per resource, attach `verificarToken` middleware | `agrodroid/app/routes/*.routes.js` |
-| Auth middleware | Verifies JWT on protected routes, injects `req.usuario` | `agrodroid/app/middlewares/auth.middleware.js` |
-| Controllers | HTTP layer: parse req, call service, shape res/status codes | `agrodroid/app/controllers/*.controller.js` |
-| Services | Business logic + raw SQL queries via `pg` | `agrodroid/app/services/*.service.js` |
-| DB pool | Single shared `pg.Pool` configured from env vars | `agrodroid/app/config/db.js` |
-| DB schema/seed | Table definitions and initial data, mounted into Postgres container on first boot | `agrodroid/db/init.sql` |
-| React app shell | Top-level routing, global data fetch/state, passes props down | `agrodroid/web/src/App.tsx` |
-| App layout | Authenticated shell (navbar + sidebar) wrapping nested routes via `<Outlet/>` | `agrodroid/web/src/pages/Usuario/Applayout.tsx` |
-| Feature views | One view per domain concept (dashboard, map, readings, drones, disease detection, alerts) | `agrodroid/web/src/pages/Usuario/*.tsx` |
-| Auth views | Login/Register forms, own API calls | `agrodroid/web/src/pages/Auth/*.tsx` |
-| Shared components | Navbar, Sidebar, StatCard, DataReadOut — presentational, prop-driven | `agrodroid/web/src/components/*.tsx` |
-| Domain types | TypeScript interfaces mirroring API/DB shapes | `agrodroid/web/src/types/models.ts` |
+| App shell / router | Top-level route table, auth/session bootstrap, data fetching for operator views | `agrodroid/web/src/App.tsx` |
+| Operator layout | Sidebar/navbar shell for logged-in field-user routes | `agrodroid/web/src/pages/Usuario/Applayout.tsx` |
+| Admin layout | Sidebar/navbar shell for `/admin/*` routes, reuses operator's `.app-shell` CSS | `agrodroid/web/src/pages/Admin/AdminLayout.tsx` |
+| Admin views (CRUD) | Per-entity CRUD screens (Empresa, Vinedo, Sensor, Dron, Umbral, Usuario) — currently mock-data-backed | `agrodroid/web/src/pages/Admin/*.tsx` |
+| Admin dashboard | Aggregate stat cards computed from mock arrays | `agrodroid/web/src/pages/Admin/AdminDashboard.tsx` |
+| Shared admin widgets | Generic table, modal shell, delete-confirmation dialog | `agrodroid/web/src/components/DataTable.tsx`, `Modal.tsx`, `ConfirmDialog.tsx` |
+| Entity edit forms | One modal-form component per admin entity | `agrodroid/web/src/modals/*.tsx` |
+| Mock data source | In-memory fixture arrays typed against admin models, doc comment says "replace with real fetch when connecting API" | `agrodroid/web/src/mockData.ts` |
+| API client | Placeholder — file exists but is currently empty | `agrodroid/web/src/services/api.ts` |
+| Express entry | Registers all route modules, starts HTTP server on :3000 | `agrodroid/app/server.js` |
+| Routes → Controllers → Services | Standard 3-tier Express layering, one triplet per resource | `agrodroid/app/routes/*.js`, `agrodroid/app/controllers/*.js`, `agrodroid/app/services/*.js` |
+| DB schema | Postgres schema/seed loaded by container init | `agrodroid/db/init.sql` |
+| Auth middleware | JWT verification for protected routes | `agrodroid/app/middlewares/auth.middleware.js` |
 
 ## Pattern Overview
 
-**Overall:** Classic 3-tier REST architecture — Router → Controller → Service → raw SQL, consumed by a separate React SPA. No ORM; no ID base classes; each resource follows the identical route/controller/service triad independently (not a generic CRUD framework, just copy-pasted per resource).
+**Overall:** Two independent frontend sub-apps (Operator "Usuario" flow, Admin flow) sharing one React Router tree, one CSS shell (`app-shell`), and one component library, backed by a single Express + Postgres REST API. **The Admin sub-app is not yet wired to that API** — it is a self-contained CRUD prototype running entirely on local component state seeded from `mockData.ts`.
 
 **Key Characteristics:**
-- One file per resource per layer (routes/controllers/services), named `<resource>.routes.js` / `.controller.js` / `.service.js` — 10 resources total (alerta, auth, deteccion, dron, empresa, imagen, lectura, notificacion, sensor, umbral, usuario, vinedo).
-- No models/entities layer — services query Postgres directly with template-literal SQL and return raw rows.
-- Stateless JWT auth; no session store, no refresh tokens.
-- Frontend has no dedicated API client abstraction beyond `agrodroid/web/src/services/api.ts` (currently effectively empty/unused — most components call `fetch` directly, see `App.tsx`).
-- Frontend state lives entirely in `App.tsx` (lifted state passed down via props), no Redux/Context/Zustand.
+- Operator views (`pages/Usuario/*`) get their data from `App.tsx`'s `useEffect` `fetch()` calls against `http://localhost:3000`.
+- Admin views (`pages/Admin/*`) each call `useState<XAdmin[]>(xMock)` directly from `mockData.ts` — no `fetch`, no `services/api.ts` usage. Create/Update/Delete are pure client-side array mutations (`setEmpresas(prev => ...)`), lost on refresh.
+- `agrodroid/web/src/services/api.ts` exists as a stub (empty file) — the intended integration point for wiring Admin to the real backend, not yet implemented.
+- Types for the Admin domain live in `agrodroid/web/src/types/models.ts` as `*Admin` interfaces (e.g. `EmpresaAdmin`, `VinedoAdmin`), separate from the operator-facing types (`Empresa`, `Vinedo`, etc.) used by `App.tsx`. Field shapes overlap but are declared independently.
+- Backend (`agrodroid/app/`) is unaware of the Admin panel; it exposes the same REST resources (`/empresas`, `/vinedos`, `/sensores`, `/drones`, `/umbrales`, `/usuarios`) that the Admin panel *could* consume but currently doesn't call.
 
 ## Layers
 
-**Routes:**
-- Purpose: Map HTTP verb + path to controller function; attach auth middleware per-route.
-- Location: `agrodroid/app/routes/`
-- Contains: Thin `express.Router()` wiring only, no logic.
-- Depends on: `controllers/`, `middlewares/auth.middleware.js`
-- Used by: `agrodroid/app/server.js` (mounted with `app.use("/<resource>", ...)`)
+**Presentation — Operator (`agrodroid/web/src/pages/Usuario/`):**
+- Purpose: field-operator dashboard, sensor map, readings, drones, disease detection, alerts.
+- Depends on: state/handlers passed down from `App.tsx`.
+- Data source: real API via `fetch`.
 
-**Controllers:**
-- Purpose: Translate HTTP request/response to/from service calls; try/catch → status codes.
-- Location: `agrodroid/app/controllers/`
-- Contains: Async functions per action (e.g. `listar`, `obtener`, `crear`, `actualizar`, `register`, `login`).
-- Depends on: `services/`
-- Used by: `routes/`
+**Presentation — Admin (`agrodroid/web/src/pages/Admin/`):**
+- Purpose: back-office CRUD for Empresa, Vinedo, Sensor, Dron, Umbral, Usuario, plus a stats dashboard.
+- Location: `AdminDashboard.tsx`, `EmpresaView.tsx`, `VinedoView.tsx`, `SensorView.tsx`, `DronView.tsx`, `UmbralView.tsx`, `UsuarioView.tsx`, `AdminLayout.tsx`.
+- Contains: one `useState` array of `*Admin[]` per view, initialized from `mockData.ts`; modal-driven create/edit; `ConfirmDialog` for delete.
+- Depends on: `mockData.ts`, `components/DataTable.tsx`, `components/Modal.tsx`, `components/ConfirmDialog.tsx`, `modals/*Modal.tsx`, `types/models.ts`.
+- Used by: routed under `/admin/*` in `App.tsx`.
+- **Not yet connected to:** `services/api.ts` or the Express backend.
 
-**Services:**
-- Purpose: Business logic and direct SQL access via the shared `pg.Pool`.
-- Location: `agrodroid/app/services/`
-- Contains: Async functions running parametrized SQL queries (`pool.query(...)`).
-- Depends on: `config/db.js`, `bcrypt`, `jsonwebtoken`
-- Used by: `controllers/`
+**Shared UI Components (`agrodroid/web/src/components/`):**
+- `DataTable.tsx` — generic typed table (`T extends { id: string }`), column-driven, used by every Admin view.
+- `Modal.tsx` — generic modal shell (open/title/onClose/children/widthPx), used to host each entity's form.
+- `ConfirmDialog.tsx` — generic yes/no confirmation, used for delete actions.
+- `AdminNavbar.tsx` / `AdminSidebar.tsx` — Admin-specific chrome, parallel to operator's `navbar.tsx` / `Sidebar.tsx`.
 
-**Config:**
-- Purpose: Central DB connection pool built from `process.env`.
-- Location: `agrodroid/app/config/db.js`
-- Contains: Single `pg.Pool` instance, exported as module default.
-- Depends on: env vars `DB_USER`, `DB_HOST`, `DB_NAME`, `DB_PASSWORD`, `DB_PORT` (set in `docker-compose.yml`)
-- Used by: every `*.service.js`
+**Modal Forms (`agrodroid/web/src/modals/`):**
+- One form component per admin entity: `EmpresaModal.tsx`, `VinedoModal.tsx`, `SensorModal.tsx`, `DronModal.tsx`, `UmbralModal.tsx`, `UsuarioModal.tsx`.
+- Pattern: controlled form fields, `onGuardar`/`onCerrar`-style callbacks handed in from the parent view; view owns the array mutation, modal only edits a draft object.
 
-**Frontend App Shell:**
-- Purpose: Routing table + all top-level data fetching/state.
-- Location: `agrodroid/web/src/App.tsx`
-- Contains: `<BrowserRouter>` with public (`/`, `/login`, `/register`) and nested authenticated (`/dashboard/*`) routes; `useEffect` fetches for vinedos/sensores/alertas/notificaciones.
-- Depends on: `pages/Auth/*`, `pages/Usuario/*`, `types/models.ts`
-- Used by: `agrodroid/web/src/main.tsx` (entry point)
+**Mock Data (`agrodroid/web/src/mockData.ts`):**
+- Purpose: fixture arrays (`empresasMock`, `vinedosMock`, `sensoresMock`, `dronesMock`, `umbralesMock`, `usuariosMock`) typed against `*Admin` interfaces in `types/models.ts`.
+- Explicit doc comment in the file states it should be replaced by real API calls "when connecting" — confirms this is a known temporary state, not an oversight.
 
-**Frontend Views:**
-- Purpose: Render one domain screen each, purely presentational + local UI state.
-- Location: `agrodroid/web/src/pages/Usuario/`
-- Contains: `DashboardView`, `SensorMapView` (Leaflet), `SensorReadingsView` (Recharts), `DronesView`, `DiseaseDetectionView`, `AlertsNotificationView`.
-- Depends on: props from `App.tsx`, `components/`, `styles/Usuario/*.css`
-- Used by: nested `<Route>` elements inside `AppLayout`
+**API Layer (`agrodroid/app/`):**
+- Purpose: Express REST API — one routes/controllers/services triplet per resource.
+- Entry: `agrodroid/app/server.js` mounts all route modules under path prefixes matching resource names (`/empresas`, `/vinedos`, `/sensores`, `/drones`, `/alertas`, `/notificaciones`, `/usuarios`, `/imagenes`, `/detecciones`, `/lecturas`, `/umbrales`, `/auth`).
+- Depends on: `agrodroid/app/config/db.js` (Postgres pool), `agrodroid/app/middlewares/auth.middleware.js` (JWT).
+
+**Data Store (`agrodroid/db/init.sql`):**
+- Postgres schema and seed data, loaded automatically by the `db` container via `docker-entrypoint-initdb.d`.
 
 ## Data Flow
 
-### Primary Request Path (authenticated resource fetch, e.g. Alertas)
+### Operator Request Path (real API)
 
-1. Frontend fetch with `Authorization: Bearer <token>` header (`agrodroid/web/src/App.tsx:105-117`)
-2. Express route matches `/alertas` → `verificarToken` middleware validates JWT, sets `req.usuario` (`agrodroid/app/middlewares/auth.middleware.js:6-33`)
-3. `controller.listarAlertas` invoked (`agrodroid/app/routes/alerta.routes.js:8`) → calls `alerta.service.js` → `pool.query(...)`
-4. JSON rows returned straight to client; React maps snake_case Postgres columns → camelCase view model in `useEffect` (`agrodroid/web/src/App.tsx:107-116`)
+1. `App.tsx` mounts, runs `useEffect` fetches to `http://localhost:3000/vinedos`, `/sensores`, `/alertas`, `/notificaciones` (`agrodroid/web/src/App.tsx:88-150`).
+2. Raw snake_case API rows are mapped into camelCase view models inline in each `.then()`.
+3. State flows down as props into `AppLayout` → route-specific views (`DashboardView`, `SensorMapView`, etc.).
+4. Express routes (`agrodroid/app/routes/*.js`) dispatch to controllers, which call services, which query Postgres via `config/db.js`.
 
-### Auth Flow (Login)
+### Admin CRUD Path (mock-only, NOT wired to API)
 
-1. `Login.tsx` posts credentials to `POST /auth/login` (`agrodroid/app/routes/auth.routes.js:8`)
-2. `auth.controller.js:login` → `auth.service.js:login` — looks up user by `correo`, `bcrypt.compare` against stored hash (`agrodroid/app/services/auth.service.js:54-98`)
-3. On success, `jwt.sign` issues a 2h token using hardcoded `SECRET_KEY = "AgroDroid_2026"` (note: this differs from the `JWT_SECRET` env var defined in `docker-compose.yml`, which is never read by the code — env var is effectively dead)
-4. Client stores `token` and `usuario` in `localStorage`; used for all subsequent authenticated fetches.
+1. Admin view mounts (e.g. `EmpresaView.tsx`), initializes `useState(empresasMock)` from `agrodroid/web/src/mockData.ts`.
+2. User opens `Modal` with an `EmpresaModal` form to create/edit a row, or `ConfirmDialog` to delete.
+3. On save, the view's own setter (`setEmpresas`) mutates the local array — no HTTP request is made, nothing persists past a page refresh, and the Express `/empresas` endpoint is never called from this flow.
+4. `AdminDashboard.tsx` separately imports the same mock arrays directly to compute stat-card totals (`agrodroid/web/src/pages/Admin/AdminDashboard.tsx:2`).
 
 **State Management:**
-- Backend: stateless per-request; no server-side session.
-- Frontend: all cross-view state lifted into `App.tsx` component state (`useState`/`useEffect`/`useMemo`), passed down as props through `AppLayout` → view components. Auth identity persisted client-side in `localStorage` (`usuario`, `token`).
+- No global store (no Redux/Zustand/Context for domain data) — state lives in `App.tsx` (operator) or per-view `useState` (admin), passed down via props.
+- Auth/session state is read ad hoc from `localStorage` (`usuario`, `token`) in `App.tsx`, not centralized.
 
 ## Key Abstractions
 
-**Resource triad (routes/controller/service):**
-- Purpose: Repeated per-domain-object pattern giving CRUD-ish endpoints.
-- Examples: `agrodroid/app/routes/dron.routes.js`, `agrodroid/app/controllers/dron.controller.js`, `agrodroid/app/services/dron.service.js`
-- Pattern: Router declares path + middleware → controller wraps service call in try/catch → service runs SQL and returns rows.
+**`*Admin` type family:**
+- Purpose: admin-panel-specific view models (`EmpresaAdmin`, `VinedoAdmin`, `SensorAdmin`, `DronAdmin`, `UmbralAdmin`, `UsuarioAdmin`), separate from operator-facing types (`Empresa`, `Vinedo`, `Sensor`, `Dron`).
+- Examples: `agrodroid/web/src/types/models.ts`, consumed by `agrodroid/web/src/mockData.ts` and every `pages/Admin/*View.tsx`.
+- Pattern: flat interfaces with an `id: string` field satisfying `DataTable<T extends { id: string }>`'s generic constraint.
 
-**verificarToken middleware:**
-- Purpose: Single reusable auth gate applied selectively per-route (not globally).
-- Examples: `agrodroid/app/middlewares/auth.middleware.js`, used inline in almost every `*.routes.js`
-- Pattern: Express middleware function reading `Authorization` header, decoding JWT, attaching `req.usuario`.
+**Generic `DataTable<T>`:**
+- Purpose: single reusable table component driven by a `DataTableColumn<T>[]` config, used identically across all six Admin entity views.
+- Examples: `agrodroid/web/src/components/DataTable.tsx`.
 
-**Domain type models (frontend):**
-- Purpose: TypeScript contracts for `Usuario`, `Empresa`, `Vinedo`, `Sensor`, `LecturaSensor`, `Dron`, `DeteccionEnfermedad`, `Alerta`, `Notificacion`.
-- Examples: `agrodroid/web/src/types/models.ts`
-- Pattern: Plain interfaces; components accept typed props built from these.
+**Modal + ConfirmDialog pair:**
+- Purpose: consistent create/edit (`Modal` + entity-specific form) and delete (`ConfirmDialog`) UX across all Admin views.
+- Examples: `agrodroid/web/src/components/Modal.tsx`, `agrodroid/web/src/components/ConfirmDialog.tsx`.
 
 ## Entry Points
 
-**API Server:**
-- Location: `agrodroid/app/server.js`
-- Triggers: `npm start` (`node server.js`) or docker-compose `app` service build (`agrodroid/app/dockerfile`)
-- Responsibilities: Wire CORS/JSON middleware, mount all 11 routers, listen on port 3000.
-
-**Frontend App:**
+**Frontend SPA:**
 - Location: `agrodroid/web/src/main.tsx` → `agrodroid/web/src/App.tsx`
-- Triggers: `npm run dev` (Vite) or built static bundle (`npm run build`)
-- Responsibilities: Mount React root, set up router, fetch initial data.
+- Triggers: Vite dev server (`npm run dev`) or built bundle served statically
+- Responsibilities: route table (public auth routes, `/dashboard/*` operator routes, `/admin/*` admin routes), operator data fetching
 
-**Database Init:**
-- Location: `agrodroid/db/init.sql`
-- Triggers: Automatically executed by Postgres container on first startup via `docker-entrypoint-initdb.d` volume mount in `docker-compose.yml`
-- Responsibilities: Create all tables and seed/reference data (14 `CREATE TABLE` statements).
+**Backend API:**
+- Location: `agrodroid/app/server.js`
+- Triggers: `npm start` inside the `app` container, listens on port 3000
+- Responsibilities: mounts all resource route modules, applies `cors()` and `express.json()` globally
 
 ## Architectural Constraints
 
-- **Threading:** Single-threaded Node event loop (standard Express); no worker threads or clustering configured.
-- **Global state:** Single shared `pg.Pool` singleton in `agrodroid/app/config/db.js`, imported by every service file — connection pooling is implicit and unconfigured (defaults).
-- **Circular imports:** None observed — strict one-directional layering (routes → controllers → services → config).
-- **Hardcoded secrets:** JWT secret is hardcoded as a literal string in both `agrodroid/app/services/auth.service.js:53` and `agrodroid/app/middlewares/auth.middleware.js:4`, duplicated rather than shared, and does not use the `JWT_SECRET` env var already defined in `docker-compose.yml`.
-- **No shared API client:** Frontend has `agrodroid/web/src/services/api.ts` present but effectively unused; most data fetching is inlined directly in `App.tsx` with hardcoded `http://localhost:3000` base URL, meaning environment-specific API URLs are not configurable without code changes.
-- **Stray build artifacts:** Zip files present in the source tree (`agrodroid/app/routes/routes.zip`, `agrodroid/app/controllers/controllers.zip`, `agrodroid/app/services/services.zip`) — likely leftover archives, not part of the runtime.
+- **Frontend/backend integration gap:** the entire Admin panel (`pages/Admin/*`, `modals/*`) is built against `mockData.ts`, not the live API. Any phase that "completes" the Admin panel must wire each view to `services/api.ts` (currently empty) and the matching Express endpoints (`/empresas`, `/vinedos`, `/sensores`, `/drones`, `/umbrales`, `/usuarios`).
+- **Duplicate type universes:** operator types (`Empresa`, `Vinedo`, `Sensor`, `Dron`) and admin types (`EmpresaAdmin`, `VinedoAdmin`, `SensorAdmin`, `DronAdmin`) both live in `types/models.ts` and describe overlapping domain concepts independently — reconciling them is required before Admin can consume the same `/vinedos` etc. responses that operator views already parse.
+- **No shared HTTP client:** operator code calls `fetch` directly with a hardcoded `API = "http://localhost:3000"` constant inside `App.tsx`; there is no shared axios/fetch wrapper. `services/api.ts` is the presumed intended location but is empty.
+- **Global state:** none beyond `localStorage` reads for `usuario`/`token` in `App.tsx`; each Admin view holds independent local `useState`, so data is not shared between the Admin dashboard's stat cards and any given entity view (both re-derive from the same static `mockData.ts` module-level constants, so they stay visually consistent only because the source is static).
+- **docker-compose.yml indentation bug:** the `web` service block in `agrodroid/docker-compose.yml` is not indented under `services:` (it is at document root, sibling to `services:`), so `docker compose up` will not build/start the `web` container as currently written. This must be fixed before the new `agrodroid/web/dockerfile` takes effect.
 
 ## Anti-Patterns
 
-### Duplicated hardcoded JWT secret
+### Mock-data-as-state-source in production-shaped components
 
-**What happens:** The string `"AgroDroid_2026"` is defined independently in `agrodroid/app/services/auth.service.js:53` and `agrodroid/app/middlewares/auth.middleware.js:4`, instead of being read from `process.env.JWT_SECRET` (already provisioned in `docker-compose.yml`).
-**Why it's wrong:** Secret is committed to source control, cannot be rotated without a code deploy, and the two definitions could silently drift out of sync.
-**Do this instead:** Read a single `JWT_SECRET` from `agrodroid/app/config/db.js`-style config module or `process.env.JWT_SECRET` directly in both files.
+**What happens:** Every Admin view calls `useState<XAdmin[]>(xMock)` directly against the imported mock array from `mockData.ts`, and all CRUD operations mutate only that in-memory array.
+**Why it's wrong:** Data does not persist, is not shared across browser tabs/sessions, and diverges silently from what the real `/empresas`, `/vinedos`, etc. endpoints will return once wired up.
+**Do this instead:** Replace the `useState(xMock)` initializer with a `useEffect` fetch to `services/api.ts` (mirroring the pattern already used in `App.tsx` for operator views), keep `mockData.ts` only as a fallback/dev fixture behind an explicit flag if needed.
 
-### Frontend fetches hardcoded to localhost
+### Two parallel type hierarchies for the same domain concepts
 
-**What happens:** `const API = "http://localhost:3000";` is defined inline in `agrodroid/web/src/App.tsx:63` and reused for every fetch call in that file.
-**Why it's wrong:** Any non-local deployment (staging/production) requires editing source code; no `.env`/Vite env var is used despite Vite supporting `import.meta.env`.
-**Do this instead:** Centralize the base URL in `agrodroid/web/src/services/api.ts` (currently unused) and source it from a Vite env variable (e.g. `VITE_API_URL`).
+**What happens:** `Vinedo` (operator) and `VinedoAdmin` (admin) are declared as separate, structurally-similar interfaces in `agrodroid/web/src/types/models.ts`.
+**Why it's wrong:** Any future integration work has to map between two shapes for what is the same backend resource, doubling mapping logic and inviting drift.
+**Do this instead:** Consolidate into one canonical type per resource (or a base type with an admin-only extension), used by both operator fetch-mapping code in `App.tsx` and Admin views.
 
 ## Error Handling
 
-**Strategy:** Try/catch at the controller layer only; services throw plain `Error` objects with user-facing Spanish messages (e.g. `"El correo ya está registrado"`).
+**Strategy:** Minimal — no visible try/catch around the operator `fetch().then()` chains in `App.tsx`, no error boundaries observed in the SPA. Admin panel has no error paths at all since it performs no I/O.
 
 **Patterns:**
-- Controllers catch and map to HTTP status: 500 for generic failures, 401 for auth failures (`agrodroid/app/controllers/auth.controller.js:14-21,32-39`).
-- No centralized Express error-handling middleware; each controller replicates its own try/catch block.
-- No structured/logged error format — `console.error(error)` only.
+- Operator fetches assume success; failures are unhandled at the call site.
+- Backend controllers (`agrodroid/app/controllers/*.js`) are the presumed location for request-level error handling; each resource has one controller.
 
 ## Cross-Cutting Concerns
 
-**Logging:** `console.log`/`console.error` only, no logging library, no request logging middleware (e.g. morgan) configured in `server.js`.
-**Validation:** No request validation library (e.g. joi/zod); controllers pass `req.body` straight through to services, which assume well-formed shape.
-**Authentication:** JWT-based, verified per-route via `verificarToken` middleware; not applied globally (e.g. `POST /empresas` in `agrodroid/app/routes/empresa.routes.js:9` omits it while `GET`/`PUT` on the same resource require it — inconsistent coverage).
+**Logging:** `console.log("Servidor corriendo en puerto 3000")` only, in `agrodroid/app/server.js`. No structured logging observed anywhere.
+**Validation:** Not evident in Admin modal forms (no schema library imported: no zod/yup usage found). Backend validation lives (if present) inside individual controllers.
+**Authentication:** JWT-based, token read from `localStorage` and sent as `Authorization: Bearer` header for a subset of operator fetches (`/alertas`, `/notificaciones`) in `App.tsx`; enforced server-side by `agrodroid/app/middlewares/auth.middleware.js`. Admin panel routes are not gated by any auth check in `App.tsx`'s router — `/admin/*` is reachable without a role check.
 
 ---
 

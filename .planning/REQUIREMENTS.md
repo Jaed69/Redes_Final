@@ -17,8 +17,8 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Roles y Autenticación (AUTH)
 
 - [x] **AUTH-01**: `Usuario.rol` soporta 4 valores: Admin general, Cliente/Productor, Operador/Monitor de campo, TI
-- [ ] **AUTH-02**: El login devuelve el rol del usuario y el frontend enruta a la vista correspondiente según ese rol
-- [ ] **AUTH-03**: Cada rol solo ve rutas/menús de su propio perfil (sin acceso cruzado a vistas de otro rol)
+- [x] **AUTH-02**: El login devuelve el rol del usuario y el frontend enruta a la vista correspondiente según ese rol
+- [x] **AUTH-03**: Cada rol solo ve rutas/menús de su propio perfil (sin acceso cruzado a vistas de otro rol)
 
 ### Panel Admin (ADMIN)
 
@@ -85,8 +85,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEC-03 | Phase 1 | Complete |
 | SEC-04 | Phase 1 | Complete |
 | AUTH-01 | Phase 1 | Complete |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Complete |
+| AUTH-03 | Phase 1 | Complete |
 | ADMIN-02 | Phase 1 | Complete |
 | INFRA-01 | Phase 1 | Complete |
 | ADMIN-01 | Phase 2 | Pending |

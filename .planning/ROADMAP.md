@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Crear una empresa (`POST /empresas`) sin token válido es rechazado, y un usuario autenticado que intenta una mutación fuera de los permisos de su rol recibe 403.
   5. Todas las llamadas de red del frontend (vistas de operador existentes y, en adelante, vistas Admin) pasan por un único cliente de API con base URL configurable, no strings `localhost:3000` hardcodeados.
 
-**Plans**: 3/5 plans executed
+**Plans**: 4/5 plans executed
 Plans:
 **Wave 1**
 
@@ -45,7 +45,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-04-PLAN.md — Frontend: guard RequireRole, vista Próximamente, enrutar App.tsx/Login.tsx por rol y migrar a api.ts
+- [x] 01-04-PLAN.md — Frontend: guard RequireRole, vista Próximamente, enrutar App.tsx/Login.tsx por rol y migrar a api.ts
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -120,7 +120,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Seguridad, Roles y Base de API Compartida | 3/5 | In Progress|  |
+| 1. Seguridad, Roles y Base de API Compartida | 4/5 | In Progress|  |
 | 2. Panel Admin — Datos Reales | 0/TBD | Not started | - |
 | 3. Monitor de Campo — Tiempo Real y Alertas | 0/TBD | Not started | - |
 | 4. Cliente/Productor — Vista de Solo Lectura y Reportes | 0/TBD | Not started | - |

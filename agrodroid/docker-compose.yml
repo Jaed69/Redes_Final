@@ -29,3 +29,11 @@ services:
 
     depends_on:
       - db
+
+web:
+  build: ./web
+  container_name: agrodroid-web
+  ports:
+    - "5173:5173"
+  depends_on:
+    - app

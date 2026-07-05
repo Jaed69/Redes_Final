@@ -23,7 +23,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Panel Admin (ADMIN)
 
 - [ ] **ADMIN-01**: Las vistas Admin (Empresa, Viñedo, Sensor, Dron, Umbral, Usuario) leen y escriben contra la API real, no `mockData.ts`
-- [ ] **ADMIN-02**: `services/api.ts` implementa un cliente HTTP centralizado (base URL desde variable de entorno, no hardcodeada) usado por Admin y por las vistas existentes de Usuario
+- [x] **ADMIN-02**: `services/api.ts` implementa un cliente HTTP centralizado (base URL desde variable de entorno, no hardcodeada) usado por Admin y por las vistas existentes de Usuario
 - [ ] **ADMIN-03**: CRUD de Umbral (mín/máx por sensor) funcional desde la UI Admin contra la tabla `Umbral` existente
 
 ### Vista Cliente/Productor (CLIENTE)
@@ -87,7 +87,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-01 | Phase 1 | Complete |
 | AUTH-02 | Phase 1 | Pending |
 | AUTH-03 | Phase 1 | Pending |
-| ADMIN-02 | Phase 1 | Pending |
+| ADMIN-02 | Phase 1 | Complete |
 | INFRA-01 | Phase 1 | Complete |
 | ADMIN-01 | Phase 2 | Pending |
 | ADMIN-03 | Phase 2 | Pending |

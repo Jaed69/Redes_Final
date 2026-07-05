@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import Navbar from "../../components/Navbar";
+import Navbar from "../../components/navbar";
 import Sidebar from "../../components/Sidebar";
 import type { Empresa, Notificacion, Usuario, Vinedo } from "../../types/models";
 import "../../styles/Usuario/theme.css";

@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { api } from "../../services/api";
 import "../../styles/Auth/Login.css";
 
 
@@ -13,23 +14,7 @@ const Login: React.FC = () => {
   e.preventDefault();
 
   try {
-    const response = await fetch("http://localhost:3000/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        correo,
-        contrasenia,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      alert(data.mensaje);
-      return;
-    }
+    const data = (await api.post("/auth/login", { correo, contrasenia })) as any;
 
     // Guardar el token
     localStorage.setItem("token", data.token);
@@ -37,18 +22,26 @@ const Login: React.FC = () => {
     // Guardar información del usuario (opcional)
     localStorage.setItem("usuario", JSON.stringify(data.usuario));
 
-    console.log(data);
-
     // Redirigir según el rol
-    if (data.usuario.rol === "Administrador") {
-      navigate("/admin_dashboard");
-    } else {
-      navigate("/dashboard");
+    switch (data.usuario.rol) {
+      case "admin":
+        navigate("/admin");
+        break;
+      case "monitor":
+        navigate("/dashboard");
+        break;
+      case "cliente":
+      case "ti":
+        navigate("/proximamente");
+        break;
+      default:
+        navigate("/dashboard");
+        break;
     }
 
   } catch (error) {
     console.error(error);
-    alert("Error al conectar con el servidor.");
+    alert(error instanceof Error ? error.message : "Error al conectar con el servidor.");
   }
 };
 

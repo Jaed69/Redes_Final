@@ -5,8 +5,8 @@ milestone_name: milestone
 current_phase: 1
 current_phase_name: Seguridad, Roles y Base de API Compartida
 status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-07-05T08:20:36.413Z"
+stopped_at: Phase 1 UI-SPEC approved
+last_updated: "2026-07-05T19:42:20.080Z"
 last_activity: 2026-07-05
 last_activity_desc: ROADMAP.md and REQUIREMENTS.md traceability created
 progress:
@@ -87,6 +87,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-05T08:20:36.408Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-seguridad-roles-y-base-de-api-compartida/01-CONTEXT.md
+Last session: 2026-07-05T19:42:20.076Z
+Stopped at: Phase 1 UI-SPEC approved
+Resume file: .planning/phases/01-seguridad-roles-y-base-de-api-compartida/01-UI-SPEC.md

@@ -35,12 +35,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Crear una empresa (`POST /empresas`) sin token válido es rechazado, y un usuario autenticado que intenta una mutación fuera de los permisos de su rol recibe 403.
   5. Todas las llamadas de red del frontend (vistas de operador existentes y, en adelante, vistas Admin) pasan por un único cliente de API con base URL configurable, no strings `localhost:3000` hardcodeados.
 
-**Plans**: 1/5 plans executed
+**Plans**: 2/5 plans executed
 Plans:
 **Wave 1**
 
 - [x] 01-01-PLAN.md — Backend: centralizar JWT secret, implementar requireRole y aplicarlo a las 11 rutas, cerrar fuga de hash de contraseña
-- [ ] 01-02-PLAN.md — docker-compose a .env + fix indentación de web, migrar seed a 4 roles con bcrypt
+- [x] 01-02-PLAN.md — docker-compose a .env + fix indentación de web, migrar seed a 4 roles con bcrypt
 - [ ] 01-03-PLAN.md — Implementar cliente HTTP centralizado services/api.ts
 
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -120,7 +120,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Seguridad, Roles y Base de API Compartida | 1/5 | In Progress|  |
+| 1. Seguridad, Roles y Base de API Compartida | 2/5 | In Progress|  |
 | 2. Panel Admin — Datos Reales | 0/TBD | Not started | - |
 | 3. Monitor de Campo — Tiempo Real y Alertas | 0/TBD | Not started | - |
 | 4. Cliente/Productor — Vista de Solo Lectura y Reportes | 0/TBD | Not started | - |

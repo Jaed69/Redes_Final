@@ -11,12 +11,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **SEC-01**: El secreto JWT se lee exclusivamente de `process.env.JWT_SECRET` (elimina el hardcode duplicado en `auth.middleware.js` y `auth.service.js`)
 - [x] **SEC-02**: `POST /empresas` requiere `verificarToken` como el resto de rutas de empresa
-- [ ] **SEC-03**: Credenciales de base de datos y JWT salen de `docker-compose.yml` en texto plano hacia un `.env` ignorado por git
+- [x] **SEC-03**: Credenciales de base de datos y JWT salen de `docker-compose.yml` en texto plano hacia un `.env` ignorado por git
 - [x] **SEC-04**: Middleware de autorización por rol (`requireRole(...)`) bloquea acciones de mutación según el perfil del usuario autenticado
 
 ### Roles y Autenticación (AUTH)
 
-- [ ] **AUTH-01**: `Usuario.rol` soporta 4 valores: Admin general, Cliente/Productor, Operador/Monitor de campo, TI
+- [x] **AUTH-01**: `Usuario.rol` soporta 4 valores: Admin general, Cliente/Productor, Operador/Monitor de campo, TI
 - [ ] **AUTH-02**: El login devuelve el rol del usuario y el frontend enruta a la vista correspondiente según ese rol
 - [ ] **AUTH-03**: Cada rol solo ve rutas/menús de su propio perfil (sin acceso cruzado a vistas de otro rol)
 
@@ -48,7 +48,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Infraestructura (INFRA)
 
-- [ ] **INFRA-01**: `docker-compose.yml` levanta correctamente los 3 servicios (db, app, web) — corrige el bloque `web` mal indentado fuera de `services:`
+- [x] **INFRA-01**: `docker-compose.yml` levanta correctamente los 3 servicios (db, app, web) — corrige el bloque `web` mal indentado fuera de `services:`
 
 ## v2 Requirements
 
@@ -82,13 +82,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | SEC-01 | Phase 1 | Complete |
 | SEC-02 | Phase 1 | Complete |
-| SEC-03 | Phase 1 | Pending |
+| SEC-03 | Phase 1 | Complete |
 | SEC-04 | Phase 1 | Complete |
-| AUTH-01 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
 | AUTH-02 | Phase 1 | Pending |
 | AUTH-03 | Phase 1 | Pending |
 | ADMIN-02 | Phase 1 | Pending |
-| INFRA-01 | Phase 1 | Pending |
+| INFRA-01 | Phase 1 | Complete |
 | ADMIN-01 | Phase 2 | Pending |
 | ADMIN-03 | Phase 2 | Pending |
 | MONITOR-01 | Phase 3 | Pending |

@@ -31,7 +31,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Tras iniciar sesión, el usuario es enrutado a la vista de su rol (Admin general, Cliente/Productor, Operador/Monitor, TI) y no puede alcanzar rutas/menús de otro rol navegando directamente.
   4. Crear una empresa (`POST /empresas`) sin token válido es rechazado, y un usuario autenticado que intenta una mutación fuera de los permisos de su rol recibe 403.
   5. Todas las llamadas de red del frontend (vistas de operador existentes y, en adelante, vistas Admin) pasan por un único cliente de API con base URL configurable, no strings `localhost:3000` hardcodeados.
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 01-01-PLAN.md — Backend: centralizar JWT secret, implementar requireRole y aplicarlo a las 11 rutas, cerrar fuga de hash de contraseña
+- [ ] 01-02-PLAN.md — docker-compose a .env + fix indentación de web, migrar seed a 4 roles con bcrypt
+- [ ] 01-03-PLAN.md — Implementar cliente HTTP centralizado services/api.ts
+- [ ] 01-04-PLAN.md — Frontend: guard RequireRole, vista Próximamente, enrutar App.tsx/Login.tsx por rol y migrar a api.ts
+- [ ] 01-05-PLAN.md — Verificación end-to-end del walking skeleton (script automatizado + checkpoint humano)
 **UI hint**: yes
 
 ### Phase 2: Panel Admin — Datos Reales
@@ -89,7 +95,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Seguridad, Roles y Base de API Compartida | 0/TBD | Not started | - |
+| 1. Seguridad, Roles y Base de API Compartida | 0/5 | Not started | - |
 | 2. Panel Admin — Datos Reales | 0/TBD | Not started | - |
 | 3. Monitor de Campo — Tiempo Real y Alertas | 0/TBD | Not started | - |
 | 4. Cliente/Productor — Vista de Solo Lectura y Reportes | 0/TBD | Not started | - |

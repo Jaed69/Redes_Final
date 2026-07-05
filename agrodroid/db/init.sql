@@ -292,9 +292,10 @@ VALUES
 -- USUARIOS
 INSERT INTO Usuario (nombreUsuario, correo, contrasenia, rol, Empresa_idEmpresa)
 VALUES
-('admin', 'admin@agrovina.com', 'admin123', 'Administrador', 1),
-('supervisor1', 'supervisor1@agrovina.com', 'clave123', 'Usuario', 1),
-('operador1', 'operador1@agrovina.com', 'clave123', 'Usuario', 1);
+('admin', 'admin@agrovina.com', '$2b$10$jhHbwEekykq1dkI13xXBr.p7uaXihsf05WOALGAl2BJf.TKYNaJNu', 'admin', 1),
+('supervisor1', 'supervisor1@agrovina.com', '$2b$10$ySqy1qY3ywmGBxkH.mO8RuOzEsLosl3e358jC0QfTDqKUb2XtnptW', 'cliente', 1),
+('operador1', 'operador1@agrovina.com', '$2b$10$ySqy1qY3ywmGBxkH.mO8RuOzEsLosl3e358jC0QfTDqKUb2XtnptW', 'monitor', 1),
+('ti1', 'ti1@agrovina.com', '$2b$10$K1Ek5km.ZiBfAuDlmKmzUObp1iFi1ms0m/.UFdbxBe/X1P46QgvGy', 'ti', 1);
 
 -- DRONES
 INSERT INTO Dron (nombreDron, Vinedo_idVinedo) VALUES

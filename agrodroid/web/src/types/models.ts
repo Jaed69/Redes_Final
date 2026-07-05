@@ -443,3 +443,78 @@ export function claseEstadoAlerta(estado: string): "critico" | "en_proceso" | "r
   if (valor === "resuelta" || valor === "resuelto") return "resuelto";
   return "en_proceso";
 }
+
+
+//////////////////////////////////////////////////
+
+
+/**
+ * Modelos del panel de administrador.
+ * Son independientes de src/types/models.ts (que refleja la API real del
+ * usuario/operador): aquí todo es mock en memoria, listo para conectar
+ * a una API REST más adelante reemplazando el estado local de cada
+ * vista por llamadas reales.
+ */
+
+export type EstadoGenerico = "Activo" | "Inactivo";
+
+export interface EmpresaAdmin {
+  id: string;
+  nombre: string;
+  ruc: string;
+  direccion: string;
+  responsable: string;
+  estado: EstadoGenerico;
+}
+
+export interface VinedoAdmin {
+  id: string;
+  nombre: string;
+  empresaId: string;
+  empresaNombre: string;
+  latitud: number;
+  longitud: number;
+  areaHectareas: number;
+  estado: EstadoGenerico;
+}
+
+export interface UsuarioAdmin {
+  id: string;
+  nombre: string;
+  correo: string;
+  rol: "Administrador" | "Usuario";
+  empresaId: string;
+  empresaNombre: string;
+  estado: EstadoGenerico;
+}
+
+export interface SensorAdmin {
+  id: string;
+  nombre: string;
+  tipo: "Humedad" | "Temperatura" | "Combinado";
+  vinedoId: string;
+  vinedoNombre: string;
+  estado: EstadoGenerico;
+  latitud: number;
+  longitud: number;
+}
+
+export interface DronAdmin {
+  id: string;
+  codigo: string;
+  modelo: string;
+  vinedoId: string;
+  vinedoNombre: string;
+  estado: "En vuelo" | "Disponible" | "Mantenimiento";
+  bateria: number;
+}
+
+export interface UmbralAdmin {
+  id: string;
+  sensorId: string;
+  sensorNombre: string;
+  variable: "Humedad" | "Temperatura";
+  valorMinimo: number;
+  valorMaximo: number;
+  estado: EstadoGenerico;
+}

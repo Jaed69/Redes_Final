@@ -13,6 +13,15 @@ import DronesView from "./pages/Usuario/DronesView";
 import DiseaseDetectionView from "./pages/Usuario/DiseaseDetectionView";
 import AlertsNotificationsView from "./pages/Usuario/AlertsNotificationView";
 
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import AdminLayout from "./pages/Admin/AdminLayout";
+import DronView from "./pages/Admin/DronView";
+import EmpresaView from "./pages/Admin/EmpresaView";
+import VinedoView from "./pages/Admin/VinedoView";
+import SensorView from "./pages/Admin/SensorView";
+import UsuarioView from "./pages/Admin/UsuarioView";
+import UmbralView from "./pages/Admin/UmbralView";
+
 import type {
   Alerta,
   DeteccionEnfermedad,
@@ -236,7 +245,39 @@ export default function App() {
             }
           />
         </Route>
+
+        {/* =========================
+          ADMINISTRADOR
+      ========================= */}
+
+      <Route
+        path="/admin"
+        element={
+          <AdminLayout
+            usuario={usuario}
+            notificaciones={notifs}
+            backendOnline={backendOnline}
+          />
+        }
+      >
+        <Route index element={<AdminDashboard />} />
+
+        <Route path="empresas" element={<EmpresaView />} />
+
+        <Route path="vinedos" element={<VinedoView />} />
+
+        <Route path="usuarios" element={<UsuarioView />} />
+
+        <Route path="sensores" element={<SensorView />} />
+
+        <Route path="drones" element={<DronView />} />
+
+        <Route path="umbrales" element={<UmbralView />} />
+      </Route>
+        
       </Routes>
+
+      
     </BrowserRouter>
   );
 }

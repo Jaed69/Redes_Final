@@ -50,7 +50,7 @@ const register = async (data) => {
 
 
 //Login
-const SECRET_KEY = "AgroDroid_2026";
+const SECRET_KEY = process.env.JWT_SECRET;
 const login = async (data) => {
 
     const { correo, contrasenia } = data;

@@ -52,6 +52,7 @@ export default function App() {
     empresaNombre?: string;
   };
   const empresa = { id: usuario.empresaId ?? "", nombre: usuario.empresaNombre ?? "" } as Empresa;
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem("token"));
   const [backendOnline] = useState(true);
 
   const [vinedos, setVinedos] = useState<Vinedo[]>([]);
@@ -67,7 +68,15 @@ export default function App() {
 
   const [rango, setRango] = useState({ inicio: "2026-06-01", fin: "2026-07-03" });
 
+  // Sincroniza token con localStorage (login/logout en esta o otra pestaña)
   useEffect(() => {
+    const sincronizar = () => setToken(localStorage.getItem("token"));
+    window.addEventListener("storage", sincronizar);
+    return () => window.removeEventListener("storage", sincronizar);
+  }, []);
+
+  useEffect(() => {
+    if (!token) return;
     api.get("/vinedos").then((d: any) =>
       setVinedos(
         d.map((v: any) => ({
@@ -80,9 +89,10 @@ export default function App() {
         }))
       )
     );
-  }, []);
+  }, [token]);
 
   useEffect(() => {
+    if (!token) return;
     api.get("/sensores").then((d: any) =>
       setSensores(
         d.map((s: any) => ({
@@ -96,9 +106,10 @@ export default function App() {
         }))
       )
     );
-  }, []);
+  }, [token]);
 
   useEffect(() => {
+    if (!token) return;
     api.get("/lecturas").then((d: any) =>
       setLecturas(
         d.map((l: any) => ({
@@ -110,9 +121,10 @@ export default function App() {
         }))
       )
     );
-  }, []);
+  }, [token]);
 
   useEffect(() => {
+    if (!token) return;
     api.get("/drones").then(async (d: any) => {
       const vinedoIdPorNombre = new Map<string, string>();
       vinedos.forEach((v) => vinedoIdPorNombre.set(v.nombre, v.id));
@@ -146,9 +158,10 @@ export default function App() {
       }));
       setDrones(dronesMapped);
     });
-  }, [vinedos]);
+  }, [vinedos, token]);
 
   useEffect(() => {
+    if (!token) return;
     api.get("/detecciones").then((d: any) =>
       setDetecciones(
         d.map((det: any) => ({
@@ -162,9 +175,10 @@ export default function App() {
         }))
       )
     );
-  }, []);
+  }, [token]);
 
   useEffect(() => {
+    if (!token) return;
     api.get("/alertas").then((d: any) =>
       setAlertas(
         d.map((a: any) => ({
@@ -177,9 +191,10 @@ export default function App() {
         }))
       )
     );
-  }, []);
+  }, [token]);
 
   useEffect(() => {
+    if (!token) return;
     api.get("/notificaciones").then((d: any) =>
       setNotifs(
         d.map((n: any) => ({
@@ -193,7 +208,7 @@ export default function App() {
         }))
       )
     );
-  }, []);
+  }, [token]);
 
   const sensoresDelVinedo = useMemo(
     () => sensores.filter((s) => !vinedoActivoId || s.vinedoId === vinedoActivoId),

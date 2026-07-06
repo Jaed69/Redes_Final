@@ -1,12 +1,11 @@
 import React, {useState} from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { api } from "../../services/api";
 import "../../styles/Auth/Login.css";
 
 
 
 const Login: React.FC = () => {
-  const navigate = useNavigate();
   const [correo, setCorreo] = useState("");
   const [contrasenia, setContrasenia] = useState("");
 
@@ -22,22 +21,25 @@ const Login: React.FC = () => {
     // Guardar información del usuario (opcional)
     localStorage.setItem("usuario", JSON.stringify(data.usuario));
 
-    // Redirigir según el rol
+    // Redirigir según el rol. Recarga el documento para que App.tsx
+    // re-monte con token presente y sus useEffect de carga disparen
+    // contra la API ya autenticada (sin dependen de navigate que no
+    // remonta el árbol y deja los efectos en [] sin disparar).
     switch (data.usuario.rol) {
       case "admin":
-        navigate("/admin");
+        window.location.href = "/admin";
         break;
       case "monitor":
-        navigate("/dashboard");
+        window.location.href = "/dashboard";
         break;
       case "cliente":
-        navigate("/cliente");
+        window.location.href = "/cliente";
         break;
       case "ti":
-        navigate("/ti/cuentas");
+        window.location.href = "/ti/cuentas";
         break;
       default:
-        navigate("/dashboard");
+        window.location.href = "/dashboard";
         break;
     }
 

@@ -28,6 +28,12 @@ async function request<T>(path: string, options: RequestOptions): Promise<T> {
   const data = await response.json();
 
   if (!response.ok) {
+    if (response.status === 401 && !path.startsWith("/auth/")) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("usuario");
+      const t = localStorage.getItem("token");
+      if (!t) window.location.href = "/login";
+    }
     throw new Error(data.mensaje || "Error de red");
   }
 

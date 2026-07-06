@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "../../styles/Auth/Register.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface EmpresaForm {
   ruc: string;
@@ -16,8 +16,6 @@ interface UsuarioForm {
 }
 
 const Register: React.FC = () => {
-  const navigate = useNavigate();
-
   const [empresa, setEmpresa] = useState<EmpresaForm>({
     ruc: "",
     nombreEmpresa: "",
@@ -94,7 +92,7 @@ const Register: React.FC = () => {
     }
 
     alert("Registro exitoso");
-    navigate("/login");
+    window.location.href = "/login";
 
   } catch (error) {
     console.error(error);

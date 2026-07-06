@@ -62,6 +62,11 @@ Sin framework de tests (MVP). Sin CI/CD. Sin despliegue cloud (el informe TB1 ju
 
 **Recursos REST:** `/auth`, `/usuarios`, `/empresas`, `/vinedos`, `/sensores`, `/drones`, `/umbrales`, `/lecturas`, `/imagenes`, `/detecciones`, `/alertas`, `/notificaciones`, `/system`.
 
+**Documentación API:**
+- **Swagger UI interactivo:** `http://localhost:3000/api-docs` — explorar y probar endpoints con JWT embebido.
+- **Spec OpenAPI 3.0:** `agrodroid/app/swagger.json` — importable a Postman, redoc, codegen.
+- **Colección Postman:** `agrodroid/Agrodroid.postman_collection.json` — 55 requests en 14 grupos.
+
 **Modelo de datos** (`db/init.sql`): `Empresa` 1→N `Vinedo` 1→N `Sensor`/`Dron`; `Sensor` 1→N `LecturaSensor`, 1→N `Umbral`; `Dron` 1→N `Imagen` 1→N `DeteccionEnfermedad` N→1 `TipoEnfermedad`; `Alerta` N→1 `Vinedo`/`EstadoAlerta`/`TipoAlerta`; `Notificacion` N→1 `Usuario`/`Alerta`; `Usuario` N→1 `Empresa`.
 
 ---

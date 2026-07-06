@@ -1,0 +1,1036 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Agrodroid API",
+    "version": "1.0.0",
+    "description": "REST API para monitoreo agrícola de viñedos (AgroVina). 4 roles: admin, monitor, cliente, ti. Autenticación JWT + autorización por rol. Base de datos PostgreSQL con 13 tablas: Empresa, Vinedo, Sensor, Dron, Umbral, LecturaSensor, Imagen, DeteccionEnfermedad, Alerta, Notificacion, Usuario, TipoEnfermedad, EstadoAlerta, TipoAlerta.\n\n## Autenticación\nUsar `/auth/login` para obtener JWT. Luego incluir `Authorization: Bearer <token>` en requests protegidos.\n\n## Roles\n- **admin**: CRUD completo en Empresa/Vinedo/Sensor/Dron/Umbral/Usuario.\n- **monitor**: lectura + cambio de estado de alertas.\n- **cliente**: sólo lectura (filtrado por empresa en frontend).\n- **ti**: CRUD de usuarios + estado del sistema.",
+    "contact": { "name": "Equipo Agrodroid", "email": "agrovina@example.com" }
+  },
+  "servers": [
+    { "url": "http://localhost:3000", "description": "Desarrollo local" }
+  ],
+  "tags": [
+    { "name": "Auth", "description": "Registro y login público" },
+    { "name": "Usuario", "description": "CRUD de usuarios (admin/ti)" },
+    { "name": "Empresa", "description": "CRUD de empresas (admin)" },
+    { "name": "Vinedo", "description": "CRUD de viñedos (admin)" },
+    { "name": "Sensor", "description": "CRUD de sensores (admin)" },
+    { "name": "Dron", "description": "CRUD de drones (admin)" },
+    { "name": "Umbral", "description": "CRUD de umbrales (admin)" },
+    { "name": "LecturaSensor", "description": "Lecturas de sensores (admin)" },
+    { "name": "Imagen", "description": "Imágenes capturadas por drones (admin)" },
+    { "name": "DeteccionEnfermedad", "description": "Detecciones de enfermedades (admin)" },
+    { "name": "Alerta", "description": "Alertas y su estado (admin/monitor)" },
+    { "name": "Notificacion", "description": "Notificaciones a usuarios (admin)" },
+    { "name": "Sistema", "description": "Estado del sistema (admin/ti)" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "AuthLogin": {
+        "type": "object",
+        "required": ["correo", "contrasenia"],
+        "properties": {
+          "correo": { "type": "string", "format": "email" },
+          "contrasenia": { "type": "string" }
+        }
+      },
+      "AuthRegisterAuto": {
+        "type": "object",
+        "required": ["nombreUsuario", "correo", "contrasenia"],
+        "properties": {
+          "nombreUsuario": { "type": "string" },
+          "correo": { "type": "string", "format": "email" },
+          "contrasenia": { "type": "string", "minLength": 6 },
+          "rol": { "type": "string", "default": "admin" },
+          "empresa": {
+            "$ref": "#/components/schemas/EmpresaCreate"
+          }
+        }
+      },
+      "AuthRegisterUsuario": {
+        "type": "object",
+        "required": ["nombreUsuario", "correo", "contrasenia", "Empresa_idEmpresa"],
+        "properties": {
+          "nombreUsuario": { "type": "string" },
+          "correo": { "type": "string", "format": "email" },
+          "contrasenia": { "type": "string", "minLength": 6 },
+          "rol": { "type": "string", "enum": ["admin", "monitor", "cliente", "ti"] },
+          "Empresa_idEmpresa": { "type": "integer" }
+        }
+      },
+      "AuthLoginResponse": {
+        "type": "object",
+        "properties": {
+          "mensaje": { "type": "string" },
+          "token": { "type": "string" },
+          "usuario": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer" },
+              "nombre": { "type": "string" },
+              "correo": { "type": "string" },
+              "rol": { "type": "string" },
+              "empresaId": { "type": "integer" },
+              "empresaNombre": { "type": "string" }
+            }
+          }
+        }
+      },
+      "Usuario": {
+        "type": "object",
+        "properties": {
+          "idusuario": { "type": "integer" },
+          "nombreusuario": { "type": "string" },
+          "correo": { "type": "string", "format": "email" },
+          "rol": { "type": "string", "enum": ["admin", "monitor", "cliente", "ti"] },
+          "empresa_idempresa": { "type": "integer" },
+          "nombreempresa": { "type": "string" }
+        }
+      },
+      "UsuarioCreate": {
+        "type": "object",
+        "required": ["nombreUsuario", "correo", "contrasenia", "rol", "Empresa_idEmpresa"],
+        "properties": {
+          "nombreUsuario": { "type": "string" },
+          "correo": { "type": "string", "format": "email" },
+          "contrasenia": { "type": "string", "minLength": 6 },
+          "rol": { "type": "string", "enum": ["admin", "monitor", "cliente", "ti"] },
+          "Empresa_idEmpresa": { "type": "integer" }
+        }
+      },
+      "UsuarioUpdate": {
+        "type": "object",
+        "required": ["nombreUsuario", "correo", "rol", "Empresa_idEmpresa"],
+        "properties": {
+          "nombreUsuario": { "type": "string" },
+          "correo": { "type": "string", "format": "email" },
+          "rol": { "type": "string", "enum": ["admin", "monitor", "cliente", "ti"] },
+          "Empresa_idEmpresa": { "type": "integer" },
+          "contrasenia": { "type": "string", "description": "Opcional. Si se envía, resetea la contraseña del usuario." }
+        }
+      },
+      "Empresa": {
+        "type": "object",
+        "properties": {
+          "idempresa": { "type": "integer" },
+          "ruc": { "type": "string", "pattern": "^\\d{11}$" },
+          "nombreempresa": { "type": "string" },
+          "direccion": { "type": "string" }
+        }
+      },
+      "EmpresaCreate": {
+        "type": "object",
+        "required": ["ruc", "nombreEmpresa", "direccion"],
+        "properties": {
+          "ruc": { "type": "string", "pattern": "^\\d{11}$", "minLength": 11, "maxLength": 11 },
+          "nombreEmpresa": { "type": "string" },
+          "direccion": { "type": "string" }
+        }
+      },
+      "Vinedo": {
+        "type": "object",
+        "properties": {
+          "idvinedo": { "type": "integer" },
+          "nombrevinedo": { "type": "string" },
+          "ubicacion": { "type": "string" },
+          "area_hectareas": { "type": "string", "description": "Decimal como string" },
+          "empresa_idempresa": { "type": "integer" },
+          "nombreempresa": { "type": "string" }
+        }
+      },
+      "VinedoCreate": {
+        "type": "object",
+        "required": ["nombreVinedo", "ubicacion", "area_hectareas", "Empresa_idEmpresa"],
+        "properties": {
+          "nombreVinedo": { "type": "string" },
+          "ubicacion": { "type": "string" },
+          "area_hectareas": { "type": "number", "format": "float" },
+          "Empresa_idEmpresa": { "type": "integer" }
+        }
+      },
+      "Sensor": {
+        "type": "object",
+        "properties": {
+          "idsensor": { "type": "integer" },
+          "nombresensor": { "type": "string" },
+          "latitud": { "type": "string" },
+          "longitud": { "type": "string" },
+          "vinedo_idvinedo": { "type": "integer" },
+          "nombrevinedo": { "type": "string" }
+        }
+      },
+      "SensorCreate": {
+        "type": "object",
+        "required": ["nombreSensor", "longitud", "latitud", "Vinedo_idVinedo"],
+        "properties": {
+          "nombreSensor": { "type": "string" },
+          "longitud": { "type": "number", "format": "float" },
+          "latitud": { "type": "number", "format": "float" },
+          "Vinedo_idVinedo": { "type": "integer" }
+        }
+      },
+      "Dron": {
+        "type": "object",
+        "properties": {
+          "iddron": { "type": "integer" },
+          "nombredron": { "type": "string" },
+          "vinedo_idvinedo": { "type": "integer" },
+          "nombrevinedo": { "type": "string" }
+        }
+      },
+      "DronCreate": {
+        "type": "object",
+        "required": ["nombreDron", "Vinedo_idVinedo"],
+        "properties": {
+          "nombreDron": { "type": "string" },
+          "Vinedo_idVinedo": { "type": "integer" }
+        }
+      },
+      "Umbral": {
+        "type": "object",
+        "properties": {
+          "idumbral": { "type": "integer" },
+          "valorminimo": { "type": "string" },
+          "valormaximo": { "type": "string" },
+          "descripcion": { "type": "string" },
+          "sensor_idsensor": { "type": "integer" }
+        }
+      },
+      "UmbralCreate": {
+        "type": "object",
+        "required": ["valorMinimo", "valorMaximo", "descripcion", "Sensor_idSensor"],
+        "properties": {
+          "valorMinimo": { "type": "number", "format": "float" },
+          "valorMaximo": { "type": "number", "format": "float" },
+          "descripcion": { "type": "string" },
+          "Sensor_idSensor": { "type": "integer" }
+        }
+      },
+      "UmbralUpdate": {
+        "type": "object",
+        "required": ["valorMinimo", "valorMaximo", "descripcion"],
+        "properties": {
+          "valorMinimo": { "type": "number", "format": "float" },
+          "valorMaximo": { "type": "number", "format": "float" },
+          "descripcion": { "type": "string" }
+        }
+      },
+      "LecturaSensor": {
+        "type": "object",
+        "properties": {
+          "idlectura": { "type": "integer" },
+          "valor": { "type": "string" },
+          "fechalectura": { "type": "string", "format": "date" },
+          "horalectura": { "type": "string" },
+          "sensor_idsensor": { "type": "integer" }
+        }
+      },
+      "LecturaSensorCreate": {
+        "type": "object",
+        "required": ["valor", "fechaLectura", "horaLectura", "Sensor_idSensor"],
+        "properties": {
+          "valor": { "type": "number", "format": "float" },
+          "fechaLectura": { "type": "string", "format": "date" },
+          "horaLectura": { "type": "string" },
+          "Sensor_idSensor": { "type": "integer" }
+        }
+      },
+      "Imagen": {
+        "type": "object",
+        "properties": {
+          "idimagen": { "type": "integer" },
+          "fechacaptura": { "type": "string", "format": "date" },
+          "horacaptura": { "type": "string" },
+          "tamanoarchivo": { "type": "integer" },
+          "rutaarchivo": { "type": "string" },
+          "ancho": { "type": "integer" },
+          "alto": { "type": "integer" },
+          "latitud": { "type": "string" },
+          "longitud": { "type": "string" },
+          "dron_iddron": { "type": "integer" }
+        }
+      },
+      "ImagenCreate": {
+        "type": "object",
+        "required": ["fechaCaptura", "horaCaptura", "tamanoArchivo", "rutaArchivo", "ancho", "alto", "latitud", "longitud", "Dron_idDron"],
+        "properties": {
+          "fechaCaptura": { "type": "string", "format": "date" },
+          "horaCaptura": { "type": "string" },
+          "tamanoArchivo": { "type": "integer" },
+          "rutaArchivo": { "type": "string" },
+          "ancho": { "type": "integer" },
+          "alto": { "type": "integer" },
+          "latitud": { "type": "number", "format": "float" },
+          "longitud": { "type": "number", "format": "float" },
+          "Dron_idDron": { "type": "integer" }
+        }
+      },
+      "DeteccionEnfermedad": {
+        "type": "object",
+        "properties": {
+          "iddeteccion": { "type": "integer" },
+          "nivelconfianza": { "type": "string" },
+          "descripcion": { "type": "string" },
+          "fechadeteccion": { "type": "string", "format": "date" },
+          "imagen_idimagen": { "type": "integer" },
+          "tipoenfermedad_idenfermedad": { "type": "integer" },
+          "nombreenfermedad": { "type": "string", "description": "JOIN con TipoEnfermedad" },
+          "rutaarchivo": { "type": "string", "description": "JOIN con Imagen" }
+        }
+      },
+      "DeteccionCreate": {
+        "type": "object",
+        "required": ["nivelConfianza", "descripcion", "fechaDeteccion", "Imagen_idImagen", "TipoEnfermedad_idEnfermedad"],
+        "properties": {
+          "nivelConfianza": { "type": "number", "format": "float" },
+          "descripcion": { "type": "string" },
+          "fechaDeteccion": { "type": "string", "format": "date" },
+          "Imagen_idImagen": { "type": "integer" },
+          "TipoEnfermedad_idEnfermedad": { "type": "integer" }
+        }
+      },
+      "Alerta": {
+        "type": "object",
+        "properties": {
+          "idalerta": { "type": "integer" },
+          "descripcion": { "type": "string" },
+          "estado": { "type": "string", "description": "Pendiente | En Proceso | Resuelta (lookup a EstadoAlerta.nombreestado)" },
+          "tipo": { "type": "string", "description": "Sensor | Enfermedad" },
+          "vinedo_idvinedo": { "type": "integer" },
+          "nombreempresa": { "type": "string", "description": "JOIN con Empresa" }
+        }
+      },
+      "AlertaCreate": {
+        "type": "object",
+        "required": ["fecha", "hora", "descripcion", "Vinedo_idVinedo", "EstadoAlerta_idEstado", "TipoAlerta_idTipo"],
+        "properties": {
+          "fecha": { "type": "string", "format": "date" },
+          "hora": { "type": "string" },
+          "descripcion": { "type": "string" },
+          "Vinedo_idVinedo": { "type": "integer" },
+          "DeteccionEnfermedad_idDeteccion": { "type": "integer", "nullable": true },
+          "LecturaSensor_idLectura": { "type": "integer", "nullable": true },
+          "EstadoAlerta_idEstado": { "type": "integer" },
+          "TipoAlerta_idTipo": { "type": "integer" }
+        }
+      },
+      "AlertaEstadoPorNombre": {
+        "type": "object",
+        "required": ["estado"],
+        "properties": {
+          "estado": { "type": "string", "enum": ["Pendiente", "En Proceso", "Resuelta"], "description": "Lookup en tabla EstadoAlerta" }
+        }
+      },
+      "AlertaEstadoPorId": {
+        "type": "object",
+        "required": ["estadoalerta_idestado"],
+        "properties": {
+          "estadoalerta_idestado": { "type": "integer", "description": "ID directo de EstadoAlerta (formato legacy)" }
+        }
+      },
+      "Notificacion": {
+        "type": "object",
+        "properties": {
+          "idnotificacion": { "type": "integer" },
+          "mensaje": { "type": "string" },
+          "fechaenvio": { "type": "string", "format": "date" },
+          "horaenvio": { "type": "string" },
+          "nombreusuario": { "type": "string", "description": "JOIN con Usuario" },
+          "alerta": { "type": "string", "description": "JOIN con Alerta.descripcion" }
+        }
+      },
+      "NotificacionCreate": {
+        "type": "object",
+        "required": ["mensaje", "fechaEnvio", "horaEnvio", "Usuario_idUsuario", "Alerta_idAlerta"],
+        "properties": {
+          "mensaje": { "type": "string" },
+          "fechaEnvio": { "type": "string", "format": "date" },
+          "horaEnvio": { "type": "string" },
+          "Usuario_idUsuario": { "type": "integer" },
+          "Alerta_idAlerta": { "type": "integer" }
+        }
+      },
+      "SystemStatus": {
+        "type": "object",
+        "properties": {
+          "db": { "type": "string", "enum": ["ok", "error"] },
+          "env": {
+            "type": "object",
+            "description": "Flags set/unset para cada variable de entorno. Nunca expone valores de secretos.",
+            "properties": {
+              "POSTGRES_DB": { "type": "string", "enum": ["set", "unset"] },
+              "DB_HOST": { "type": "string", "enum": ["set", "unset"] },
+              "DB_PORT": { "type": "string", "enum": ["set", "unset"] },
+              "DB_USER": { "type": "string", "enum": ["set", "unset"] },
+              "DB_NAME": { "type": "string", "enum": ["set", "unset"] },
+              "JWT_SECRET": { "type": "string", "enum": ["set", "unset"] }
+            }
+          },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "mensaje": { "type": "string" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Registrar usuario (auto-registro público crea empresa + admin)",
+        "description": "Si se envía `empresa` anidada, crea la empresa y su admin en una transacción atómica pública. Sin `empresa` y sin `Empresa_idEmpresa` devuelve 400.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AuthRegisterAuto" },
+              "examples": {
+                "auto_registro": {
+                  "value": {
+                    "nombreUsuario": "admin_nuevaempresa",
+                    "correo": "admin@nuevaempresa.com",
+                    "contrasenia": "clave123",
+                    "rol": "admin",
+                    "empresa": {
+                      "ruc": "98765432109",
+                      "nombreEmpresa": "Nueva Empresa SAC",
+                      "direccion": "Ica, Peru"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Usuario + empresa creados", "content": { "application/json": { "schema": { "type": "object", "properties": { "mensaje": { "type": "string" }, "usuario": { "$ref": "#/components/schemas/Usuario" } } } } } },
+          "400": { "description": "Validación (RUC duplicado, email duplicado, campos faltantes)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Error interno", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login",
+        "description": "Devuelve JWT firmado con `process.env.JWT_SECRET` y datos del usuario (incluye `empresaId` y `empresaNombre`).",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AuthLogin" },
+              "examples": {
+                "admin": { "value": { "correo": "admin@agrovina.com", "contrasenia": "admin123" } },
+                "monitor": { "value": { "correo": "operador1@agrovina.com", "contrasenia": "clave123" } },
+                "cliente": { "value": { "correo": "supervisor1@agrovina.com", "contrasenia": "clave123" } },
+                "ti": { "value": { "correo": "ti1@agrovina.com", "contrasenia": "ti123" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login exitoso", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthLoginResponse" } } } },
+          "401": { "description": "Credenciales inválidas", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/usuarios": {
+      "get": {
+        "tags": ["Usuario"],
+        "summary": "Listar usuarios",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Lista de usuarios", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Usuario" } } } } },
+          "401": { "description": "Token no proporcionado o inválido", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "post": {
+        "tags": ["Usuario"],
+        "summary": "Crear usuario",
+        "description": "Requiere rol admin o ti. Bcrypt hashea la contraseña antes de insertar.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UsuarioCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Usuario creado (sin hash en respuesta)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Usuario" } } } },
+          "400": { "description": "Email duplicado o campos faltantes", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "403": { "description": "Rol no autorizado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/usuarios/{id}": {
+      "get": {
+        "tags": ["Usuario"],
+        "summary": "Obtener usuario por id",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Usuario encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Usuario" } } } },
+          "404": { "description": "No encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "tags": ["Usuario"],
+        "summary": "Modificar usuario (con reset password opcional)",
+        "description": "Requiere rol admin o ti. Si se envía `contrasenia`, se resetea.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UsuarioUpdate" } } }
+        },
+        "responses": {
+          "200": { "description": "Usuario actualizado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Usuario" } } } },
+          "404": { "description": "No encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "delete": {
+        "tags": ["Usuario"],
+        "summary": "Eliminar usuario",
+        "description": "Requiere rol admin o ti.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Usuario eliminado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Usuario" } } } },
+          "404": { "description": "No encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/empresas": {
+      "get": {
+        "tags": ["Empresa"],
+        "summary": "Listar empresas",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Lista de empresas", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Empresa" } } } } }
+        }
+      },
+      "post": {
+        "tags": ["Empresa"],
+        "summary": "Crear empresa",
+        "description": "Requiere rol admin. Valida RUC de 11 dígitos numéricos y único, nombre de empresa único.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EmpresaCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Empresa creada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Empresa" } } } },
+          "400": { "description": "RUC duplicado / inválido / nombre duplicado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/empresas/{id}": {
+      "get": {
+        "tags": ["Empresa"],
+        "summary": "Obtener empresa por id",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Empresa encontrada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Empresa" } } } },
+          "404": { "description": "No encontrada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "tags": ["Empresa"],
+        "summary": "Modificar empresa",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EmpresaCreate" } } }
+        },
+        "responses": {
+          "200": { "description": "Empresa actualizada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Empresa" } } } },
+          "404": { "description": "No encontrada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "delete": {
+        "tags": ["Empresa"],
+        "summary": "Eliminar empresa",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Empresa eliminada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Empresa" } } } },
+          "404": { "description": "No encontrada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vinedos": {
+      "get": {
+        "tags": ["Vinedo"],
+        "summary": "Listar viñedos",
+        "description": "JOIN con Empresa para incluir `nombreempresa` y `empresa_idempresa`.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Lista de viñedos", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Vinedo" } } } } }
+        }
+      },
+      "post": {
+        "tags": ["Vinedo"],
+        "summary": "Crear viñedo",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VinedoCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Viñedo creado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Vinedo" } } } }
+        }
+      }
+    },
+    "/vinedos/{id}": {
+      "get": {
+        "tags": ["Vinedo"],
+        "summary": "Obtener viñedo por id",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Viñedo encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Vinedo" } } } },
+          "404": { "description": "No encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "tags": ["Vinedo"],
+        "summary": "Modificar viñedo",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VinedoCreate" } } }
+        },
+        "responses": {
+          "200": { "description": "Viñedo actualizado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Vinedo" } } } },
+          "404": { "description": "No encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "delete": {
+        "tags": ["Vinedo"],
+        "summary": "Eliminar viñedo",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Viñedo eliminado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Vinedo" } } } },
+          "404": { "description": "No encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/sensores": {
+      "get": {
+        "tags": ["Sensor"],
+        "summary": "Listar sensores",
+        "description": "JOIN con Vinedo para incluir `nombrevinedo` y `vinedo_idvinedo`.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Lista de sensores", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Sensor" } } } } }
+        }
+      },
+      "post": {
+        "tags": ["Sensor"],
+        "summary": "Crear sensor",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SensorCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Sensor creado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Sensor" } } } }
+        }
+      }
+    },
+    "/sensores/{id}": {
+      "get": {
+        "tags": ["Sensor"],
+        "summary": "Obtener sensor por id",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Sensor encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Sensor" } } } },
+          "404": { "description": "No encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "tags": ["Sensor"],
+        "summary": "Modificar sensor",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SensorCreate" } } }
+        },
+        "responses": {
+          "200": { "description": "Sensor actualizado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Sensor" } } } }
+        }
+      },
+      "delete": {
+        "tags": ["Sensor"],
+        "summary": "Eliminar sensor",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Sensor eliminado", "content": { "application/json": { "schema": { "type": "object", "properties": { "mensaje": { "type": "string" }, "sensor": { "$ref": "#/components/schemas/Sensor" } } } } } },
+          "404": { "description": "No encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/drones": {
+      "get": {
+        "tags": ["Dron"],
+        "summary": "Listar drones",
+        "description": "JOIN con Vinedo para incluir `nombrevinedo` y `vinedo_idvinedo`.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Lista de drones", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Dron" } } } } }
+        }
+      },
+      "post": {
+        "tags": ["Dron"],
+        "summary": "Crear dron",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DronCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Dron creado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Dron" } } } }
+        }
+      }
+    },
+    "/drones/{id}": {
+      "get": {
+        "tags": ["Dron"],
+        "summary": "Obtener dron por id",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Dron encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Dron" } } } },
+          "404": { "description": "No encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "tags": ["Dron"],
+        "summary": "Modificar dron",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DronCreate" } } }
+        },
+        "responses": {
+          "200": { "description": "Dron actualizado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Dron" } } } }
+        }
+      },
+      "delete": {
+        "tags": ["Dron"],
+        "summary": "Eliminar dron",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Dron eliminado", "content": { "application/json": { "schema": { "type": "object", "properties": { "mensaje": { "type": "string" }, "dron": { "$ref": "#/components/schemas/Dron" } } } } } },
+          "404": { "description": "No encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/umbrales": {
+      "get": {
+        "tags": ["Umbral"],
+        "summary": "Listar umbrales",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Lista de umbrales", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Umbral" } } } } }
+        }
+      },
+      "post": {
+        "tags": ["Umbral"],
+        "summary": "Crear umbral",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UmbralCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Umbral creado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Umbral" } } } }
+        }
+      }
+    },
+    "/umbrales/{id}": {
+      "get": {
+        "tags": ["Umbral"],
+        "summary": "Obtener umbral por id",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Umbral encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Umbral" } } } },
+          "404": { "description": "No encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "tags": ["Umbral"],
+        "summary": "Modificar umbral",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UmbralUpdate" } } }
+        },
+        "responses": {
+          "200": { "description": "Umbral actualizado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Umbral" } } } },
+          "404": { "description": "No encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "delete": {
+        "tags": ["Umbral"],
+        "summary": "Eliminar umbral",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Umbral eliminado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Umbral" } } } },
+          "404": { "description": "No encontrado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/lecturas": {
+      "get": {
+        "tags": ["LecturaSensor"],
+        "summary": "Listar lecturas",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Lista de lecturas", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/LecturaSensor" } } } } }
+        }
+      },
+      "post": {
+        "tags": ["LecturaSensor"],
+        "summary": "Crear lectura",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LecturaSensorCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Lectura creada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LecturaSensor" } } } }
+        }
+      }
+    },
+    "/lecturas/{id}": {
+      "get": {
+        "tags": ["LecturaSensor"],
+        "summary": "Obtener lectura por id",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Lectura encontrada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LecturaSensor" } } } },
+          "404": { "description": "No encontrada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/imagenes": {
+      "get": {
+        "tags": ["Imagen"],
+        "summary": "Listar imágenes",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Lista de imágenes", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Imagen" } } } } }
+        }
+      },
+      "post": {
+        "tags": ["Imagen"],
+        "summary": "Crear imagen",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ImagenCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Imagen creada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Imagen" } } } }
+        }
+      }
+    },
+    "/imagenes/{id}": {
+      "get": {
+        "tags": ["Imagen"],
+        "summary": "Obtener imagen por id",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Imagen encontrada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Imagen" } } } },
+          "404": { "description": "No encontrada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/detecciones": {
+      "get": {
+        "tags": ["DeteccionEnfermedad"],
+        "summary": "Listar detecciones",
+        "description": "JOIN con TipoEnfermedad + Imagen; devuelve `nombreenfermedad` y `rutaarchivo` resueltos.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Lista de detecciones", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/DeteccionEnfermedad" } } } } }
+        }
+      },
+      "post": {
+        "tags": ["DeteccionEnfermedad"],
+        "summary": "Crear detección",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DeteccionCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Detección creada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DeteccionEnfermedad" } } } }
+        }
+      }
+    },
+    "/detecciones/{id}": {
+      "get": {
+        "tags": ["DeteccionEnfermedad"],
+        "summary": "Obtener detección por id",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Detección encontrada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DeteccionEnfermedad" } } } },
+          "404": { "description": "No encontrada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/alertas": {
+      "get": {
+        "tags": ["Alerta"],
+        "summary": "Listar alertas",
+        "description": "JOIN con EstadoAlerta, TipoAlerta, Vinedo y Empresa. Devuelve `estado`, `tipo`, `vinedo_idvinedo` y `nombreempresa` resueltos.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Lista de alertas", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Alerta" } } } } }
+        }
+      },
+      "post": {
+        "tags": ["Alerta"],
+        "summary": "Crear alerta",
+        "description": "Requiere rol admin.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AlertaCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Alerta creada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Alerta" } } } }
+        }
+      }
+    },
+    "/alertas/{id}": {
+      "get": {
+        "tags": ["Alerta"],
+        "summary": "Obtener alerta por id",
+        "description": "JOIN con EstadoAlerta, TipoAlerta y datos de fecha/hora.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Alerta encontrada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Alerta" } } } },
+          "404": { "description": "No encontrada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/alertas/{id}/estado": {
+      "put": {
+        "tags": ["Alerta"],
+        "summary": "Cambiar estado de alerta",
+        "description": "Requiere rol admin o monitor. Acepta dos formatos:\n- `{\"estado\": \"En Proceso\"}` — string lookup en tabla EstadoAlerta (recomendado).\n- `{\"estadoalerta_idestado\": 2}` — ID directo (legacy).",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  { "$ref": "#/components/schemas/AlertaEstadoPorNombre" },
+                  { "$ref": "#/components/schemas/AlertaEstadoPorId" }
+                ]
+              },
+              "examples": {
+                "por_nombre": { "value": { "estado": "En Proceso" } },
+                "por_id_legacy": { "value": { "estadoalerta_idestado": 3 } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Estado actualizado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Alerta" } } } },
+          "400": { "description": "Estado de alerta desconocido (string no encontrado)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Alerta no encontrada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/notificaciones": {
+      "get": {
+        "tags": ["Notificacion"],
+        "summary": "Listar notificaciones",
+        "description": "JOIN con Usuario y Alerta.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Lista de notificaciones", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Notificacion" } } } } }
+        }
+      },
+      "post": {
+        "tags": ["Notificacion"],
+        "summary": "Crear notificación",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NotificacionCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Notificación creada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Notificacion" } } } }
+        }
+      }
+    },
+    "/notificaciones/{id}": {
+      "get": {
+        "tags": ["Notificacion"],
+        "summary": "Obtener notificación por id",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Notificación encontrada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Notificacion" } } } },
+          "404": { "description": "No encontrada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/system/status": {
+      "get": {
+        "tags": ["Sistema"],
+        "summary": "Estado del sistema",
+        "description": "Requiere rol admin o ti. Devuelve estado de conexión a DB + flags `set`/`unset` de variables de entorno. **No expone valores de secretos.**",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Estado del sistema", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SystemStatus" } } } }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": ["Sistema"],
+        "summary": "Prueba de conectividad",
+        "description": "Endpoint público de salud sin autenticación.",
+        "security": [],
+        "responses": {
+          "200": { "description": "Servidor en línea", "content": { "text/html": { "schema": { "type": "string", "example": "Servidor funcionando" } } } }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,920 @@
+{
+  "info": {
+    "_postman_id": "e1cc775b-4d3a-428b-9638-8da3fd86034b",
+    "name": "Agrodroid",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "56158517",
+    "_collection_link": "https://go.postman.co/collection/56158517-e1cc775b-4d3a-428b-9638-8da3fd86034b?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Registro (auto-registro público: crea empresa + admin)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreUsuario\": \"admin_nuevaempresa\",\n  \"correo\": \"admin@nuevaempresa.com\",\n  \"contrasenia\": \"clave123\",\n  \"rol\": \"admin\",\n  \"empresa\": {\n    \"ruc\": \"98765432109\",\n    \"nombreEmpresa\": \"Nueva Empresa SAC\",\n    \"direccion\": \"Ica, Peru\"\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/auth/register",
+              "host": ["{{URL_Local}}"],
+              "path": ["auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registro (usuario adicional a empresa existente — admin logueado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreUsuario\": \"UsuarioPrueba\",\n  \"correo\": \"usuarioprueba@gmail.com\",\n  \"contrasenia\": \"123456\",\n  \"rol\": \"monitor\",\n  \"Empresa_idEmpresa\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/auth/register",
+              "host": ["{{URL_Local}}"],
+              "path": ["auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login (admin)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"admin@agrovina.com\",\n  \"contrasenia\": \"admin123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/auth/login",
+              "host": ["{{URL_Local}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login (monitor)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"operador1@agrovina.com\",\n  \"contrasenia\": \"clave123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/auth/login",
+              "host": ["{{URL_Local}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login (cliente)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"supervisor1@agrovina.com\",\n  \"contrasenia\": \"clave123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/auth/login",
+              "host": ["{{URL_Local}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login (ti)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"ti1@agrovina.com\",\n  \"contrasenia\": \"ti123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/auth/login",
+              "host": ["{{URL_Local}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Usuario",
+      "item": [
+        {
+          "name": "Obtener usuarios",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/usuarios",
+              "host": ["{{URL_Local}}"],
+              "path": ["usuarios"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener usuario por id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/usuarios/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["usuarios", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear usuario (admin/ti)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreUsuario\": \"nuevo_monitor\",\n  \"correo\": \"nuevo@agrovina.com\",\n  \"contrasenia\": \"clave123\",\n  \"rol\": \"monitor\",\n  \"Empresa_idEmpresa\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/usuarios",
+              "host": ["{{URL_Local}}"],
+              "path": ["usuarios"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modificar usuario (admin/ti) — con reset password opcional",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreUsuario\": \"admin_actualizado\",\n  \"correo\": \"admin@agrovina.com\",\n  \"rol\": \"admin\",\n  \"Empresa_idEmpresa\": 1,\n  \"contrasenia\": \"nuevaclave\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/usuarios/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["usuarios", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar usuario (admin/ti)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/usuarios/5",
+              "host": ["{{URL_Local}}"],
+              "path": ["usuarios", "5"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Empresa",
+      "item": [
+        {
+          "name": "Obtener empresas",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/empresas",
+              "host": ["{{URL_Local}}"],
+              "path": ["empresas"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener empresa por id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/empresas/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["empresas", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear empresa (admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ruc\": \"12345678924\",\n  \"nombreEmpresa\": \"Viñedos del Sur EIRL\",\n  \"direccion\": \"Pisco, Peru\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/empresas",
+              "host": ["{{URL_Local}}"],
+              "path": ["empresas"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modificar empresa (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ruc\": \"20123456789\",\n  \"nombreEmpresa\": \"AgroVina SAC Actualizada\",\n  \"direccion\": \"Ica, Peru\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/empresas/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["empresas", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar empresa (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/empresas/2",
+              "host": ["{{URL_Local}}"],
+              "path": ["empresas", "2"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Vinedo",
+      "item": [
+        {
+          "name": "Obtener viñedos",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/vinedos",
+              "host": ["{{URL_Local}}"],
+              "path": ["vinedos"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener viñedo por id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/vinedos/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["vinedos", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear viñedo (admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreVinedo\": \"Vinedo Nuevo\",\n  \"ubicacion\": \"Ica\",\n  \"area_hectareas\": 120.5,\n  \"Empresa_idEmpresa\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/vinedos",
+              "host": ["{{URL_Local}}"],
+              "path": ["vinedos"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modificar viñedo (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreVinedo\": \"Vinedo Actualizado\",\n  \"ubicacion\": \"Ica\",\n  \"area_hectareas\": 150,\n  \"Empresa_idEmpresa\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/vinedos/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["vinedos", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar viñedo (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/vinedos/4",
+              "host": ["{{URL_Local}}"],
+              "path": ["vinedos", "4"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sensor",
+      "item": [
+        {
+          "name": "Obtener sensores",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/sensores",
+              "host": ["{{URL_Local}}"],
+              "path": ["sensores"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener sensor por id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/sensores/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["sensores", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear sensor (admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreSensor\": \"HS_Nuevo_1\",\n  \"longitud\": -71.9800000,\n  \"latitud\": -13.5300000,\n  \"Vinedo_idVinedo\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/sensores",
+              "host": ["{{URL_Local}}"],
+              "path": ["sensores"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modificar sensor (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreSensor\": \"HS_Actualizado\",\n  \"longitud\": -71.9810000,\n  \"latitud\": -13.5310000,\n  \"Vinedo_idVinedo\": 2\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/sensores/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["sensores", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar sensor (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/sensores/13",
+              "host": ["{{URL_Local}}"],
+              "path": ["sensores", "13"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dron",
+      "item": [
+        {
+          "name": "Obtener drones",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/drones",
+              "host": ["{{URL_Local}}"],
+              "path": ["drones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener dron por id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/drones/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["drones", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear dron (admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreDron\": \"W_Nuevo_1\",\n  \"Vinedo_idVinedo\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/drones",
+              "host": ["{{URL_Local}}"],
+              "path": ["drones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modificar dron (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreDron\": \"W_Actualizado\",\n  \"Vinedo_idVinedo\": 2\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/drones/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["drones", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar dron (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/drones/13",
+              "host": ["{{URL_Local}}"],
+              "path": ["drones", "13"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Umbral",
+      "item": [
+        {
+          "name": "Obtener umbrales",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/umbrales",
+              "host": ["{{URL_Local}}"],
+              "path": ["umbrales"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener umbral por id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/umbrales/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["umbrales", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear umbral (admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valorMinimo\": 18,\n  \"valorMaximo\": 30,\n  \"descripcion\": \"Temperatura ideal\",\n  \"Sensor_idSensor\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/umbrales",
+              "host": ["{{URL_Local}}"],
+              "path": ["umbrales"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modificar umbral (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valorMinimo\": 16,\n  \"valorMaximo\": 32,\n  \"descripcion\": \"Temperatura ideal actualizada\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/umbrales/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["umbrales", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar umbral (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/umbrales/13",
+              "host": ["{{URL_Local}}"],
+              "path": ["umbrales", "13"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "LecturaSensor",
+      "item": [
+        {
+          "name": "Obtener lecturas",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/lecturas",
+              "host": ["{{URL_Local}}"],
+              "path": ["lecturas"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener lectura por id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/lecturas/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["lecturas", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear lectura (admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valor\": 29.7,\n  \"fechaLectura\": \"2026-06-25\",\n  \"horaLectura\": \"14:30:00\",\n  \"Sensor_idSensor\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/lecturas",
+              "host": ["{{URL_Local}}"],
+              "path": ["lecturas"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Imagen",
+      "item": [
+        {
+          "name": "Obtener imágenes",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/imagenes",
+              "host": ["{{URL_Local}}"],
+              "path": ["imagenes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener imagen por id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/imagenes/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["imagenes", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear imagen (admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fechaCaptura\": \"2026-06-25\",\n  \"horaCaptura\": \"10:30:00\",\n  \"tamanoArchivo\": 4000,\n  \"rutaArchivo\": \"/imagenes/test.jpg\",\n  \"ancho\": 1920,\n  \"alto\": 1080,\n  \"latitud\": -13.5200000,\n  \"longitud\": -71.9700000,\n  \"Dron_idDron\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/imagenes",
+              "host": ["{{URL_Local}}"],
+              "path": ["imagenes"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "DeteccionEnfermedad",
+      "item": [
+        {
+          "name": "Obtener detecciones (con JOIN a tipoenfermedad + imagen)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/detecciones",
+              "host": ["{{URL_Local}}"],
+              "path": ["detecciones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener detección por id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/detecciones/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["detecciones", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear detección (admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nivelConfianza\": 95.8,\n  \"descripcion\": \"Posible presencia de Oidio\",\n  \"fechaDeteccion\": \"2026-06-25\",\n  \"Imagen_idImagen\": 1,\n  \"TipoEnfermedad_idEnfermedad\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/detecciones",
+              "host": ["{{URL_Local}}"],
+              "path": ["detecciones"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Alerta",
+      "item": [
+        {
+          "name": "Obtener alertas (con JOIN vinedo+empresa)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/alertas",
+              "host": ["{{URL_Local}}"],
+              "path": ["alertas"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener alerta por id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/alertas/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["alertas", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear alerta (admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fecha\": \"2026-06-25\",\n  \"hora\": \"10:30:00\",\n  \"descripcion\": \"Alerta por sensor fuera de rango\",\n  \"Vinedo_idVinedo\": 1,\n  \"DeteccionEnfermedad_idDeteccion\": null,\n  \"LecturaSensor_idLectura\": 2,\n  \"EstadoAlerta_idEstado\": 1,\n  \"TipoAlerta_idTipo\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/alertas",
+              "host": ["{{URL_Local}}"],
+              "path": ["alertas"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cambiar estado de alerta (admin/monitor) — por nombre",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"En Proceso\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/alertas/1/estado",
+              "host": ["{{URL_Local}}"],
+              "path": ["alertas", "1", "estado"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cambiar estado de alerta (admin/monitor) — por id numérico (legacy)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estadoalerta_idestado\": 3\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/alertas/1/estado",
+              "host": ["{{URL_Local}}"],
+              "path": ["alertas", "1", "estado"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notificación",
+      "item": [
+        {
+          "name": "Obtener notificaciones",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/notificaciones",
+              "host": ["{{URL_Local}}"],
+              "path": ["notificaciones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener notificación por id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/notificaciones/1",
+              "host": ["{{URL_Local}}"],
+              "path": ["notificaciones", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear notificación (admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mensaje\": \"Alerta de prueba\",\n  \"fechaEnvio\": \"2026-06-25\",\n  \"horaEnvio\": \"10:30:00\",\n  \"Usuario_idUsuario\": 1,\n  \"Alerta_idAlerta\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{URL_Local}}/notificaciones",
+              "host": ["{{URL_Local}}"],
+              "path": ["notificaciones"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sistema (TI)",
+      "item": [
+        {
+          "name": "Estado del sistema (admin/ti)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }],
+            "url": {
+              "raw": "{{URL_Local}}/system/status",
+              "host": ["{{URL_Local}}"],
+              "path": ["system", "status"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Prueba_conectividad",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": [""]
+        }
+      },
+      "response": []
+    }
+  ]
+}

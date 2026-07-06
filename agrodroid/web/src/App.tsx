@@ -286,7 +286,7 @@ export default function App() {
               }
             />
 
-            <Route path="drones" element={<DronesView drones={dronesDelVinedo} vinedos={vinedos} />} />
+            <Route path="drones" element={<DronesView drones={dronesDelVinedo} />} />
 
             <Route path="enfermedades" element={<DiseaseDetectionView detecciones={detecciones} />} />
 

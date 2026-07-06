@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import type { Notificacion, Usuario } from "../types/models";
 import "../styles/Usuario/theme.css";
 import "../styles/Usuario/Navbar.css";
@@ -28,7 +27,6 @@ export default function AdminNavbar({
   onVerPerfil,
   onCerrarSesion,
 }: AdminNavbarProps) {
-  const navigate = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [vistaMenu, setVistaMenu] = useState<"acciones" | "perfil">("acciones");
   const [notifAbierta, setNotifAbierta] = useState(false);

@@ -33,7 +33,6 @@ export default function Navbar({
   vinedoActivoId,
   onCambiarVinedo,
   notificaciones,
-  backendOnline,
   onAbrirNotificaciones,
   onToggleSidebar,
   onMarcarLeida,

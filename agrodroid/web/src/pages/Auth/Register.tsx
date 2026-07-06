@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "../../styles/Auth/Register.css";
 import { Link } from "react-router-dom";
+import { api } from "../../services/api";
 
 interface EmpresaForm {
   ruc: string;
@@ -12,7 +13,6 @@ interface UsuarioForm {
   nombreUsuario: string;
   correo: string;
   contrasenia: string;
-  rol: string;
 }
 
 const Register: React.FC = () => {
@@ -26,7 +26,6 @@ const Register: React.FC = () => {
     nombreUsuario: "",
     correo: "",
     contrasenia: "",
-    rol: "Administrador",
   });
 
   const handleEmpresaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,63 +41,30 @@ const Register: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    // 1. Crear empresa
-    const empresaResponse = await fetch("http://localhost:3000/empresas", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ruc: empresa.ruc,
-        nombreEmpresa: empresa.nombreEmpresa,
-        direccion: empresa.direccion,
-      }),
-    });
+    try {
+      // Una sola llamada pública /auth/register crea empresa + admin
+      // atómicamente (backend valida RUC y email únicos).
+      const data = (await api.post("/auth/register", {
+        nombreUsuario: usuario.nombreUsuario,
+        correo: usuario.correo,
+        contrasenia: usuario.contrasenia,
+        rol: "admin",
+        empresa: {
+          ruc: empresa.ruc,
+          nombreEmpresa: empresa.nombreEmpresa,
+          direccion: empresa.direccion,
+        },
+      })) as any;
 
-    const empresaData = await empresaResponse.json();
-
-    if (!empresaResponse.ok) {
-      alert(empresaData.mensaje);
-      return;
+      alert(data.mensaje || "Registro exitoso");
+      window.location.href = "/login";
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "Error de conexión");
     }
-
-    // 🔥 IMPORTANTE: backend devuelve idempresa (minúscula)
-    const idEmpresa = empresaData.idempresa;
-
-    // 2. Crear usuario
-    const usuarioResponse = await fetch(
-      "http://localhost:3000/auth/register",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombreUsuario: usuario.nombreUsuario,
-          correo: usuario.correo,
-          contrasenia: usuario.contrasenia,
-          rol: "Administrador",
-
-          // 🔥 ESTE ES EL NOMBRE QUE TU BACKEND ESPERA
-          Empresa_idEmpresa: idEmpresa,
-        }),
-      }
-    );
-
-    const usuarioData = await usuarioResponse.json();
-
-    if (!usuarioResponse.ok) {
-      alert(usuarioData.mensaje);
-      return;
-    }
-
-    alert("Registro exitoso");
-    window.location.href = "/login";
-
-  } catch (error) {
-    console.error(error);
-    alert("Error de conexión");
-  }
-};
+  };
 
   return (
     <div className="wrapper">
@@ -119,8 +85,11 @@ const Register: React.FC = () => {
                 type="text"
                 className="input-field"
                 placeholder="12345678913"
+                maxLength={11}
+                inputMode="numeric"
                 value={empresa.ruc}
                 onChange={handleEmpresaChange}
+                required
               />
             </div>
 
@@ -213,5 +182,6 @@ const Register: React.FC = () => {
     </div>
   );
 };
+
 
 export default Register;

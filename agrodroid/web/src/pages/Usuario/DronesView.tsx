@@ -1,11 +1,10 @@
 import { useState } from "react";
 import DataReadout from "../../components/DataReadOut";
-import type { Dron, Vinedo } from "../../types/models";
+import type { Dron } from "../../types/models";
 import "../../styles/Usuario/DronesView.css";
 
 export interface DronesViewProps {
   drones: Dron[];
-  vinedos: Vinedo[];
 }
 
 /**
@@ -14,7 +13,7 @@ export interface DronesViewProps {
  * (ver gap 2 en models.ts), así que esta vista solo muestra lo que el
  * backend realmente entrega hoy: nombre, viñedo y sus imágenes.
  */
-export default function DronesView({ drones, vinedos }: DronesViewProps) {
+export default function DronesView({ drones }: DronesViewProps) {
   const [dronSeleccionadoId, setDronSeleccionadoId] = useState<string | null>(drones[0]?.id ?? null);
   const dronSeleccionado = drones.find((d) => d.id === dronSeleccionadoId) ?? null;
 

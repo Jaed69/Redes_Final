@@ -10,8 +10,52 @@ const register = async (data) => {
         correo,
         contrasenia,
         rol,
-        Empresa_idEmpresa
+        Empresa_idEmpresa,
+        empresa
     } = data;
+
+    if (!nombreUsuario || !correo || !contrasenia) {
+        throw new Error("nombreUsuario, correo y contrasenia son obligatorios.");
+    }
+
+    let idEmpresaFinal = Empresa_idEmpresa;
+
+    // Flujo de auto-registro: si viene `empresa` anidado, se crea la empresa
+    // atómicamente y su admin asociado en una sola llamada pública a
+    // /auth/register (evita exponer POST /empresas sin auth).
+    if (empresa && (!idEmpresaFinal || idEmpresaFinal === "")) {
+        const { ruc, nombreEmpresa, direccion } = empresa;
+        if (!ruc || !nombreEmpresa || !direccion) {
+            throw new Error("empresa exige ruc, nombreEmpresa y direccion.");
+        }
+        if (ruc.length !== 11 || !/^\d+$/.test(ruc)) {
+            throw new Error("El RUC debe tener 11 dígitos numéricos.");
+        }
+        const existeRuc = await pool.query("SELECT 1 FROM empresa WHERE ruc = $1", [ruc]);
+        if (existeRuc.rows.length > 0) {
+            throw new Error("Ya existe una empresa registrada con ese RUC.");
+        }
+        const existeNombre = await pool.query(
+            "SELECT 1 FROM empresa WHERE nombreempresa = $1",
+            [nombreEmpresa]
+        );
+        if (existeNombre.rows.length > 0) {
+            throw new Error("Ya existe una empresa con ese nombre.");
+        }
+        const insertada = await pool.query(
+            `INSERT INTO empresa (ruc, nombreempresa, direccion)
+             VALUES ($1, $2, $3) RETURNING idempresa`,
+            [ruc, nombreEmpresa, direccion]
+        );
+        idEmpresaFinal = insertada.rows[0].idempresa;
+    }
+
+    if (!idEmpresaFinal) {
+        throw new Error("Falta Empresa_idEmpresa o datos de empresa para crearla.");
+    }
+
+    const rolFinal = rol || "admin";
+
         const existe = await pool.query(
         "SELECT * FROM usuario WHERE correo = $1",
         [correo]
@@ -41,8 +85,8 @@ const register = async (data) => {
         nombreUsuario,
         correo,
         passwordHash,
-        rol,
-        Empresa_idEmpresa
+        rolFinal,
+        idEmpresaFinal
     ]);       
     return result.rows[0];
 };

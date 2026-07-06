@@ -15,7 +15,14 @@ const register = async (req, res) => {
 
         console.error(error);
 
-        res.status(500).json({
+        const status = error.message && (
+            error.message.includes("obligatorios") ||
+            error.message.includes("RUC") ||
+            error.message.includes("Ya existe") ||
+            error.message.includes("Falta")
+        ) ? 400 : 500;
+
+        res.status(status).json({
             mensaje: error.message
         });
     }

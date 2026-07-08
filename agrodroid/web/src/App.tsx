@@ -51,7 +51,7 @@ export default function App() {
     empresaId?: string;
     empresaNombre?: string;
   };
-  const empresa = { id: usuario.empresaId ?? "", nombre: usuario.empresaNombre ?? "" } as Empresa;
+  const empresa = { id: String(usuario.empresaId ?? ""), nombre: usuario.empresaNombre ?? "" } as Empresa;
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("token"));
   const [backendOnline] = useState(true);
 
@@ -66,7 +66,7 @@ export default function App() {
   const [vinedoActivoId, setVinedoActivoId] = useState<string | null>(null);
   const [sensorSeleccionadoId, setSensorSeleccionadoId] = useState<string | null>(null);
 
-  const [rango, setRango] = useState({ inicio: "2026-06-01", fin: "2026-07-03" });
+  const [rango, setRango] = useState({ inicio: "2026-06-01", fin: "2026-07-31" });
 
   // Sincroniza token con localStorage (login/logout en esta o otra pestaña)
   useEffect(() => {

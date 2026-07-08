@@ -397,7 +397,7 @@ VALUES
 (79.20, 'Botrytis en racimos maduros', '2026-06-18', 11, 3),
 (95.10, 'Mildiu esporulado en envés', '2026-06-19', 9, 2);
 
--- LECTURAS DE SENSORES (series temporales 14 dias, 2 lecturas/dia)
+-- LECTURAS DE SENSORES (series temporales 60 dias, 3 lecturas/dia, desde junio)
 INSERT INTO LecturaSensor (valor, fechaLectura, horaLectura, Sensor_idSensor)
 SELECT
   CASE
@@ -406,62 +406,78 @@ SELECT
     ELSE
       (38 + (random() * 35))::numeric(10,2)
   END,
-  (DATE '2026-06-20' + dia)::date,
+  (DATE '2026-06-01' + dia)::date,
   hora,
   s.idsensor
 FROM Sensor s
-CROSS JOIN generate_series(0, 13) AS dia
-CROSS JOIN (VALUES (TIME '08:00:00'), (TIME '14:00:00')) AS t(hora);
+CROSS JOIN generate_series(0, 59) AS dia
+CROSS JOIN (VALUES (TIME '07:00:00'), (TIME '12:00:00'), (TIME '18:00:00')) AS t(hora);
 
--- ALERTAS (15 distribuidas, estados y tipos varios)
+-- ALERTAS (24 distribuidas en 6 vinedos, estados y fechas variadas jun-jul)
 INSERT INTO Alerta
 (fecha, hora, descripcion, Vinedo_idVinedo,
  DeteccionEnfermedad_idDeteccion, LecturaSensor_idLectura,
  EstadoAlerta_idEstado, TipoAlerta_idTipo)
 VALUES
--- vinedo 1 (Pendiente + Resuelta)
-('2026-06-15', '09:30:00', 'Mildiu con alta confianza en hojas de vid', 1, 1, NULL, 1, 2),
-('2026-06-18', '08:10:00', 'Humedad fuera del rango establecido', 1, NULL, NULL, 3, 1),
-('2026-06-21', '11:00:00', 'Oidio esporulado detectado', 1, 8, NULL, 3, 2),
--- vinedo 2 (En Proceso + Pendiente)
-('2026-06-16', '09:05:00', 'Manchas de Botrytis en racimos', 2, 3, NULL, 2, 2),
-('2026-06-20', '08:45:00', 'Temperatura sobre umbral Critico', 2, NULL, NULL, 1, 1),
--- vinedo 3 (Resuelta + Pendiente)
-('2026-06-17', '08:50:00', 'Antracnosis en hojas jovenes', 3, 4, NULL, 3, 2),
-('2026-06-19', '07:30:00', 'Humedad bajo limite inferior', 3, NULL, NULL, 1, 1),
--- vinedo 4 (Pendiente + En Proceso)
-('2026-06-14', '09:35:00', 'Yesca marcada en tronco', 4, 5, NULL, 1, 2),
-('2026-06-18', '10:00:00', 'Temperatura elevada sostenidad', 4, NULL, NULL, 2, 1),
--- vinedo 5 (Resuelta + Pendiente + En Proceso)
-('2026-06-15', '09:20:00', 'Podredumbre acida inicial', 5, 7, NULL, 3, 2),
+-- vinedo 1 (jun)
+('2026-06-05', '09:30:00', 'Mildiu con alta confianza en hojas de vid', 1, 1, NULL, 1, 2),
+('2026-06-12', '08:10:00', 'Humedad fuera del rango establecido', 1, NULL, NULL, 3, 1),
+('2026-06-18', '11:00:00', 'Oidio esporulado detectado', 1, 8, NULL, 3, 2),
+('2026-06-25', '07:20:00', 'Temperatura bajo umbral critico', 1, NULL, NULL, 2, 1),
+-- vinedo 2 (jun-jul)
+('2026-06-08', '09:05:00', 'Manchas de Botrytis en racimos', 2, 3, NULL, 3, 2),
+('2026-06-15', '08:45:00', 'Temperatura sobre umbral critico', 2, NULL, NULL, 2, 1),
+('2026-06-22', '08:50:00', 'Mildiu avanzado en sector Sur', 2, 6, NULL, 1, 2),
+('2026-07-04', '07:30:00', 'Humedad bajo limite inferior', 2, NULL, NULL, 2, 1),
+-- vinedo 3 (jun-jul)
+('2026-06-10', '08:50:00', 'Antracnosis en hojas jovenes', 3, 4, NULL, 3, 2),
+('2026-06-20', '07:30:00', 'Humedad bajo limite inferior', 3, NULL, NULL, 1, 1),
+('2026-06-28', '09:00:00', 'Oidio en brotes nuevos', 3, NULL, NULL, 1, 2),
+('2026-07-10', '10:15:00', 'Botrytis en frutos maduros', 3, 9, NULL, 2, 2),
+-- vinedo 4 (jun-jul)
+('2026-06-03', '09:35:00', 'Yesca marcada en tronco', 4, 5, NULL, 2, 2),
+('2026-06-14', '10:00:00', 'Temperatura elevada sostenida', 4, NULL, NULL, 3, 1),
+('2026-06-26', '11:20:00', 'Podredumbre acida detectada', 4, 7, NULL, 1, 2),
+('2026-07-08', '08:40:00', 'Humedad excesiva post riego', 4, NULL, NULL, 2, 1),
+-- vinedo 5 (jun-jul)
+('2026-06-07', '09:20:00', 'Mildiu esporulado en hojas', 5, 10, NULL, 3, 2),
 ('2026-06-19', '11:10:00', 'Humedad excesiva post riego', 5, NULL, NULL, 1, 1),
-('2026-06-22', '08:30:00', 'Mildiu en sector Norte', 5, 10, NULL, 2, 2),
--- vinedo 6 (En Proceso + Resuelta)
-('2026-06-16', '08:55:00', 'Oidio esporulado', 6, 6, NULL, 2, 2),
-('2026-06-19', '11:05:00', 'Botrytis en racimos maduros', 6, 9, NULL, 3, 2),
-('2026-06-21', '09:15:00', 'Sensor humedad con ruido alto', 6, NULL, NULL, 1, 1);
+('2026-06-29', '08:30:00', 'Sensor temperatura ruido alto', 5, NULL, NULL, 2, 1),
+('2026-07-15', '09:45:00', 'Mildiu en sector Norte', 5, NULL, NULL, 1, 2),
+-- vinedo 6 (jun-jul)
+('2026-06-01', '08:55:00', 'Oidio esporulado en hojas', 6, NULL, NULL, 1, 2),
+('2026-06-16', '11:05:00', 'Botrytis en racimos maduros', 6, NULL, NULL, 3, 2),
+('2026-07-02', '09:15:00', 'Sensor humedad con ruido alto', 6, NULL, NULL, 2, 1),
+('2026-07-20', '08:20:00', 'Antracnosis en sector Este', 6, NULL, NULL, 1, 2);
 
--- NOTIFICACIONES (para usuarios de ambas empresas)
+-- NOTIFICACIONES (para usuarios de ambas empresas, fechas variadas jun-jul)
 INSERT INTO Notificacion
 (mensaje, fechaEnvio, horaEnvio, Usuario_idUsuario, Alerta_idAlerta)
 VALUES
--- empresa 1
-('Mildiu detectado en Vinedo Santa Rosa', '2026-06-15', '09:31:00', 1, 1),
-('Humedad fuera de rango en Vinedo Santa Rosa', '2026-06-18', '08:06:00', 1, 2),
-('Oidio resuelto en Vinedo Santa Rosa', '2026-06-21', '11:05:00', 1, 3),
-('Botrytis en Vinedo San Jose', '2026-06-16', '09:10:00', 2, 4),
-('Temperatura critica en Vinedo San Jose', '2026-06-20', '08:50:00', 2, 5),
-('Antracnosis ya resuelta en Vinedo La Esperanza', '2026-06-17', '09:00:00', 2, 6),
-('Humedad baja en Vinedo La Esperanza', '2026-06-19', '07:35:00', 2, 7),
-('Nueva alerta de Mildiu para operador', '2026-06-15', '09:32:00', 3, 1),
-('Confirmacion de Oidio resuelto', '2026-06-21', '11:10:00', 3, 3),
-('Reporte de Botrytis para revision', '2026-06-16', '09:12:00', 3, 4),
--- empresa 2
-('Yesca marcada en Vinedo El Pedregal', '2026-06-14', '09:40:00', 9, 8),
-('Temperatura sostenida en Vinedo El Pedregal', '2026-06-18', '10:05:00', 9, 9),
-('Podredumbre resuelta en Vinedo Majes', '2026-06-15', '09:25:00', 9, 10),
-('Humedad excesiva en Vinedo Majes', '2026-06-19', '11:15:00', 9, 11),
-('Nuevo Mildiu en Vinedo Majes', '2026-06-22', '08:35:00', 9, 12),
-('Oidio en revision en Vinedo Vitor', '2026-06-16', '09:00:00', 9, 13),
-('Botrytis resuelto en Vinedo Vitor', '2026-06-19', '11:10:00', 9, 14),
-('Ruido alta en sensor Vinedo Vitor', '2026-06-21', '09:20:00', 9, 15);
+-- junio (empresa 1: usuarios 1-4,7,8 admin/cliente/monitor/ti)
+('Alerta: Mildiu detectado en Vinedo Santa Rosa', '2026-06-05', '09:31:00', 1, 1),
+('Alerta: Humedad fuera de rango en Santa Rosa', '2026-06-12', '08:06:00', 1, 2),
+('Alerta: Oidio resuelto en Santa Rosa', '2026-06-18', '11:05:00', 1, 3),
+('Alerta: Temp bajo umbral Santa Rosa', '2026-06-25', '07:25:00', 1, 4),
+('Alerta: Botrytis en Vinedo San Jose', '2026-06-08', '09:10:00', 2, 5),
+('Alerta: Temperatura critica San Jose', '2026-06-15', '08:50:00', 2, 6),
+('Alerta: Mildiu avanzado San Jose', '2026-06-22', '08:55:00', 2, 7),
+('Alerta: Antracnosis resuelta La Esperanza', '2026-06-10', '09:00:00', 2, 9),
+('Alerta: Humedad baja La Esperanza', '2026-06-20', '07:35:00', 3, 10),
+('Alerta: Oidio en brotes La Esperanza', '2026-06-28', '09:05:00', 3, 11),
+-- junio (empresa 2: usuarios 9-12)
+('Alerta: Yesca en Vinedo El Pedregal', '2026-06-03', '09:40:00', 9, 13),
+('Alerta: Temp elevada El Pedregal', '2026-06-14', '10:05:00', 9, 14),
+('Alerta: Podredumbre El Pedregal', '2026-06-26', '11:25:00', 9, 15),
+('Alerta: Mildiu esporulado Majes', '2026-06-07', '09:25:00', 9, 17),
+('Alerta: Humedad excesiva Majes', '2026-06-19', '11:15:00', 9, 18),
+('Alerta: Sensor ruido alto Majes', '2026-06-29', '08:35:00', 9, 19),
+('Alerta: Oidio Vinedo Vitor', '2026-06-01', '09:00:00', 10, 21),
+('Alerta: Botrytis resuelto Vitor', '2026-06-16', '11:10:00', 10, 22),
+-- julio (ambas empresas)
+('Alerta: Humedad San Jose bajo limite', '2026-07-04', '07:35:00', 2, 8),
+('Alerta: Botrytis frutos La Esperanza', '2026-07-10', '10:20:00', 2, 12),
+('Alerta: Humedad excesiva El Pedregal', '2026-07-08', '08:45:00', 9, 16),
+('Alerta: Mildiu sector Norte Majes', '2026-07-15', '09:50:00', 9, 20),
+('Alerta: Ruido sensor humedad Vitor', '2026-07-02', '09:20:00', 9, 23),
+('Alerta: Antracnosis sector Este Vitor', '2026-07-20', '08:25:00', 9, 24);

@@ -1,7 +1,22 @@
+import {
+  Bar,
+  BarChart,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import StatCard from "../../components/StatCard";
 import DataReadout from "../../components/DataReadOut";
 import type { Alerta, DeteccionEnfermedad, Sensor, Vinedo } from "../../types/models";
 import "../../styles/Usuario/theme.css";
+import "../../styles/Shared/ClienteTi.css";
+
+const COLORS = ["var(--critical)", "var(--warning)", "var(--success)", "var(--accent-violet)", "var(--accent-water)"];
 
 export interface DashboardViewProps {
   vinedos: Vinedo[];
@@ -25,6 +40,18 @@ export default function DashboardView({
   const sensoresCriticos = sensores.filter((s) => s.estado === "critico").length;
   const deteccionesRecientes = detecciones.slice(0, 5);
   const resumen = alertas.slice(0, 6);
+  const estadosUnicos = Array.from(new Set(alertas.map((a) => a.estado)));
+  const dataAlertasPorEstado = estadosUnicos.map((e, i) => ({
+    estado: e,
+    cantidad: alertas.filter((a) => a.estado === e).length,
+    fill: COLORS[i % COLORS.length],
+  }));
+  const tiposUnicos = Array.from(new Set(alertas.map((a) => a.tipo)));
+  const dataTipos = tiposUnicos.map((t, i) => ({
+    name: t,
+    value: alertas.filter((a) => a.tipo === t).length,
+    fill: COLORS[(i + 2) % COLORS.length],
+  }));
 
   return (
     <div className="dashboard-view">
@@ -123,6 +150,56 @@ export default function DashboardView({
           </div>
         </section>
       )}
+
+      <section className="roled-grid">
+        <div className="roled-panel">
+          <div className="roled-panel__title">
+            <span>Alertas por estado</span>
+            <span className="eyebrow">{alertas.length} alertas</span>
+          </div>
+          <div className="roled-chart">
+            {estadosUnicos.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={dataAlertasPorEstado} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                  <XAxis dataKey="estado" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+                  <YAxis allowDecimals stroke="var(--text-muted)" fontSize={11} tickLine={false} width={28} />
+                  <Tooltip contentStyle={{ background: "var(--surface)", border: "1px solid var(--border-soft)", borderRadius: 8, fontSize: 12 }} cursor={{ fill: "rgba(0,0,0,0.04)" }} />
+                  <Bar dataKey="cantidad" radius={[4, 4, 0, 0]}>
+                    {dataAlertasPorEstado.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="roled-empty">Sin alertas registradas.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="roled-panel">
+          <div className="roled-panel__title">
+            <span>Distribución por tipo de alerta</span>
+          </div>
+          <div className="roled-chart">
+            {dataTipos.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={dataTipos} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={85} label>
+                    {dataTipos.map((d, i) => (
+                      <Cell key={i} fill={d.fill} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ background: "var(--surface)", border: "1px solid var(--border-soft)", borderRadius: 8, fontSize: 12 }} />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="roled-empty">Sin datos.</p>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

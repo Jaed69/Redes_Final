@@ -2,7 +2,10 @@ const vinedoService = require("../services/vinedo.service");
 
 const listarVinedos = async (req, res) => {
     try {
-        const data = await vinedoService.obtenerVinedos();
+        // Scope por empresa: monitor/cliente ven solo su empresa; admin/ti ven todo
+        const rol = req.usuario.rol;
+        const empresaId = (rol === "monitor" || rol === "cliente") ? req.usuario.empresaId : undefined;
+        const data = await vinedoService.obtenerVinedos(empresaId);
         res.json(data);
     } catch (error) {
         res.status(500).json({ mensaje: "Error obteniendo viñedos" });

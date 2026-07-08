@@ -1,7 +1,13 @@
 const pool = require("../config/db");
 
-// GET todos
-const obtenerDetecciones = async () => {
+// GET todos — empresaId opcional para scope por empresa (monitor/cliente)
+const obtenerDetecciones = async (empresaId) => {
+    const params = [];
+    let where = "";
+    if (empresaId) {
+        params.push(empresaId);
+        where = ` WHERE v.empresa_idempresa = $${params.length} `;
+    }
     const result = await pool.query(`
         SELECT
             d.iddeteccion,
@@ -17,7 +23,12 @@ const obtenerDetecciones = async () => {
             ON d.tipoenfermedad_idenfermedad = te.idenfermedad
         LEFT JOIN imagen im
             ON d.imagen_idimagen = im.idimagen
-    `);
+        LEFT JOIN dron dr
+            ON im.dron_iddron = dr.iddron
+        LEFT JOIN vinedo v
+            ON dr.vinedo_idvinedo = v.idvinedo
+        ${where}
+    `, params);
     return result.rows;
 };
 

@@ -39,7 +39,13 @@ const crearAlerta = async (data) => {
     return result.rows[0];
 };
 
-const obtenerAlertas = async () => {
+const obtenerAlertas = async (empresaId) => {
+    const params = [];
+    let where = "";
+    if (empresaId) {
+        params.push(empresaId);
+        where = ` WHERE e.idempresa = $${params.length} `;
+    }
     const result = await pool.query(`
         SELECT
             a.idalerta,
@@ -57,8 +63,9 @@ const obtenerAlertas = async () => {
             ON a.vinedo_idvinedo = v.idvinedo
         JOIN empresa e
             ON v.empresa_idempresa = e.idempresa
+        ${where}
         ORDER BY a.idalerta
-    `);
+    `, params);
 
     return result.rows;
 };

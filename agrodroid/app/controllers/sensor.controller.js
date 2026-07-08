@@ -3,8 +3,11 @@ const sensorService = require("../services/sensor.service");
 const listarSensores = async (req, res) => {
     try {
 
+        const rol = req.usuario.rol;
+        const empresaId = (rol === "monitor" || rol === "cliente") ? req.usuario.empresaId : undefined;
+
         const sensores =
-            await sensorService.obtenerSensores();
+            await sensorService.obtenerSensores(empresaId);
 
         res.status(200).json(sensores);
 

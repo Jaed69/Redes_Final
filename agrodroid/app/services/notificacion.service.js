@@ -1,9 +1,15 @@
 const pool = require("../config/db");
 
-// GET ALL
-const obtenerNotificaciones = async () => {
+// GET ALL — empresaId opcional para scope por empresa (monitor/cliente)
+const obtenerNotificaciones = async (empresaId) => {
+    const params = [];
+    let where = "";
+    if (empresaId) {
+        params.push(empresaId);
+        where = ` WHERE u.empresa_idempresa = $${params.length} `;
+    }
     const result = await pool.query(`
-        SELECT 
+        SELECT
             n.idnotificacion,
             n.mensaje,
             n.fechaenvio,
@@ -13,8 +19,9 @@ const obtenerNotificaciones = async () => {
         FROM notificacion n
         JOIN usuario u ON n.usuario_idusuario = u.idusuario
         JOIN alerta a ON n.alerta_idalerta = a.idalerta
+        ${where}
         ORDER BY n.idnotificacion DESC
-    `);
+    `, params);
 
     return result.rows;
 };

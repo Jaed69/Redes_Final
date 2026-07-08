@@ -130,12 +130,13 @@ const login = async (data) => {
         throw new Error("Correo o contraseña incorrectos");
     }
 
-    // Generar token
+    // Generar token — incluye empresaId para scope por empresa en servicios
     const token = jwt.sign(
         {
             id: usuario.idusuario,
             correo: usuario.correo,
-            rol: usuario.rol
+            rol: usuario.rol,
+            empresaId: usuario.empresa_idempresa
         },
         SECRET_KEY,
         {

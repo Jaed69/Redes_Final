@@ -1,7 +1,14 @@
 const service = require("../services/lectura.service");
 
 const listar = async (req, res) => {
-    res.json(await service.obtenerLecturas());
+    try {
+        const rol = req.usuario.rol;
+        const empresaId = (rol === "monitor" || rol === "cliente") ? req.usuario.empresaId : undefined;
+        res.json(await service.obtenerLecturas(empresaId));
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: "Error obteniendo lecturas" });
+    }
 };
 
 const obtener = async (req, res) => {

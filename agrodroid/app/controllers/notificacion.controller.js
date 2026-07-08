@@ -3,7 +3,9 @@ const notificacionService = require("../services/notificacion.service");
 // GET /
 const listarNotificaciones = async (req, res) => {
     try {
-        const data = await notificacionService.obtenerNotificaciones();
+        const rol = req.usuario.rol;
+        const empresaId = (rol === "monitor" || rol === "cliente") ? req.usuario.empresaId : undefined;
+        const data = await notificacionService.obtenerNotificaciones(empresaId);
         res.json(data);
     } catch (error) {
         console.error(error);

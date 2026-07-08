@@ -126,9 +126,6 @@ export default function App() {
   useEffect(() => {
     if (!token) return;
     api.get("/drones").then(async (d: any) => {
-      const vinedoIdPorNombre = new Map<string, string>();
-      vinedos.forEach((v) => vinedoIdPorNombre.set(v.nombre, v.id));
-
       let imagenes: any[] = [];
       try {
         imagenes = (await api.get("/imagenes")) as any[];
@@ -158,7 +155,7 @@ export default function App() {
       }));
       setDrones(dronesMapped);
     });
-  }, [vinedos, token]);
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;

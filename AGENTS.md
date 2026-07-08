@@ -69,7 +69,15 @@ Frontend: `VITE_API_URL` opcional (default `http://localhost:3000`), respeta `se
 
 4 roles: `admin`, `monitor`, `cliente`, `ti`. Backend: `verificarToken` en toda ruta protegida, `requireRole(...)` en cada mutación. Frontend: `RequireRole` guard bloquea cross-role por URL.
 
-Creds dev sembradas en `db/init.sql` (bcrypt), todas empresa id 1 (AgroVina SAC). Documentadas en README. Para probar aislamiento entre empresas: crear segunda empresa desde Admin.
+Creds dev sembradas en `db/init.sql` (bcrypt). 2 empresas:
+- **AgroVina SAC** (id 1): `admin@agrovina.com`/`admin123`, `operador1@agrovina.com`/`clave123`, `supervisor1@agrovina.com`/`clave123`, `ti1@agrovina.com`/`ti123`
+- **Viñas del Sur SAC** (id 2): `admin@vinasdelsur.com`/`admin123`, `monitor@vinasdelsur.com`/`clave123`, `cliente@vinasdelsur.com`/`clave123`, `ti@vinasdelsur.com`/`ti123`
+
+Backend filtra por `empresaId` (extraída del JWT) para monitor/cliente. Admin/ti ven todo. Aislamiento entre empresas verificado. Polling 30s en App.tsx para lecturas/alertas/notificaciones.
+
+## Docker
+
+Healthcheck postgres (`pg_isready`) + `depends_on: condition: service_healthy` en el servicio `app`. Los 3 servicios tienen `restart: unless-stopped`. Hot reload vía volumes (`./web/src` y `./app:/app`).
 
 ## GSD & .claude/CLAUDE.md
 

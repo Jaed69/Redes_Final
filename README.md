@@ -12,11 +12,11 @@ Proyecto final del curso **Redes y Protocolos de Comunicación (UPC)**. El repo 
 
 | Fase | Estado | Entrega |
 |------|--------|---------|
-| 1 — Seguridad, Roles y Base de API Compartida | ✓ | JWT unificado, 4 roles sembrados, `requireRole` en todas las mutaciones, `.env` fuera de git, cliente HTTP centralizado, enrutado por rol |
-| 2 — Panel Admin Datos Reales | ✓ | 6 vistas CRUD (Empresa, Viñedo, Sensor, Dron, Umbral, Usuario) contra API real; `mockData.ts` eliminado; dashboard con KPIs en vivo |
-| 3 — Monitor de Campo | ✓ | Drones + lecturas + detecciones cargadas reales; trend chart (`Recharts`) poblado; selector de estado de alerta (Pendiente/En Proceso/Resuelta) |
-| 4 — Cliente/Productor | ✓ | Layout propio, dashboard/alertas/reportes de solo lectura filtrados por `empresaId` |
-| 5 — TI | ✓ | Layout propio (`/ti`), CRUD de cuentas de usuario, `GET /system/status` (DB + env flags, sin secretos) |
+| 1 — Seguridad, Roles y Base de API Compartida | ✓ | JWT unificado (`process.env.JWT_SECRET`), 4 roles sembrados, `requireRole` en todas las mutaciones, `.env` fuera de git, cliente HTTP centralizado, enrutado por rol |
+| 2 — Panel Admin Datos Reales | ✓ | 6 vistas CRUD contra API real; `mockData.ts` eliminado; dashboard con KPIs + 3 gráficos Recharts (alertas por viñedo apiladas, distribución por estado, usuarios por rol) |
+| 3 — Monitor de Campo | ✓ | Drones + lecturas + detecciones cargadas reales; mapa Leaflet; trend chart Recharts; **polling 30s** para lecturas/alertas/notifs (cumple MONITOR-01 literal); selector de estado de alerta |
+| 4 — Cliente/Productor | ✓ | Layout propio, dashboard/alertas/reportes de solo lectura filtrados por `empresaId` (servidor + cliente, defensa en profundidad) |
+| 5 — TI | ✓ | Layout propio (`/ti`), CRUD de cuentas de usuario, dashboard con KPIs + salud de servicios DB/API/Web + donut env flags + gráficos (usuarios por rol/empresa) + tabla control de zonas por empresa; `GET /system/status` |
 
 **Verificación:** `bash agrodroid/scripts/verify-walking-skeleton.sh` → 10/10 checks PASS, `WALKING SKELETON VERIFIED`.
 
@@ -76,9 +76,9 @@ Sin framework de tests (MVP). Sin CI/CD. Sin despliegue cloud (el informe TB1 ju
 | Rol | Ruta | Lo que puede |
 |-----|------|--------------|
 | `admin` | `/admin` | CRUD completo sobre Empresa, Viñedo, Sensor, Dron, Umbral, Usuario. Dashboard con KPIs en vivo. |
-| `monitor` | `/dashboard` | Ver sensores/drones/lecturas/detecciones de sus viñedos; mapa (Leaflet); trend chart; **cambiar estado de alertas** (Pendiente/En Proceso/Resuelta). |
-| `cliente` | `/cliente` | Solo lectura filtrada por `empresaId`: **dashboard con gráficos** (LineChart de tendencia de lecturas + BarChart de alertas por viñedo + panel de notificaciones recientes), **alertas y notificaciones** (tabs, sin mutación), **reportes comparativos** (BarChart activas vs resueltas + PieChart de distribución de estados + ranking). |
-| `ti` | `/ti` (dashboard), `/ti/cuentas`, `/ti/sistema` | Dashboard TI con KPIs (usuarios, empresas, DB ok, env faltantes) + últimos usuarios + estado de sistema de un vistazo; CRUD de cuentas (alta/baja/reset password); estado detallado de DB y variables de entorno. |
+| `monitor` | `/dashboard` | Ver sensores/drones/lecturas/detecciones de sus viñedos; mapa (Leaflet); trend chart; **cambiar estado de alertas** (Pendiente/En Proceso/Resuelta). Datos refrescados cada 30s (polling). |
+| `cliente` | `/cliente` | Solo lectura filtrada por `empresaId` (backend + frontend): **dashboard con gráficos** (LineChart de tendencia de lecturas + BarChart de alertas por viñedo + panel de notificaciones recientes + BarChart/PieChart de estados), **alertas y notificaciones** (tabs, sin mutación), **reportes comparativos** (BarChart activas vs resueltas + PieChart de distribución de estados + ranking). |
+| `ti` | `/ti` (dashboard), `/ti/cuentas`, `/ti/sistema` | Dashboard TI con KPIs, **salud de servicios** DB/API/Web (operativo/caído), **donut de variables de entorno**, **gráficos** (BarChart usuarios por rol + PieChart por empresa), **tabla control de zonas** (recursos por empresa con totales); CRUD de cuentas; estado detallado de DB y variables de entorno. |
 
 **Autorización backend:** `verificarToken` en toda ruta protegida; `requireRole(...)` en cada mutación (POST/PUT/DELETE). Frontend Además tiene `RequireRole` guard que bloquea cross‑role por URL.
 
@@ -118,14 +118,28 @@ docker compose up -d --build
 
 ## Credenciales sembradas (`db/init.sql`)
 
+### Empresa 1 — AgroVina SAC
+
 | Correo | Contraseña | Rol | Ruta |
 |--------|-----------|------|------|
 | `admin@agrovina.com` | `admin123` | admin | `/admin` |
 | `operador1@agrovina.com` | `clave123` | monitor | `/dashboard` |
+| `operador2@agrovina.com` | `clave123` | monitor | `/dashboard` |
 | `supervisor1@agrovina.com` | `clave123` | cliente | `/cliente` |
+| `supervisor2@agrovina.com` | `clave123` | cliente | `/cliente` |
 | `ti1@agrovina.com` | `ti123` | ti | `/ti/cuentas` |
+| `ti2@agrovina.com` | `ti123` | ti | `/ti/cuentas` |
 
-Todas las empresas sembradas pertenecen a **AgroVina SAC** ( заходid `1`), por lo que los 4 roles ven el mismo set de viñedos. Para probar aislamiento entre empresas, crear una segunda empresa desde Admin y un usuario asociado.
+### Empresa 2 — Viñas del Sur SAC
+
+| Correo | Contraseña | Rol | Ruta |
+|--------|-----------|------|------|
+| `admin@vinasdelsur.com` | `admin123` | admin | `/admin` |
+| `monitor@vinasdelsur.com` | `clave123` | monitor | `/dashboard` |
+| `cliente@vinasdelsur.com` | `clave123` | cliente | `/cliente` |
+| `ti@vinasdelsur.com` | `ti123` | ti | `/ti/cuentas` |
+
+**Aislamiento entre empresas verificado:** cada usuario solo ve los viñedos/sensores/drones/lecturas/alertas de su empresa. El backend filtra por `empresaId` extraído del JWT para los roles `monitor` y `cliente`; `admin` y `ti` ven todo sin filtro.
 
 > **Aviso:** son credenciales de desarrollo. Los hashes bcrypt viven en `db/init.sql`; los plaintexts están documentados solo para facilitar la verificación manual.
 
@@ -195,7 +209,7 @@ Redes_Final/
 | ADMIN-01 | Vistas Admin contra API real | ✓ |
 | ADMIN-02 | `services/api.ts` cliente HTTP centralizado | ✓ |
 | ADMIN-03 | CRUD Umbral funcional | ✓ |
-| MONITOR-01 | Monitor en (casi) tiempo real | ✓ (refresco on mount, no polling) |
+| MONITOR-01 | Monitor en tiempo real | ✓ (polling 30s lecturas/alertas/notifs) |
 | MONITOR-02 | Cambio de estado de alerta | ✓ |
 | STATS-01 | Tendencia por sensor + rango fechas | ✓ |
 | CLIENTE-01 | Vista solo lectura filtrada por empresa | ✓ |
@@ -214,7 +228,7 @@ Redes_Final/
 - **Integración real con Vertex AI / visión computacional** — las detecciones vienen de datos sembrados; no hay pipeline de inferencia.
 - **Ingesta real desde drones DJI Mavic 3** — las imágenes son rutas estáticas sembradas.
 - **Despliegue en Google Cloud** (Vertex AI, BigQuery, Pub/Sub, Looker Studio) — el informe TB1 lo justifica teóricamente; el MVP corre local en Docker.
-- **Multi‑tenancy fino por viñedo** (`Usuario_Vinedo`) — el Cliente ve todos los viñedos de su empresa; el filtrado es por `Empresa_idEmpresa` en frontend (post‑login). Back-end no filtra por empresa todavía (deferred v2).
+- **Multi‑tenancy fino por viñedo** (`Usuario_Vinedo`) — el Cliente ve todos los viñedos de su empresa; el filtrado es por empresa (back-end y front-end).
 - **Tests automatizados** — el script `verify-walking-skeleton.sh` es la prueba end‑to‑end; no hay suite unit/integration.
 - **Paginación en endpoints de listado** — no es bloqueante con el volumen de datos sembrados.
 - **Refresh token / logout server‑side** — el logout limpia `localStorage` en frontend.
@@ -227,14 +241,12 @@ Redes_Final/
 - **`mockData.ts` eliminado** — 0 importaciones tras el refactor.
 - **`/system/status` no expone secretos** — solo flags `set`/`unset` + `db: ok/error`.
 - **`actualizarEstadoAlerta`** acepta `estado` string (lookup en `EstadoAlerta`) o `estadoalerta_idestado` numérico (retrocompat).
-- **Login devuelve `empresaId` + `empresaNombre`** en `usuario` — Cliente/Monitor filtran por empresa en frontend.
-- **Detecciones JOIN a TipoEnfermedad + Imagen** ahora devuelven `nombreenfermedad` + `rutaarchivo`.
-- **Cliente TI usan shell + design system de DESIGN.md** (Mintlify: Inter, mint accent #00d4a4, pill buttons, hairline cards 12px, elevation 1). Tokens inyectados en `theme.css`; componentes en `styles/Shared/ClienteTi.css`.
-- **Cliente Dashboard con gráficos Recharts:** LineChart tendencia de lecturas, BarChart alertas por viñedo (activas vs resueltas), panel de notificaciones recientes. Fltrado real por `empresaId`.
-- **Cliente Alertas:** tabs (Alertas + Notificaciones), sin selector de estado (cliente no muta).
-- **Cliente Reportes:** BarChart comparativo + PieChart de distribución de estados + tabla ranking.
-- **TI Dashboard (`/ti` index):** KPIs (usuarios, empresas, DB ok/fail, env 6/6), últimos 5 usuarios, estado de sistema de un vistazo + accesos rápidos.
-- **Docker Compose** monta `./web/src` y `./app:/app` (con `node_modules` anónimo) para dev en caliente.
+- **Login devuelve `empresaId` + `empresaNombre`** en `usuario` — Cliente/Monitor filtran por empresa en frontend. **El backend también filtra:** los services reciben `empresaId` del JWT y aplican `WHERE` clause para monitor/cliente.
+- **Aislamiento entre empresas:** segunda empresa (`Viñas del Sur SAC`) sembrada con 3 viñedos, 12 sensores, 12 drones y sus propios usuarios. Verificado en runtime: cliente de Viñas del Sur ve solo sus recursos.
+- **Seed ampliado:** 2 empresas, 6 viñedos, 12 usuarios, 24 sensores/drones/umbrales, 672 lecturas (`generate_series` 14 días), 15 alertas balanceadas (5/5/5), 18 notificaciones.
+- **Polling 30s:** `App.tsx` refresca lecturas, alertas y notificaciones cada 30 segundos (MONITOR-01 cumple literal "casi real").
+- **Gráficos en todos los dashboards:** AdminDashboard (BarChart alertas por viñedo + PieChart estados + BarChart usuarios por rol), TiDashboard (RadialBar env flags + BarChart usuarios por rol + PieChart por empresa + salud servicios + tabla zonas), DashboardView monitor (BarChart + PieChart alertas), ClienteDashboard (LineChart + BarChart + notificaciones), ClienteReportes (BarChart comparativo + PieChart + ranking).
+- **Docker Compose** monta `./web/src` y `./app:/app` (con `node_modules` anónimo) para dev en caliente. Healthcheck postgres (`pg_isready`) + `depends_on: condition: service_healthy` + `restart: unless-stopped` en los 3 servicios.
 
 ---
 
@@ -265,4 +277,4 @@ Proyecto académico — curso Redes y Protocolos de Comunicación, UPC. Uso educ
 
 ---
 
-*Última actualización: 2026-07-05 — MVP funcional cerrado.*
+*Última actualización: 2026-07-08 — MVP completo, 19/19 requisitos verificados.*

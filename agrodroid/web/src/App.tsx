@@ -108,7 +108,7 @@ export default function App() {
     );
   }, [token]);
 
-  useEffect(() => {
+  const cargarLecturas = () => {
     if (!token) return;
     api.get("/lecturas").then((d: any) =>
       setLecturas(
@@ -121,6 +121,10 @@ export default function App() {
         }))
       )
     );
+  };
+
+  useEffect(() => {
+    cargarLecturas();
   }, [token]);
 
   useEffect(() => {
@@ -174,7 +178,7 @@ export default function App() {
     );
   }, [token]);
 
-  useEffect(() => {
+  const cargarAlertas = () => {
     if (!token) return;
     api.get("/alertas").then((d: any) =>
       setAlertas(
@@ -188,9 +192,13 @@ export default function App() {
         }))
       )
     );
-  }, [token]);
+  };
 
   useEffect(() => {
+    cargarAlertas();
+  }, [token]);
+
+  const cargarNotifs = () => {
     if (!token) return;
     api.get("/notificaciones").then((d: any) =>
       setNotifs(
@@ -205,6 +213,21 @@ export default function App() {
         }))
       )
     );
+  };
+
+  useEffect(() => {
+    cargarNotifs();
+  }, [token]);
+
+  // MONITOR-01: polling "casi real" cada 30s refresca lecturas, alertas y notificaciones
+  useEffect(() => {
+    if (!token) return;
+    const id = setInterval(() => {
+      cargarLecturas();
+      cargarAlertas();
+      cargarNotifs();
+    }, 30000);
+    return () => clearInterval(id);
   }, [token]);
 
   const sensoresDelVinedo = useMemo(

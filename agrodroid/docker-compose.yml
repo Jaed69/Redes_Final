@@ -22,9 +22,9 @@ services:
     container_name: agrodroid-api
     ports:
       - "3000:3000"
-    volumes:
-      - ./app:/app
-      - /app/node_modules
+#    volumes:
+#      - ./app:/app
+#      - /app/node_modules
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}

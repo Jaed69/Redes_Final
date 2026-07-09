@@ -22,29 +22,29 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Panel Admin (ADMIN)
 
-- [ ] **ADMIN-01**: Las vistas Admin (Empresa, Viñedo, Sensor, Dron, Umbral, Usuario) leen y escriben contra la API real, no `mockData.ts`
+- [x] **ADMIN-01**: Las vistas Admin (Empresa, Viñedo, Sensor, Dron, Umbral, Usuario) leen y escriben contra la API real, no `mockData.ts`
 - [x] **ADMIN-02**: `services/api.ts` implementa un cliente HTTP centralizado (base URL desde variable de entorno, no hardcodeada) usado por Admin y por las vistas existentes de Usuario
-- [ ] **ADMIN-03**: CRUD de Umbral (mín/máx por sensor) funcional desde la UI Admin contra la tabla `Umbral` existente
+- [x] **ADMIN-03**: CRUD de Umbral (mín/máx por sensor) funcional desde la UI Admin contra la tabla `Umbral` existente
 
 ### Vista Cliente/Productor (CLIENTE)
 
-- [ ] **CLIENTE-01**: Vista de solo lectura: dashboard, alertas y reportes de todos los viñedos de su empresa (filtrado por `Empresa_idEmpresa`)
-- [ ] **CLIENTE-02**: Sin acceso a acciones de creación/edición/eliminación en ninguna entidad
+- [x] **CLIENTE-01**: Vista de solo lectura: dashboard, alertas y reportes de todos los viñedos de su empresa (filtrado por `Empresa_idEmpresa`)
+- [x] **CLIENTE-02**: Sin acceso a acciones de creación/edición/eliminación en ninguna entidad
 
 ### Vista Operador/Monitor de campo (MONITOR)
 
-- [ ] **MONITOR-01**: Ve sensores, drones y lecturas de sensor en tiempo (casi) real para los viñedos de su empresa
-- [ ] **MONITOR-02**: Puede cambiar el estado de una alerta entre Pendiente/En Proceso/Resuelta
+- [x] **MONITOR-01**: Ve sensores, drones y lecturas de sensor en tiempo (casi) real para los viñedos de su empresa
+- [x] **MONITOR-02**: Puede cambiar el estado de una alerta entre Pendiente/En Proceso/Resuelta
 
 ### Vista TI/Admin de servidores (TI)
 
-- [ ] **TI-01**: Gestión de cuentas de usuario (alta/baja/reset básico) separada del panel de administración de negocio
-- [ ] **TI-02**: Vista de configuración de sistema (al menos: estado de conexión a base de datos, variables de entorno activas sin exponer secretos)
+- [x] **TI-01**: Gestión de cuentas de usuario (alta/baja/reset básico) separada del panel de administración de negocio
+- [x] **TI-02**: Vista de configuración de sistema (al menos: estado de conexión a base de datos, variables de entorno activas sin exponer secretos)
 
 ### Monitoreo y Gráficos (STATS)
 
-- [ ] **STATS-01**: Gráfico de tendencia de lecturas de sensor por viñedo/rango de fechas (extiende el uso actual de Recharts)
-- [ ] **STATS-02**: Vista de comparación entre viñedos (alertas totales o lecturas fuera de umbral, por viñedo)
+- [x] **STATS-01**: Gráfico de tendencia de lecturas de sensor por viñedo/rango de fechas (extiende el uso actual de Recharts)
+- [x] **STATS-02**: Vista de comparación entre viñedos (alertas totales o lecturas fuera de umbral, por viñedo)
 
 ### Infraestructura (INFRA)
 
@@ -89,23 +89,39 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-03 | Phase 1 | Complete |
 | ADMIN-02 | Phase 1 | Complete |
 | INFRA-01 | Phase 1 | Complete |
-| ADMIN-01 | Phase 2 | Pending |
-| ADMIN-03 | Phase 2 | Pending |
-| MONITOR-01 | Phase 3 | Pending |
-| MONITOR-02 | Phase 3 | Pending |
-| STATS-01 | Phase 3 | Pending |
-| CLIENTE-01 | Phase 4 | Pending |
-| CLIENTE-02 | Phase 4 | Pending |
-| STATS-02 | Phase 4 | Pending |
-| TI-01 | Phase 5 | Pending |
-| TI-02 | Phase 5 | Pending |
+| ADMIN-01 | Phase 2 | Complete |
+| ADMIN-03 | Phase 2 | Complete |
+| MONITOR-01 | Phase 3 | Complete |
+| MONITOR-02 | Phase 3 | Complete |
+| STATS-01 | Phase 3 | Complete |
+| CLIENTE-01 | Phase 4 | Complete |
+| CLIENTE-02 | Phase 4 | Complete |
+| STATS-02 | Phase 4 | Complete |
+| TI-01 | Phase 5 | Complete |
+| TI-02 | Phase 5 | Complete |
 
 **Coverage:**
 
 - v1 requirements: 19 total
+- Completed: 19/19 ✓
 - Mapped to phases: 19/19 ✓
 - Unmapped: 0
 
+## Verification evidence
+
+All 19 requirements verified in runtime (2026-07-08):
+
+| Group | Verification method |
+|-------|-------------------|
+| SEC-01..04 | `verify-walking-skeleton.sh` steps 4-5: 401/403; `process.env.JWT_SECRET` via grep |
+| AUTH-01..03 | init.sql seed (4 roles bcrypt), Login.tsx switch, RequireRole guard, backend filter by `empresaId` in JWT |
+| ADMIN-01..03 | 35 `api.get/post` calls in Admin/, 0 `mockData`; UmbralView CRUD complete |
+| CLIENTE-01..02 | Cliente tsx filter by `empresaId`; 0 api mutations in Cliente/ |
+| MONITOR-01..02 | App.tsx polling 30s lecturas/alertas/notifs; verify step 8: 200 |
+| STATS-01..02 | SensorReadingsView LineChart + rango; ClienteReportes BarChart + PieChart + ranking |
+| TI-01..02 | TiCuentas GET/PUT/POST/DEL; GET /system/status db=ok + 6 env flags |
+| INFRA-01 | docker compose up 3 services; step 2: app responds at :3000 |
 ---
+
 *Requirements defined: 2026-07-05*
-*Last updated: 2026-07-05 after roadmap creation*
+*Last updated: 2026-07-08 — 19/19 verified, all phases complete*

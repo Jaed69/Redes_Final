@@ -1,15 +1,19 @@
 import { useMemo, useState } from "react";
 import DataReadout from "../../components/DataReadOut";
-import type { DeteccionEnfermedad } from "../../types/models";
+import DiseaseImagePlaceholder from "../../components/DiseaseImagePlaceholder";
+import DeteccionModal from "../../components/DeteccionModal";
+import type { Alerta, DeteccionEnfermedad, Dron } from "../../types/models";
 import "../../styles/Usuario/theme.css";
 
 export interface DiseaseDetectionViewProps {
   detecciones: DeteccionEnfermedad[];
+  alertas?: Alerta[];
+  drones?: Dron[];
 }
 
-/** Vista 5 — resultados de análisis de imágenes por IA, filtrable por enfermedad. */
-export default function DiseaseDetectionView({ detecciones }: DiseaseDetectionViewProps) {
+export default function DiseaseDetectionView({ detecciones, alertas = [], drones = [] }: DiseaseDetectionViewProps) {
   const [filtro, setFiltro] = useState<string>("todas");
+  const [seleccionada, setSeleccionada] = useState<DeteccionEnfermedad | null>(null);
 
   const enfermedades = useMemo(
     () => Array.from(new Set(detecciones.map((d) => d.enfermedad))).sort(),
@@ -18,6 +22,17 @@ export default function DiseaseDetectionView({ detecciones }: DiseaseDetectionVi
 
   const filtradas =
     filtro === "todas" ? detecciones : detecciones.filter((d) => d.enfermedad === filtro);
+
+  const dronDeDeteccion = useMemo(() => {
+    const imagenADron = new Map<string, string>();
+    drones.forEach((dr) => dr.imagenes.forEach((im) => imagenADron.set(im.id, dr.nombre)));
+    return (d: DeteccionEnfermedad) => imagenADron.get(d.imagenId) ?? "—";
+  }, [drones]);
+
+  const alertaDeDeteccion = useMemo(() => {
+    return (d: DeteccionEnfermedad) =>
+      alertas.find((a) => a.tipo === "Enfermedad" && a.descripcion.includes(d.enfermedad.split(" ")[0]));
+  }, [alertas]);
 
   return (
     <div className="disease-view">
@@ -41,13 +56,18 @@ export default function DiseaseDetectionView({ detecciones }: DiseaseDetectionVi
 
       <section className="disease-view__grid">
         {filtradas.map((d) => (
-          <article key={d.id} className="disease-card">
+          <article
+            key={d.id}
+            className="disease-card"
+            style={{ cursor: "pointer" }}
+            onClick={() => setSeleccionada(d)}
+          >
             <div
               className="disease-card__img"
-              style={{ backgroundImage: `url(${d.imagenUrl})` }}
-              role="img"
-              aria-label={`Imagen analizada para ${d.enfermedad}`}
-            />
+              style={{ padding: 0, overflow: "hidden" }}
+            >
+              <DiseaseImagePlaceholder enfermedad={d.enfermedad} confianza={d.nivelConfianza} />
+            </div>
             <div className="disease-card__body">
               <span className="disease-card__nombre">{d.enfermedad}</span>
               <DataReadout label="Confianza" value={d.nivelConfianza.toFixed(1)} unit="%" tone="violet" />
@@ -58,11 +78,21 @@ export default function DiseaseDetectionView({ detecciones }: DiseaseDetectionVi
                 />
               </div>
               <span className="disease-card__fecha mono-cell">{d.fecha}</span>
+              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{dronDeDeteccion(d)}</span>
             </div>
           </article>
         ))}
         {filtradas.length === 0 && <p className="empty-hint">No hay detecciones para este filtro.</p>}
       </section>
+
+      {seleccionada && (
+        <DeteccionModal
+          deteccion={seleccionada}
+          dronNombre={dronDeDeteccion(seleccionada)}
+          alerta={alertaDeDeteccion(seleccionada)}
+          onClose={() => setSeleccionada(null)}
+        />
+      )}
     </div>
   );
 }

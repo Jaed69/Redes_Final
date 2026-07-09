@@ -14,7 +14,9 @@ const crearAlerta = async (req, res) => {
 
 const listarAlertas = async (req, res) => {
     try {
-        const alertas = await alertaService.obtenerAlertas();
+        const rol = req.usuario.rol;
+        const empresaId = (rol === "monitor" || rol === "cliente") ? req.usuario.empresaId : undefined;
+        const alertas = await alertaService.obtenerAlertas(empresaId);
         res.status(200).json(alertas);
     } catch (error) {
         console.error(error);

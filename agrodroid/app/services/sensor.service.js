@@ -1,6 +1,12 @@
 const pool = require("../config/db");
 
-const obtenerSensores = async () => {
+const obtenerSensores = async (empresaId) => {
+    const params = [];
+    let where = "";
+    if (empresaId) {
+        params.push(empresaId);
+        where = ` WHERE v.empresa_idempresa = $${params.length} `;
+    }
     const result = await pool.query(`
         SELECT
             s.idsensor,
@@ -12,8 +18,9 @@ const obtenerSensores = async () => {
         FROM sensor s
         JOIN vinedo v
             ON s.vinedo_idvinedo = v.idvinedo
+        ${where}
         ORDER BY s.idsensor
-    `);
+    `, params);
 
     return result.rows;
 };

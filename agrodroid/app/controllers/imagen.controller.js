@@ -2,10 +2,13 @@ const imagenService = require("../services/imagen.service");
 
 const listarImagenes = async (req, res) => {
     try {
-        const imagenes = await imagenService.obtenerImagenes(req.query);
+        const rol = req.usuario.rol;
+        const empresaId = (rol === "monitor" || rol === "cliente") ? req.usuario.empresaId : undefined;
+        const imagenes = await imagenService.obtenerImagenes({ ...req.query, empresaId });
         res.json(imagenes);
     } catch (error) {
-        res.status(500).json({ mensaje: "Error" });
+        console.error(error);
+        res.status(500).json({ mensaje: "Error obteniendo imágenes" });
     }
 };
 

@@ -1,9 +1,9 @@
 import {
-  CartesianGrid,
+  
   Line,
   LineChart,
   ResponsiveContainer,
-  Tooltip,
+
   XAxis,
   YAxis,
 } from "recharts";
@@ -18,6 +18,7 @@ export interface SensorReadingsViewProps {
   fechaFin: string;
   onCambiarRango: (fechaInicio: string, fechaFin: string) => void;
   lecturas: LecturaSensor[];
+  
 }
 
 /** Vista 3 — histórico de lecturas de un sensor: gráfico + tabla. */
@@ -29,12 +30,14 @@ export default function SensorReadingsView({
   fechaFin,
   onCambiarRango,
   lecturas,
-}: SensorReadingsViewProps) {
+}: SensorReadingsViewProps) {  
   const datosGrafico = lecturas.map((l) => ({
     etiqueta: l.hora,
     valor: l.valor,
   }));
-
+console.log(lecturas);
+console.log("LECTURAS:", lecturas);
+console.log("DATOS GRAFICO:", datosGrafico);
   return (
     <div className="readings-view">
       <header className="view-header">
@@ -91,50 +94,28 @@ export default function SensorReadingsView({
 
         <div className="readings-view__chart-area">
           {datosGrafico.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={datosGrafico}
-                margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid
-                  stroke="var(--border-soft)"
-                  vertical={false}
-                />
-
-                <XAxis
-                  dataKey="etiqueta"
-                  stroke="var(--text-muted)"
-                  fontSize={11}
-                  tickLine={false}
-                />
-
-                <YAxis
-                  stroke="var(--text-muted)"
-                  fontSize={11}
-                  tickLine={false}
-                  width={36}
-                />
-
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--surface-raised)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    fontSize: 12,
-                  }}
-                  labelStyle={{ color: "var(--text-secondary)" }}
-                />
-
-                <Line
-                  type="monotone"
-                  dataKey="valor"
-                  stroke="var(--accent-water)"
-                  strokeWidth={2}
-                  dot={{ r: 3, fill: "var(--accent-water)" }}
-                  activeDot={{ r: 5 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <ResponsiveContainer width="100%" height={300}>
+  <LineChart data={datosGrafico}>
+     <XAxis
+      dataKey="etiqueta"
+      label={{
+        value: "Hora",
+        position: "insideBottom",
+        offset: -5,
+      }}
+    />
+    <YAxis  label={{
+        value: "Humedad (%)",
+        angle: -90,
+        position: "insideLeft",
+      }} />
+    <Line 
+      type="monotone"
+      dataKey="valor"
+      stroke="blue"
+    />
+  </LineChart>
+</ResponsiveContainer>
           ) : (
             <p className="empty-hint">
               No hay lecturas para el rango seleccionado.

@@ -2,7 +2,9 @@ const dronService = require("../services/dron.service");
 
 const listarDrones = async (req, res) => {
     try {
-        const drones = await dronService.obtenerDrones();
+        const rol = req.usuario.rol;
+        const empresaId = (rol === "monitor" || rol === "cliente") ? req.usuario.empresaId : undefined;
+        const drones = await dronService.obtenerDrones(empresaId);
         res.status(200).json(drones);
     } catch (error) {
         console.error(error);

@@ -279,7 +279,8 @@ ALTER TABLE Vinedo ADD CONSTRAINT Vinedo_Empresa
 -- EMPRESA
 INSERT INTO Empresa (ruc, nombreEmpresa, direccion)
 VALUES
-('20123456789', 'AgroVina SAC', 'Ica, Peru');
+('20123456789', 'AgroVina SAC', 'Ica, Peru'),
+('20987654321', 'Vinas del Sur SAC', 'Arequipa, Peru');
 
 -- VINEDOS
 INSERT INTO Vinedo
@@ -287,151 +288,196 @@ INSERT INTO Vinedo
 VALUES
 ('Vinedo Santa Rosa', 'Ica', 120.50, 1),
 ('Vinedo San Jose', 'Pisco', 95.30, 1),
-('Vinedo La Esperanza', 'Nazca', 80.75, 1);
+('Vinedo La Esperanza', 'Nazca', 80.75, 1),
+('Vinedo El Pedregal', 'Arequipa', 150.20, 2),
+('Vinedo Majes', 'Caylloma', 110.40, 2),
+('Vinedo Vitor', 'Arequipa', 75.80, 2);
 
--- USUARIOS
+-- USUARIOS (creds: admin@*/admin123, resto/clave123)
 INSERT INTO Usuario (nombreUsuario, correo, contrasenia, rol, Empresa_idEmpresa)
 VALUES
 ('admin', 'admin@agrovina.com', '$2b$10$jhHbwEekykq1dkI13xXBr.p7uaXihsf05WOALGAl2BJf.TKYNaJNu', 'admin', 1),
 ('supervisor1', 'supervisor1@agrovina.com', '$2b$10$ySqy1qY3ywmGBxkH.mO8RuOzEsLosl3e358jC0QfTDqKUb2XtnptW', 'cliente', 1),
 ('operador1', 'operador1@agrovina.com', '$2b$10$ySqy1qY3ywmGBxkH.mO8RuOzEsLosl3e358jC0QfTDqKUb2XtnptW', 'monitor', 1),
-('ti1', 'ti1@agrovina.com', '$2b$10$K1Ek5km.ZiBfAuDlmKmzUObp1iFi1ms0m/.UFdbxBe/X1P46QgvGy', 'ti', 1);
+('ti1', 'ti1@agrovina.com', '$2b$10$K1Ek5km.ZiBfAuDlmKmzUObp1iFi1ms0m/.UFdbxBe/X1P46QgvGy', 'ti', 1),
+('operador2', 'operador2@agrovina.com', '$2b$10$ySqy1qY3ywmGBxkH.mO8RuOzEsLosl3e358jC0QfTDqKUb2XtnptW', 'monitor', 1),
+('supervisor2', 'supervisor2@agrovina.com', '$2b$10$ySqy1qY3ywmGBxkH.mO8RuOzEsLosl3e358jC0QfTDqKUb2XtnptW', 'cliente', 1),
+('ti2', 'ti2@agrovina.com', '$2b$10$K1Ek5km.ZiBfAuDlmKmzUObp1iFi1ms0m/.UFdbxBe/X1P46QgvGy', 'ti', 1),
+('admin2', 'admin@vinasdelsur.com', '$2b$10$jhHbwEekykq1dkI13xXBr.p7uaXihsf05WOALGAl2BJf.TKYNaJNu', 'admin', 2),
+('operador3', 'monitor@vinasdelsur.com', '$2b$10$ySqy1qY3ywmGBxkH.mO8RuOzEsLosl3e358jC0QfTDqKUb2XtnptW', 'monitor', 2),
+('supervisor3', 'cliente@vinasdelsur.com', '$2b$10$ySqy1qY3ywmGBxkH.mO8RuOzEsLosl3e358jC0QfTDqKUb2XtnptW', 'cliente', 2),
+('ti3', 'ti@vinasdelsur.com', '$2b$10$K1Ek5km.ZiBfAuDlmKmzUObp1iFi1ms0m/.UFdbxBe/X1P46QgvGy', 'ti', 2);
 
 -- DRONES
 INSERT INTO Dron (nombreDron, Vinedo_idVinedo) VALUES
-('W_Norte_1', 1),
-('W_Sur_1', 1),
-('W_Este_1', 1),
-('W_Oeste_1', 1),
-
-('W_Norte_2', 2),
-('W_Sur_2', 2),
-('W_Este_2', 2),
-('W_Oeste_2', 2),
-
-('W_Norte_3', 3),
-('W_Sur_3', 3),
-('W_Este_3', 3),
-('W_Oeste_3', 3);
+('W_Norte_1', 1), ('W_Sur_1', 1), ('W_Este_1', 1), ('W_Oeste_1', 1),
+('W_Norte_2', 2), ('W_Sur_2', 2), ('W_Este_2', 2), ('W_Oeste_2', 2),
+('W_Norte_3', 3), ('W_Sur_3', 3), ('W_Este_3', 3), ('W_Oeste_3', 3),
+('W_Norte_4', 4), ('W_Sur_4', 4), ('W_Este_4', 4), ('W_Oeste_4', 4),
+('W_Norte_5', 5), ('W_Sur_5', 5), ('W_Este_5', 5), ('W_Oeste_5', 5),
+('W_Norte_6', 6), ('W_Sur_6', 6), ('W_Este_6', 6), ('W_Oeste_6', 6);
 
 -- SENSORES
 INSERT INTO Sensor (nombreSensor, longitud, latitud, Vinedo_idVinedo) VALUES
--- Viñedo 1
-('HS_Norte_1', -71.9731000, -13.5210000, 1),
-('HS_Sur_1',   -71.9732000, -13.5220000, 1),
-('HS_Este_1',  -71.9720000, -13.5215000, 1),
-('HS_Oeste_1', -71.9740000, -13.5215000, 1),
-
--- Viñedo 2
-('HS_Norte_2', -71.9751000, -13.5230000, 2),
-('HS_Sur_2',   -71.9752000, -13.5240000, 2),
-('HS_Este_2',  -71.9740000, -13.5235000, 2),
-('HS_Oeste_2', -71.9760000, -13.5235000, 2),
-
--- Viñedo 3
-('HS_Norte_3', -71.9771000, -13.5250000, 3),
-('HS_Sur_3',   -71.9772000, -13.5260000, 3),
-('HS_Este_3',  -71.9760000, -13.5255000, 3),
-('HS_Oeste_3', -71.9780000, -13.5255000, 3);
+('HS_Norte_1', -71.9731, -13.5210, 1), ('HS_Sur_1', -71.9732, -13.5220, 1),
+('HS_Este_1',  -71.9720, -13.5215, 1), ('HS_Oeste_1', -71.9740, -13.5215, 1),
+('HS_Norte_2', -71.9751, -13.5230, 2), ('HS_Sur_2', -71.9752, -13.5240, 2),
+('HS_Este_2',  -71.9740, -13.5235, 2), ('HS_Oeste_2', -71.9760, -13.5235, 2),
+('HS_Norte_3', -71.9771, -13.5250, 3), ('HS_Sur_3', -71.9772, -13.5260, 3),
+('HS_Este_3',  -71.9760, -13.5255, 3), ('HS_Oeste_3', -71.9780, -13.5255, 3),
+('HS_Norte_4', -71.9735, -16.3980, 4), ('HS_Sur_4', -71.9736, -16.3990, 4),
+('HS_Este_4',  -71.9725, -16.3985, 4), ('HS_Oeste_4', -71.9745, -16.3985, 4),
+('HS_Norte_5', -71.9755, -16.4000, 5), ('HS_Sur_5', -71.9756, -16.4010, 5),
+('HS_Este_5',  -71.9745, -16.4005, 5), ('HS_Oeste_5', -71.9765, -16.4005, 5),
+('HS_Norte_6', -71.9775, -16.4020, 6), ('HS_Sur_6', -71.9776, -16.4030, 6),
+('HS_Este_6',  -71.9765, -16.4025, 6), ('HS_Oeste_6', -71.9785, -16.4025, 6);
 
 -- UMBRALES
 INSERT INTO Umbral (valorMinimo, valorMaximo, descripcion, Sensor_idSensor)
 VALUES
-(18, 30, 'Temperatura ideal', 1),
-(40, 70, 'Humedad ideal', 2),
-(18, 30, 'Temperatura ideal', 3),
-(40, 70, 'Humedad ideal', 4),
-
-(18, 30, 'Temperatura ideal', 5),
-(40, 70, 'Humedad ideal', 6),
-(18, 30, 'Temperatura ideal', 7),
-(40, 70, 'Humedad ideal', 8),
-
-(18, 30, 'Temperatura ideal', 9),
-(40, 70, 'Humedad ideal', 10),
-(18, 30, 'Temperatura ideal', 11),
-(40, 70, 'Humedad ideal', 12);
+-- empresa 1
+(18, 30, 'Temperatura ideal', 1), (40, 70, 'Humedad ideal', 2),
+(18, 30, 'Temperatura ideal', 3), (40, 70, 'Humedad ideal', 4),
+(18, 30, 'Temperatura ideal', 5), (40, 70, 'Humedad ideal', 6),
+(18, 30, 'Temperatura ideal', 7), (40, 70, 'Humedad ideal', 8),
+(18, 30, 'Temperatura ideal', 9), (40, 70, 'Humedad ideal', 10),
+(18, 30, 'Temperatura ideal', 11), (40, 70, 'Humedad ideal', 12),
+-- empresa 2
+(18, 30, 'Temperatura ideal', 13), (40, 70, 'Humedad ideal', 14),
+(18, 30, 'Temperatura ideal', 15), (40, 70, 'Humedad ideal', 16),
+(18, 30, 'Temperatura ideal', 17), (40, 70, 'Humedad ideal', 18),
+(18, 30, 'Temperatura ideal', 19), (40, 70, 'Humedad ideal', 20),
+(18, 30, 'Temperatura ideal', 21), (40, 70, 'Humedad ideal', 22),
+(18, 30, 'Temperatura ideal', 23), (40, 70, 'Humedad ideal', 24);
 
 -- TIPOS DE ENFERMEDAD
 INSERT INTO TipoEnfermedad (nombreEnfermedad) VALUES
-('Oidio'),
-('Mildiu'),
-('Botrytis'),
-('Antracnosis'),
-('Yesca'),
-('Podredumbre Acida');
+('Oidio'), ('Mildiu'), ('Botrytis'), ('Antracnosis'), ('Yesca'), ('Podredumbre Acida');
 
 -- TIPOS DE ALERTA
-INSERT INTO TipoAlerta (nombreTipo)
-VALUES
-('Sensor'),
-('Enfermedad');
+INSERT INTO TipoAlerta (nombreTipo) VALUES ('Sensor'), ('Enfermedad');
 
 -- ESTADOS DE ALERTA
-INSERT INTO EstadoAlerta (nombreEstado)
-VALUES
-('Pendiente'),
-('En Proceso'),
-('Resuelta');
+INSERT INTO EstadoAlerta (nombreEstado) VALUES ('Pendiente'), ('En Proceso'), ('Resuelta');
 
--- IMAGENES
+-- IMAGENES (varias por dron para galerias con contenido)
 INSERT INTO Imagen
 (fechaCaptura, horaCaptura, tamanoArchivo, rutaArchivo,
  ancho, alto, latitud, longitud, Dron_idDron)
 VALUES
-('2026-06-10', '09:15:00', 3500, '/imagenes/img001.jpg',
- 1920, 1080, -14.0677000, -75.7295000, 1),
-
-('2026-06-10', '10:20:00', 4100, '/imagenes/img002.jpg',
- 1920, 1080, -13.7102000, -76.2201000, 2),
-
-('2026-06-10', '11:30:00', 3900, '/imagenes/img003.jpg',
- 1920, 1080, -14.8304000, -74.9405000, 3);
+-- empresa 1
+('2026-06-15', '09:15:00', 3500, '/imagenes/img001.jpg', 1920, 1080, -13.5210, -71.9731, 1),
+('2026-06-18', '10:20:00', 4200, '/imagenes/img002.jpg', 1920, 1080, -13.5220, -71.9732, 1),
+('2026-06-21', '11:30:00', 3800, '/imagenes/img003.jpg', 1920, 1080, -13.5215, -71.9740, 1),
+('2026-06-16', '09:00:00', 3600, '/imagenes/img004.jpg', 1920, 1080, -13.5230, -71.9751, 2),
+('2026-06-19', '10:15:00', 4100, '/imagenes/img005.jpg', 1920, 1080, -13.5240, -71.9752, 2),
+('2026-06-17', '08:45:00', 3700, '/imagenes/img006.jpg', 1920, 1080, -13.5250, -71.9771, 3),
+('2026-06-20', '10:00:00', 3900, '/imagenes/img007.jpg', 1920, 1080, -13.5260, -71.9772, 3),
+-- empresa 2 (drones ids 13-24)
+('2026-06-14', '09:30:00', 3500, '/imagenes/img008.jpg', 1920, 1080, -16.3980, -71.9735, 13),
+('2026-06-17', '10:45:00', 4200, '/imagenes/img009.jpg', 1920, 1080, -16.3990, -71.9736, 13),
+('2026-06-15', '09:15:00', 3600, '/imagenes/img010.jpg', 1920, 1080, -16.4000, -71.9755, 17),
+('2026-06-18', '10:30:00', 4100, '/imagenes/img011.jpg', 1920, 1080, -16.4010, -71.9756, 17),
+('2026-06-16', '08:50:00', 3800, '/imagenes/img012.jpg', 1920, 1080, -16.4020, -71.9775, 21),
+('2026-06-19', '11:00:00', 3700, '/imagenes/img013.jpg', 1920, 1080, -16.4025, -71.9765, 21);
 
 -- DETECCIONES DE ENFERMEDAD
 INSERT INTO DeteccionEnfermedad
 (nivelConfianza, descripcion, fechaDeteccion,
  Imagen_idImagen, TipoEnfermedad_idEnfermedad)
 VALUES
-(94.50, 'Presencia de Mildiu en hojas', '2026-06-10', 1, 2),
-(88.20, 'Posible Oidio detectado', '2026-06-10', 2, 1);
+(94.50, 'Presencia de Mildiu en hojas', '2026-06-15', 1, 2),
+(88.20, 'Posible Oidio detectado', '2026-06-18', 2, 1),
+(76.80, 'Manchas de Botrytis en racimos', '2026-06-16', 4, 3),
+(91.30, 'Antracnosis en hojas jovenes', '2026-06-17', 6, 4),
+(82.10, 'Yesca marcada en tronco', '2026-06-14', 8, 5),
+(89.40, 'Mildiu avanzado en sector Sur', '2026-06-19', 2, 2),
+(73.50, 'Podredumbre acida inicial', '2026-06-15', 10, 6),
+(85.60, 'Oidio esporulado', '2026-06-21', 3, 1),
+(79.20, 'Botrytis en racimos maduros', '2026-06-18', 11, 3),
+(95.10, 'Mildiu esporulado en envés', '2026-06-19', 9, 2);
 
--- LECTURAS DE SENSORES
-INSERT INTO LecturaSensor
-(valor, fechaLectura, horaLectura, Sensor_idSensor)
-VALUES
-(31.20, '2026-06-10', '08:30:00', 7),
-(72.40, '2026-06-10', '08:30:00', 8),
-(28.60, '2026-06-10', '08:40:00', 9),
-(68.90, '2026-06-10', '08:40:00', 10),
-(30.10, '2026-06-10', '08:50:00', 11),
-(74.30, '2026-06-10', '08:50:00', 12);
+-- LECTURAS DE SENSORES (series temporales 60 dias, 3 lecturas/dia, desde junio)
+INSERT INTO LecturaSensor (valor, fechaLectura, horaLectura, Sensor_idSensor)
+SELECT
+  CASE
+    WHEN (s.idsensor % 4) IN (0,1) THEN
+      (20 + (random() * 12))::numeric(10,2)
+    ELSE
+      (38 + (random() * 35))::numeric(10,2)
+  END,
+  (DATE '2026-06-01' + dia)::date,
+  hora,
+  s.idsensor
+FROM Sensor s
+CROSS JOIN generate_series(0, 59) AS dia
+CROSS JOIN (VALUES (TIME '07:00:00'), (TIME '12:00:00'), (TIME '18:00:00')) AS t(hora);
 
--- ALERTAS
+-- ALERTAS (24 distribuidas en 6 vinedos, estados y fechas variadas jun-jul)
 INSERT INTO Alerta
 (fecha, hora, descripcion, Vinedo_idVinedo,
- DeteccionEnfermedad_idDeteccion,
- LecturaSensor_idLectura,
- EstadoAlerta_idEstado,
- TipoAlerta_idTipo)
+ DeteccionEnfermedad_idDeteccion, LecturaSensor_idLectura,
+ EstadoAlerta_idEstado, TipoAlerta_idTipo)
 VALUES
-('2026-06-10', '09:30:00',
- 'Detección de Mildiu con alta confianza en hojas de vid',
- 1, 1, NULL, 1, 2),
+-- vinedo 1 (jun)
+('2026-06-05', '09:30:00', 'Mildiu con alta confianza en hojas de vid', 1, 1, NULL, 1, 2),
+('2026-06-12', '08:10:00', 'Humedad fuera del rango establecido', 1, NULL, NULL, 3, 1),
+('2026-06-18', '11:00:00', 'Oidio esporulado detectado', 1, 8, NULL, 3, 2),
+('2026-06-25', '07:20:00', 'Temperatura bajo umbral critico', 1, NULL, NULL, 2, 1),
+-- vinedo 2 (jun-jul)
+('2026-06-08', '09:05:00', 'Manchas de Botrytis en racimos', 2, 3, NULL, 3, 2),
+('2026-06-15', '08:45:00', 'Temperatura sobre umbral critico', 2, NULL, NULL, 2, 1),
+('2026-06-22', '08:50:00', 'Mildiu avanzado en sector Sur', 2, 6, NULL, 1, 2),
+('2026-07-04', '07:30:00', 'Humedad bajo limite inferior', 2, NULL, NULL, 2, 1),
+-- vinedo 3 (jun-jul)
+('2026-06-10', '08:50:00', 'Antracnosis en hojas jovenes', 3, 4, NULL, 3, 2),
+('2026-06-20', '07:30:00', 'Humedad bajo limite inferior', 3, NULL, NULL, 1, 1),
+('2026-06-28', '09:00:00', 'Oidio en brotes nuevos', 3, NULL, NULL, 1, 2),
+('2026-07-10', '10:15:00', 'Botrytis en frutos maduros', 3, 9, NULL, 2, 2),
+-- vinedo 4 (jun-jul)
+('2026-06-03', '09:35:00', 'Yesca marcada en tronco', 4, 5, NULL, 2, 2),
+('2026-06-14', '10:00:00', 'Temperatura elevada sostenida', 4, NULL, NULL, 3, 1),
+('2026-06-26', '11:20:00', 'Podredumbre acida detectada', 4, 7, NULL, 1, 2),
+('2026-07-08', '08:40:00', 'Humedad excesiva post riego', 4, NULL, NULL, 2, 1),
+-- vinedo 5 (jun-jul)
+('2026-06-07', '09:20:00', 'Mildiu esporulado en hojas', 5, 10, NULL, 3, 2),
+('2026-06-19', '11:10:00', 'Humedad excesiva post riego', 5, NULL, NULL, 1, 1),
+('2026-06-29', '08:30:00', 'Sensor temperatura ruido alto', 5, NULL, NULL, 2, 1),
+('2026-07-15', '09:45:00', 'Mildiu en sector Norte', 5, NULL, NULL, 1, 2),
+-- vinedo 6 (jun-jul)
+('2026-06-01', '08:55:00', 'Oidio esporulado en hojas', 6, NULL, NULL, 1, 2),
+('2026-06-16', '11:05:00', 'Botrytis en racimos maduros', 6, NULL, NULL, 3, 2),
+('2026-07-02', '09:15:00', 'Sensor humedad con ruido alto', 6, NULL, NULL, 2, 1),
+('2026-07-20', '08:20:00', 'Antracnosis en sector Este', 6, NULL, NULL, 1, 2);
 
-('2026-06-10', '08:05:00',
- 'Humedad del suelo fuera del rango establecido por el umbral',
- 1, NULL, 2, 2, 1),
-
-('2026-06-10', '10:30:00',
- 'Detección de Oidio en cultivo de vid mediante análisis de imágenes',
- 2, 2, NULL, 1, 2);
-
--- NOTIFICACIONES
+-- NOTIFICACIONES (para usuarios de ambas empresas, fechas variadas jun-jul)
 INSERT INTO Notificacion
-(mensaje, fechaEnvio, horaEnvio,
- Usuario_idUsuario, Alerta_idAlerta)
+(mensaje, fechaEnvio, horaEnvio, Usuario_idUsuario, Alerta_idAlerta)
 VALUES
-('Alerta: Mildiu detectado en Vinedo Norte', '2026-06-10', '09:31:00', 2, 1),
-('Alerta: Humedad del suelo fuera del rango establecido en Vinedo Norte', '2026-06-10', '08:06:00', 2, 2),
-('Alerta: Oidio detectado en Vinedo Sur', '2026-06-10', '10:31:00', 1, 3);
+-- junio (empresa 1: usuarios 1-4,7,8 admin/cliente/monitor/ti)
+('Alerta: Mildiu detectado en Vinedo Santa Rosa', '2026-06-05', '09:31:00', 1, 1),
+('Alerta: Humedad fuera de rango en Santa Rosa', '2026-06-12', '08:06:00', 1, 2),
+('Alerta: Oidio resuelto en Santa Rosa', '2026-06-18', '11:05:00', 1, 3),
+('Alerta: Temp bajo umbral Santa Rosa', '2026-06-25', '07:25:00', 1, 4),
+('Alerta: Botrytis en Vinedo San Jose', '2026-06-08', '09:10:00', 2, 5),
+('Alerta: Temperatura critica San Jose', '2026-06-15', '08:50:00', 2, 6),
+('Alerta: Mildiu avanzado San Jose', '2026-06-22', '08:55:00', 2, 7),
+('Alerta: Antracnosis resuelta La Esperanza', '2026-06-10', '09:00:00', 2, 9),
+('Alerta: Humedad baja La Esperanza', '2026-06-20', '07:35:00', 3, 10),
+('Alerta: Oidio en brotes La Esperanza', '2026-06-28', '09:05:00', 3, 11),
+-- junio (empresa 2: usuarios 9-12)
+('Alerta: Yesca en Vinedo El Pedregal', '2026-06-03', '09:40:00', 9, 13),
+('Alerta: Temp elevada El Pedregal', '2026-06-14', '10:05:00', 9, 14),
+('Alerta: Podredumbre El Pedregal', '2026-06-26', '11:25:00', 9, 15),
+('Alerta: Mildiu esporulado Majes', '2026-06-07', '09:25:00', 9, 17),
+('Alerta: Humedad excesiva Majes', '2026-06-19', '11:15:00', 9, 18),
+('Alerta: Sensor ruido alto Majes', '2026-06-29', '08:35:00', 9, 19),
+('Alerta: Oidio Vinedo Vitor', '2026-06-01', '09:00:00', 10, 21),
+('Alerta: Botrytis resuelto Vitor', '2026-06-16', '11:10:00', 10, 22),
+-- julio (ambas empresas)
+('Alerta: Humedad San Jose bajo limite', '2026-07-04', '07:35:00', 2, 8),
+('Alerta: Botrytis frutos La Esperanza', '2026-07-10', '10:20:00', 2, 12),
+('Alerta: Humedad excesiva El Pedregal', '2026-07-08', '08:45:00', 9, 16),
+('Alerta: Mildiu sector Norte Majes', '2026-07-15', '09:50:00', 9, 20),
+('Alerta: Ruido sensor humedad Vitor', '2026-07-02', '09:20:00', 9, 23),
+('Alerta: Antracnosis sector Este Vitor', '2026-07-20', '08:25:00', 9, 24);

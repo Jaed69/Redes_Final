@@ -14,6 +14,7 @@ import SensorReadingsView from "./pages/Usuario/SensorReadingsView";
 import DronesView from "./pages/Usuario/DronesView";
 import DiseaseDetectionView from "./pages/Usuario/DiseaseDetectionView";
 import AlertsNotificationsView from "./pages/Usuario/AlertsNotificationView";
+import PipelineDeteccion from "./pages/Usuario/PipelineDeteccion";
 
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminLayout from "./pages/Admin/AdminLayout";
@@ -28,6 +29,7 @@ import ClienteLayout from "./pages/Cliente/ClienteLayout";
 import ClienteDashboard from "./pages/Cliente/ClienteDashboard";
 import ClienteAlertas from "./pages/Cliente/ClienteAlertas";
 import ClienteReportes from "./pages/Cliente/ClienteReportes";
+import ClienteCultivos from "./pages/Cliente/ClienteCultivos";
 
 import TiLayout from "./pages/TI/TiLayout";
 import TiCuentas from "./pages/TI/TiCuentas";
@@ -51,7 +53,7 @@ export default function App() {
     empresaId?: string;
     empresaNombre?: string;
   };
-  const empresa = { id: usuario.empresaId ?? "", nombre: usuario.empresaNombre ?? "" } as Empresa;
+  const empresa = { id: String(usuario.empresaId ?? ""), nombre: usuario.empresaNombre ?? "" } as Empresa;
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("token"));
   const [backendOnline] = useState(true);
 
@@ -66,7 +68,7 @@ export default function App() {
   const [vinedoActivoId, setVinedoActivoId] = useState<string | null>(null);
   const [sensorSeleccionadoId, setSensorSeleccionadoId] = useState<string | null>(null);
 
-  const [rango, setRango] = useState({ inicio: "2026-06-01", fin: "2026-07-03" });
+  const [rango, setRango] = useState({ inicio: "2026-06-01", fin: "2026-07-31" });
 
   // Sincroniza token con localStorage (login/logout en esta o otra pestaña)
   useEffect(() => {
@@ -108,7 +110,7 @@ export default function App() {
     );
   }, [token]);
 
-  useEffect(() => {
+  const cargarLecturas = () => {
     if (!token) return;
     api.get("/lecturas").then((d: any) =>
       setLecturas(
@@ -121,14 +123,15 @@ export default function App() {
         }))
       )
     );
+  };
+
+  useEffect(() => {
+    cargarLecturas();
   }, [token]);
 
   useEffect(() => {
     if (!token) return;
     api.get("/drones").then(async (d: any) => {
-      const vinedoIdPorNombre = new Map<string, string>();
-      vinedos.forEach((v) => vinedoIdPorNombre.set(v.nombre, v.id));
-
       let imagenes: any[] = [];
       try {
         imagenes = (await api.get("/imagenes")) as any[];
@@ -158,7 +161,7 @@ export default function App() {
       }));
       setDrones(dronesMapped);
     });
-  }, [vinedos, token]);
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
@@ -177,7 +180,7 @@ export default function App() {
     );
   }, [token]);
 
-  useEffect(() => {
+  const cargarAlertas = () => {
     if (!token) return;
     api.get("/alertas").then((d: any) =>
       setAlertas(
@@ -191,9 +194,13 @@ export default function App() {
         }))
       )
     );
-  }, [token]);
+  };
 
   useEffect(() => {
+    cargarAlertas();
+  }, [token]);
+
+  const cargarNotifs = () => {
     if (!token) return;
     api.get("/notificaciones").then((d: any) =>
       setNotifs(
@@ -208,6 +215,21 @@ export default function App() {
         }))
       )
     );
+  };
+
+  useEffect(() => {
+    cargarNotifs();
+  }, [token]);
+
+  // MONITOR-01: polling "casi real" cada 30s refresca lecturas, alertas y notificaciones
+  useEffect(() => {
+    if (!token) return;
+    const id = setInterval(() => {
+      cargarLecturas();
+      cargarAlertas();
+      cargarNotifs();
+    }, 30000);
+    return () => clearInterval(id);
   }, [token]);
 
   const sensoresDelVinedo = useMemo(
@@ -269,7 +291,7 @@ export default function App() {
               }
             />
 
-            <Route path="mapa" element={<SensorMapView sensores={sensoresDelVinedo} vinedos={vinedos} />} />
+            <Route path="mapa" element={<SensorMapView sensores={sensoresDelVinedo} vinedos={vinedos} detecciones={detecciones} drones={drones} />} />
 
             <Route
               path="lecturas"
@@ -288,7 +310,9 @@ export default function App() {
 
             <Route path="drones" element={<DronesView drones={dronesDelVinedo} />} />
 
-            <Route path="enfermedades" element={<DiseaseDetectionView detecciones={detecciones} />} />
+            <Route path="enfermedades" element={<DiseaseDetectionView detecciones={detecciones} alertas={alertas} drones={drones} />} />
+
+            <Route path="pipeline" element={<PipelineDeteccion drones={drones} detecciones={detecciones} alertas={alertas} notificaciones={notifs} />} />
 
             <Route
               path="alertas"
@@ -334,16 +358,27 @@ export default function App() {
         {/* CLIENTE */}
         <Route element={<RequireRole roles={["cliente"]} />}>
           <Route path="/cliente" element={<ClienteLayout usuario={usuario} empresa={empresa} />}>
+<Route
+            index
+            element={
+              <ClienteDashboard
+                vinedos={vinedos}
+                sensores={sensores}
+                alertas={alertas}
+                detecciones={detecciones}
+                lecturas={lecturas}
+                notificaciones={notifs}
+                empresaId={empresa.id}
+              />
+            }
+          />
             <Route
-              index
+              path="cultivos"
               element={
-                <ClienteDashboard
-                  vinedos={vinedos}
-                  sensores={sensores}
-                  alertas={alertas}
+                <ClienteCultivos
                   detecciones={detecciones}
-                  lecturas={lecturas}
-                  notificaciones={notifs}
+                  drones={drones}
+                  vinedos={vinedos}
                   empresaId={empresa.id}
                 />
               }

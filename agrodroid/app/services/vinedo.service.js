@@ -1,7 +1,13 @@
 const pool = require("../config/db");
 
-// GET ALL
-const obtenerVinedos = async () => {
+// GET ALL — empresaId opcional para scope por empresa (monitor/cliente)
+const obtenerVinedos = async (empresaId) => {
+    const params = [];
+    let where = "";
+    if (empresaId) {
+        params.push(empresaId);
+        where = ` WHERE v.empresa_idempresa = $${params.length} `;
+    }
     const result = await pool.query(`
         SELECT
             v.idvinedo,
@@ -12,8 +18,9 @@ const obtenerVinedos = async () => {
             e.nombreempresa
         FROM vinedo v
         JOIN empresa e ON v.empresa_idempresa = e.idempresa
+        ${where}
         ORDER BY v.idvinedo
-    `);
+    `, params);
 
     return result.rows;
 };

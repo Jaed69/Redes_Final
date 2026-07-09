@@ -1,8 +1,15 @@
 const service = require("../services/deteccion.service");
 
 const listar = async (req, res) => {
-    const data = await service.obtenerDetecciones();
-    res.json(data);
+    try {
+        const rol = req.usuario.rol;
+        const empresaId = (rol === "monitor" || rol === "cliente") ? req.usuario.empresaId : undefined;
+        const data = await service.obtenerDetecciones(empresaId);
+        res.json(data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: "Error obteniendo detecciones" });
+    }
 };
 
 const obtener = async (req, res) => {

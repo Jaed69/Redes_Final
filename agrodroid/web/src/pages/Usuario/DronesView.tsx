@@ -1,5 +1,6 @@
 import { useState } from "react";
 import DataReadout from "../../components/DataReadOut";
+import DiseaseImagePlaceholder from "../../components/DiseaseImagePlaceholder";
 import type { Dron } from "../../types/models";
 import "../../styles/Usuario/DronesView.css";
 
@@ -53,7 +54,9 @@ export default function DronesView({ drones }: DronesViewProps) {
           <div className="galeria-grid">
             {dronSeleccionado.imagenes.map((img) => (
               <figure key={img.id} className="galeria-item">
-                <div className="galeria-item__img" style={{ backgroundImage: `url(${img.url})` }} />
+                <div className="galeria-item__img" style={{ padding: 0, overflow: "hidden" }}>
+                  <DiseaseImagePlaceholder enfermedad="Captura de dron" confianza={0} />
+                </div>
                 <figcaption>
                   <span className="galeria-item__fecha">
                     {img.fecha} · {img.hora}

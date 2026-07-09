@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Bar,
   BarChart,
+  CartesianGrid,
   Cell,
   Legend,
   Pie,
@@ -52,17 +53,25 @@ export default function TiDashboard() {
   const [sensores, setSensores] = useState<{ idsensor: number; vinedo_idvinedo: number }[]>([]);
   const [drones, setDrones] = useState<{ iddron: number; vinedo_idvinedo: number }[]>([]);
   const [apiUp, setApiUp] = useState(true);
+  const [imagenes, setImagenes] = useState<{ idimagen: number; tamanoarchivo: number; fechacaptura: string; dron_iddron: number }[]>([]);
+  const [totalDetecciones, setTotalDetecciones] = useState(0);
+  const [totalLecturas, setTotalLecturas] = useState(0);
+  const [totalAlertas, setTotalAlertas] = useState(0);
 
   useEffect(() => {
     (async () => {
       try {
-        const [usuariosApi, empresasApi, estadoSistema, vinedosApi, sensoresApi, dronesApi] = await Promise.all([
+        const [usuariosApi, empresasApi, estadoSistema, vinedosApi, sensoresApi, dronesApi, imagenesApi, deteccionesApi, alertasApi, lecturasApi] = await Promise.all([
           api.get("/usuarios") as Promise<ApiUsuario[]>,
           api.get("/empresas") as Promise<ApiEmpresa[]>,
           api.get("/system/status") as Promise<EstadoSistema>,
           api.get("/vinedos") as Promise<ApiVinedo[]>,
           api.get("/sensores") as Promise<{ idsensor: number; vinedo_idvinedo: number }[]>,
           api.get("/drones") as Promise<{ iddron: number; vinedo_idvinedo: number }[]>,
+          api.get("/imagenes") as Promise<{ idimagen: number; tamanoarchivo: number; fechacaptura: string; dron_iddron: number }[]>,
+          api.get("/detecciones") as Promise<unknown[]>,
+          api.get("/alertas") as Promise<unknown[]>,
+          api.get("/lecturas") as Promise<unknown[]>,
         ]);
         setApiUp(true);
         setTotalUsuarios(usuariosApi.length);
@@ -73,6 +82,10 @@ export default function TiDashboard() {
         setVinedos(vinedosApi);
         setSensores(sensoresApi);
         setDrones(dronesApi);
+        setImagenes(imagenesApi);
+        setTotalDetecciones(deteccionesApi.length);
+        setTotalAlertas(alertasApi.length);
+        setTotalLecturas(lecturasApi.length);
         setEstado(estadoSistema);
       } catch (e) {
         setApiUp(false);
@@ -135,6 +148,22 @@ export default function TiDashboard() {
     { nombre: "Base de datos", estado: estado?.db === "ok" ? "ok" : estado?.db === "error" ? "down" : "?", icon: "🗄", detalle: estado?.db === "ok" ? "Conectada" : estado?.db === "error" ? "Sin conexión" : "Verificando…" },
     { nombre: "Web", estado: "ok", icon: "🖥", detalle: "Frontend cargado" },
   ];
+
+  // Métricas de imágenes/almacenamiento
+  const tamanoTotal = useMemo(
+    () => imagenes.reduce((s, im) => s + (im.tamanoarchivo || 0), 0),
+    [imagenes]
+  );
+  const imagenesPorMes = useMemo(() => {
+    const conteo: Record<string, number> = {};
+    imagenes.forEach((im) => {
+      const mes = im.fechacaptura?.slice(0, 7) ?? "?";
+      conteo[mes] = (conteo[mes] || 0) + 1;
+    });
+    return Object.entries(conteo)
+      .map(([mes, imagenes]) => ({ mes, imagenes }))
+      .sort((a, b) => a.mes.localeCompare(b.mes));
+  }, [imagenes]);
 
   return (
     <div>
@@ -331,6 +360,78 @@ export default function TiDashboard() {
               {ultimosUsuarios.length === 0 && (
                 <tr><td colSpan={4} className="roled-empty">No hay usuarios registrados.</td></tr>
               )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="roled-grid">
+        <div className="roled-panel">
+          <div className="roled-panel__title">
+            <span>Imágenes por mes (crecimiento de almacenamiento)</span>
+            <span className="eyebrow">{imagenes.length} imágenes · {totalDetecciones} detecciones</span>
+          </div>
+          <div className="roled-chart">
+            {imagenesPorMes.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={imagenesPorMes} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                  <CartesianGrid stroke="var(--border-soft)" vertical={false} />
+                  <XAxis dataKey="mes" stroke="var(--text-muted)" fontSize={11} />
+                  <YAxis allowDecimals stroke="var(--text-muted)" fontSize={11} width={28} />
+                  <Tooltip contentStyle={{ background: "var(--surface)", border: "1px solid var(--border-soft)", borderRadius: 8, fontSize: 12 }} cursor={{ fill: "rgba(0,0,0,0.04)" }} />
+                  <Bar dataKey="imagenes" radius={[4, 4, 0, 0]} fill="var(--accent-violet)" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="roled-empty">Sin imágenes registradas.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="roled-panel">
+          <div className="roled-panel__title">
+            <span>Métricas de almacenamiento</span>
+          </div>
+          <div style={{ display: "grid", gap: 12, marginTop: 4 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 12px", border: "1px solid var(--border-soft)", borderRadius: 10, background: "var(--surface-raised)" }}>
+              <span style={{ fontSize: 14, color: "var(--text-secondary)" }}>Total de imágenes</span>
+              <span className="mono" style={{ fontWeight: 600 }}>{imagenes.length}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 12px", border: "1px solid var(--border-soft)", borderRadius: 10, background: "var(--surface-raised)" }}>
+              <span style={{ fontSize: 14, color: "var(--text-secondary)" }}>Tamaño total</span>
+              <span className="mono" style={{ fontWeight: 600 }}>{(tamanoTotal / 1024).toFixed(1)} KB</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 12px", border: "1px solid var(--border-soft)", borderRadius: 10, background: "var(--surface-raised)" }}>
+              <span style={{ fontSize: 14, color: "var(--text-secondary)" }}>Promedio por imagen</span>
+              <span className="mono" style={{ fontWeight: 600 }}>{imagenes.length > 0 ? (tamanoTotal / imagenes.length / 1024).toFixed(1) + " KB" : "—"}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 12px", border: "1px solid var(--border-soft)", borderRadius: 10, background: "var(--surface-raised)" }}>
+              <span style={{ fontSize: 14, color: "var(--text-secondary)" }}>Detecciones IA</span>
+              <span className="mono" style={{ fontWeight: 600 }}>{totalDetecciones}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="roled-grid">
+        <div className="roled-panel admin-dashboard__panel--full" style={{ gridColumn: "1 / -1" }}>
+          <div className="roled-panel__title">
+            <span>Volumen de datos por tabla</span>
+          </div>
+          <table className="roled-table">
+            <thead>
+              <tr><th>Tabla</th><th>Registros</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Usuarios</td><td className="mono">{totalUsuarios}</td></tr>
+              <tr><td>Empresas</td><td className="mono">{totalEmpresas}</td></tr>
+              <tr><td>Viñedos</td><td className="mono">{vinedos.length}</td></tr>
+              <tr><td>Sensores</td><td className="mono">{sensores.length}</td></tr>
+              <tr><td>Drones</td><td className="mono">{drones.length}</td></tr>
+              <tr><td>Imágenes</td><td className="mono">{imagenes.length}</td></tr>
+              <tr><td>Detecciones</td><td className="mono">{totalDetecciones}</td></tr>
+              <tr><td>Alertas</td><td className="mono">{totalAlertas}</td></tr>
+              <tr><td>Lecturas</td><td className="mono">{totalLecturas}</td></tr>
             </tbody>
           </table>
         </div>

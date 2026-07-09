@@ -13,6 +13,7 @@ const ITEMS = [
   { to: "/dashboard/lecturas", label: "Lecturas", icon: "📊" },
   { to: "/dashboard/drones", label: "Drones", icon: "🚁" },
   { to: "/dashboard/enfermedades", label: "Enfermedades", icon: "🧬" },
+  { to: "/dashboard/pipeline", label: "Pipeline", icon: "🔗" },
   { to: "/dashboard/alertas", label: "Alertas", icon: "🚨" },
 ];
 

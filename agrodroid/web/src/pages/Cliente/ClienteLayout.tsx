@@ -11,6 +11,7 @@ interface ClienteLayoutProps {
 
 const ITEMS = [
   { to: "/cliente", label: "Dashboard", icon: "🏠", end: true },
+  { to: "/cliente/cultivos", label: "Salud de cultivos", icon: "🌱" },
   { to: "/cliente/alertas", label: "Alertas y notificaciones", icon: "🚨" },
   { to: "/cliente/reportes", label: "Reportes", icon: "📊" },
 ];

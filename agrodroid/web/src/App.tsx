@@ -14,6 +14,7 @@ import SensorReadingsView from "./pages/Usuario/SensorReadingsView";
 import DronesView from "./pages/Usuario/DronesView";
 import DiseaseDetectionView from "./pages/Usuario/DiseaseDetectionView";
 import AlertsNotificationsView from "./pages/Usuario/AlertsNotificationView";
+import PipelineDeteccion from "./pages/Usuario/PipelineDeteccion";
 
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminLayout from "./pages/Admin/AdminLayout";
@@ -28,6 +29,7 @@ import ClienteLayout from "./pages/Cliente/ClienteLayout";
 import ClienteDashboard from "./pages/Cliente/ClienteDashboard";
 import ClienteAlertas from "./pages/Cliente/ClienteAlertas";
 import ClienteReportes from "./pages/Cliente/ClienteReportes";
+import ClienteCultivos from "./pages/Cliente/ClienteCultivos";
 
 import TiLayout from "./pages/TI/TiLayout";
 import TiCuentas from "./pages/TI/TiCuentas";
@@ -289,7 +291,7 @@ export default function App() {
               }
             />
 
-            <Route path="mapa" element={<SensorMapView sensores={sensoresDelVinedo} vinedos={vinedos} />} />
+            <Route path="mapa" element={<SensorMapView sensores={sensoresDelVinedo} vinedos={vinedos} detecciones={detecciones} drones={drones} />} />
 
             <Route
               path="lecturas"
@@ -308,7 +310,9 @@ export default function App() {
 
             <Route path="drones" element={<DronesView drones={dronesDelVinedo} />} />
 
-            <Route path="enfermedades" element={<DiseaseDetectionView detecciones={detecciones} />} />
+            <Route path="enfermedades" element={<DiseaseDetectionView detecciones={detecciones} alertas={alertas} drones={drones} />} />
+
+            <Route path="pipeline" element={<PipelineDeteccion drones={drones} detecciones={detecciones} alertas={alertas} notificaciones={notifs} />} />
 
             <Route
               path="alertas"
@@ -354,16 +358,27 @@ export default function App() {
         {/* CLIENTE */}
         <Route element={<RequireRole roles={["cliente"]} />}>
           <Route path="/cliente" element={<ClienteLayout usuario={usuario} empresa={empresa} />}>
+<Route
+            index
+            element={
+              <ClienteDashboard
+                vinedos={vinedos}
+                sensores={sensores}
+                alertas={alertas}
+                detecciones={detecciones}
+                lecturas={lecturas}
+                notificaciones={notifs}
+                empresaId={empresa.id}
+              />
+            }
+          />
             <Route
-              index
+              path="cultivos"
               element={
-                <ClienteDashboard
-                  vinedos={vinedos}
-                  sensores={sensores}
-                  alertas={alertas}
+                <ClienteCultivos
                   detecciones={detecciones}
-                  lecturas={lecturas}
-                  notificaciones={notifs}
+                  drones={drones}
+                  vinedos={vinedos}
                   empresaId={empresa.id}
                 />
               }
